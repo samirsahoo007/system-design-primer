@@ -145,10 +145,7 @@ Check out the sister repo [**Interactive Coding Challenges**](https://github.com
 
 > Suggested topics to review based on your interview timeline (short, medium, long).
 
-![Imgur](http://i.imgur.com/OfVllex.png)
-
 **Q: For interviews, do I need to know everything here?**
-
 **A: No, you don't need to know everything here to prepare for the interview**.
 
 What you are asked in an interview depends on variables such as:
@@ -158,8 +155,6 @@ What you are asked in an interview depends on variables such as:
 * What positions you are interviewing for
 * Which companies you are interviewing with
 * Luck
-
-More experienced candidates are generally expected to know more about system design.  Architects or team leads might be expected to know more than individual contributors.  Top tech companies are likely to have one or more design interview rounds.
 
 Start broad and go deeper in a few areas.  It helps to know a little about various key system design topics.  Adjust the following guide based on your timeline, experience, what positions you are interviewing for, and which companies you are interviewing with.
 
