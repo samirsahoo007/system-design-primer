@@ -245,15 +245,16 @@ Check out the following links to get a better idea of what to expect:
 * [The system design interview](http://www.hiredintech.com/system-design)
 * [Intro to Architecture and Systems Design Interviews](https://www.youtube.com/watch?v=ZgdS0EUmn70)
 
-## Principles of Web Distributed Systems Design
+# Principles of Web Distributed Systems Design
 Below are some of the key principles that influence the design of large-scale web systems:
-  # Availability: 
+  ## Availability: 
     The uptime of a website is absolutely critical to the reputation and functionality
     of many companies. For some of the larger online retail sites, being unavailable for even
     minutes can result in thousands or millions of dollars in lost revenue, so designing their
     systems to be constantly available and resilient to failure is both a fundamental business and
     a technology requirement. High availability in distributed systems requires the careful
     consideration of redundancy for key components, rapid recovery in the event
+   
     
 ## System design interview questions with solutions
 
