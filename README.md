@@ -3,7 +3,6 @@
 
 <p align="center">
   <img src="http://i.imgur.com/jj3A5N8.png">
-  <img src="solutions/system_design/mint/mint_basic.png">
   <br/>
 </p>
 
