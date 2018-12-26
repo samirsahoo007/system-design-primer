@@ -284,7 +284,24 @@ Below are some of the key principles that influence the design of large-scale we
   This section is focused on some of the core factors that are central to almost all large web 
   applications: services, redundancy, partitions, and handling failure.
    
-    
+Example: Image Hosting Application
+For big sites that host and deliver lots of images, there are challenges in building an
+architecture that is cost-effective, highly available, and has low latency (fast retrieval).
+
+# Introduction to architecting systems for scale.
+April 4, 2011. Filed under infrastructurearchitecture
+Few computer science or software development programs attempt to teach the building
+blocks of scalable systems. Instead, system architecture is usually picked up on the job by
+working through the pain of a growing product or by working with engineers who have
+already learned through that suffering process.
+In this post I&#39;ll attempt to document some of the scalability architecture lessons I&#39;ve learned
+while working on systems at Yahoo! and Digg.
+I&#39;ve attempted to maintain a color convention for diagrams:
+ green is an external request from an external client (an HTTP request from a browser, etc),
+ blue is your code running in some container (a Django app running on mod_wsgi, a Python
+script listening to RabbitMQ, etc), and
+ red is a piece of infrastructure (MySQL, Redis, RabbitMQ,
+
 ## System design interview questions with solutions
 
 > Common system design interview questions with sample discussions, code, and diagrams.
