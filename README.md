@@ -295,13 +295,37 @@ Few computer science or software development programs attempt to teach the build
 blocks of scalable systems. Instead, system architecture is usually picked up on the job by
 [working through the pain of a growing product](https://about.twitter.com) or by working with engineers who have
 already learned through that suffering process.
+
 In this post I&#39;ll attempt to document some of the scalability architecture lessons I&#39;ve learned
 while working on systems at Yahoo! and Digg.
 I&#39;ve attempted to maintain a color convention for diagrams:
- green is an external request from an external client (an HTTP request from a browser, etc),
- blue is your code running in some container (a Django app running on mod_wsgi, a Python
+ > green is an external request from an external client (an HTTP request from a browser, etc),
+ > blue is your code running in some container (a Django app running on mod_wsgi, a Python
 script listening to RabbitMQ, etc), and
- red is a piece of infrastructure (MySQL, Redis, RabbitMQ,
+ > red is a piece of infrastructure (MySQL, Redis, RabbitMQ,
+
+## Load balancing
+The ideal system increases capacity linearly with adding hardware. In such a system, if you have one machine and add another, your capacity would double. If you had three and you add another, your capacity would increase by 33%. Let's call this horizontal scalability.
+
+On the failure side, an ideal system isn't disrupted by the loss of a server. Losing a server should simply decrease system capacity by the same amount it increased overall capacity when it was added. Let's call this redundancy.
+
+Both horizontal scalability and redundancy are usually achieved via load balancing.
+
+(This article won't address vertical scalability, as it is usually an undesirable property for a large system, as there is inevitably a point where it becomes cheaper to add capacity in the form on additional machines rather than additional resources of one machine, and redundancy and vertical scaling can be at odds with one-another.)
+
+<p align="center">
+<img src="images/load_balance.png">
+  <br/>
+</p>
+
+Load balancing is the process of spreading requests across multiple resources according to some metric (random, round-robin, random with weighting for machine capacity, etc) and their current status (available for requests, not responding, elevated error rate, etc).
+
+Load needs to be balanced between user requests and your web servers, but must also be balanced at every stage to achieve full scalability and redundancy for your system. A moderately large system may balance load at three layers:
+
+user to your web servers,
+web servers to an internal platform layer,
+internal platform layer to your database.
+There are a number of ways to implement load balancing.
 
 ## System design interview questions with solutions
 
