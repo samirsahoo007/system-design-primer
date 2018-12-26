@@ -289,10 +289,11 @@ For big sites that host and deliver lots of images, there are challenges in buil
 architecture that is cost-effective, highly available, and has low latency (fast retrieval).
 
 # Introduction to architecting systems for scale.
-April 4, 2011. Filed under infrastructurearchitecture
+April 4, 2011. Filed under [infrastructurearchitecture](https://lethain.com/tags/infrastructure/)
+
 Few computer science or software development programs attempt to teach the building
 blocks of scalable systems. Instead, system architecture is usually picked up on the job by
-working through the pain of a growing product or by working with engineers who have
+[working through the pain of a growing product](https://about.twitter.com) or by working with engineers who have
 already learned through that suffering process.
 In this post I&#39;ll attempt to document some of the scalability architecture lessons I&#39;ve learned
 while working on systems at Yahoo! and Digg.
