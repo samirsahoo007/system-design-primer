@@ -338,9 +338,56 @@ With that caveat in mind, what is a smart client? It is a client which takes a p
 
 ## Hardware load balancers
 
-The most expensive--but very high performance--solution to load balancing is to buy a dedicated hardware load balancer (something like a Citrix NetScaler). While they can solve a remarkable range of problems, hardware solutions are remarkably expensive, and they are also "non-trivial" to configure.
+The most expensive--but very high performance--solution to load balancing is to buy a dedicated hardware load balancer (something like a [Citrix NetScaler](https://www.citrix.com/products/?contentID=21679)). While they can solve a remarkable range of problems, hardware solutions are remarkably expensive, and they are also "non-trivial" to configure.
 
 As such, generally even large companies with substantial budgets will often avoid using dedicated hardware for all their load-balancing needs; instead they use them only as the first point of contact from user requests to their infrastructure, and use other mechanisms (smart clients or the hybrid approach discussed in the next section) for load-balancing for traffic within their network.
+
+## Software load balancers
+
+If you want to avoid the pain of creating a smart client, and purchasing dedicated hardware is excessive, then the universe has been kind enough to provide a hybrid: software load-balancers.
+
+[HAProxy](http://haproxy.1wt.eu/) is a great example of this approach. It runs locally on each of your boxes, and each service you want to load-balance has a locally bound port. For example, you might have your platform machines accessible via [localhost:9000], your database read-pool at [localhost:9001] and your database write-pool at [localhost:9002]. HAProxy manages healthchecks and will remove and return machines to those pools according to your configuration, as well as balancing across all the machines in those pools as well.
+
+For most systems, I'd recommend starting with a software load balancer and moving to smart clients or hardware load balancing only with deliberate need.
+
+## Caching
+
+Load balancing helps you scale horizontally across an ever-increasing number of servers, but caching will enable you to make vastly better use of the resources you already have, as well as making otherwise unattainable product requirements feasible.
+
+Caching consists of: precalculating results (e.g. the number of visits from each referring domain for the previous day), pre-generating expensive indexes (e.g. suggested stories based on a user's click history), and storing copies of frequently accessed data in a faster backend (e.g.[Memcache](http://memcached.org/) instead of [PostgreSQL](http://www.postgresql.org/).
+
+In practice, caching is important earlier in the development process than load-balancing, and starting with a consistent caching strategy will save you time later on. It also ensures you don't optimize access patterns which can't be replicated with your caching mechanism or access patterns where performance becomes unimportant after the addition of caching (I've found that many heavily optimized Cassandra applications are a challenge to cleanly add caching to if/when the database's caching strategy can't be applied to your access patterns, as the datamodel is generally inconsistent between the [Cassandra](http://cassandra.apache.org/) and your cache).
+
+## Application vs. database caching
+
+There are two primary approaches to caching: application caching and database caching (most systems rely heavily on both).
+
+<p align="center">
+<img src="images/app_cache.png">
+  <br/>
+</p>
+
+Application caching requires explicit integration in the application code itself. Usually it will check if a value is in the cache; if not, retrieve the value from the database; then write that value into the cache (this value is especially common if you are using a cache which observes the [least recently used caching algorithm](http://en.wikipedia.org/wiki/Cache_algorithms#Least_Recently_Used)). The code typically looks like (specifically this is a read-through cache, as it reads the value from the database into the cache if it is missing from the cache):
+
+key = "user.%s" % user_id
+user_blob = memcache.get(key)
+if user_blob is None:
+    user = mysql.query("SELECT * FROM users WHERE user_id=\"%s\"", user_id)
+    if user:
+        memcache.set(key, json.dumps(user))
+    return user
+else:
+    return json.loads(user_blob)
+The other side of the coin is database caching.
+
+<p align="center">
+<img src="images/database_cache.png">
+  <br/>
+</p>
+
+When you flip your database on, you're going to get some level of default configuration which will provide some degree of caching and performance. Those initial settings will be optimized for a generic usecase, and by tweaking them to your system's access patterns you can generally squeeze a great deal of performance improvement.
+
+The beauty of database caching is that your application code gets faster "for free", and a talented DBA or operational engineer can uncover quite a bit of performance without your code changing a whit (my colleague Rob Coli spent some time recently optimizing our configuration for Cassandra row caches, and was succcessful to the extent that he spent a week harassing us with graphs showing the I/O load dropping dramatically and request latencies improving substantially as well).
 
 ## System design interview questions with solutions
 
