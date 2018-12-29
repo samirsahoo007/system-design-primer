@@ -881,7 +881,7 @@ Load balancers can also help with horizontal scaling, improving performance and 
   <br/>
 </p>
 
-A reverse proxy is a web server that centralizes internal services and provides unified interfaces to the public.  Requests from clients are forwarded to a server that can fulfill it before the reverse proxy returns the server's response to the client.
+A reverse proxy is a web server that centralizes internal services and provides unified interfaces to the public.  A reverse proxy accepts a request from a client, forwards it to a server that can fulfill it, and returns the server's response to the client.
 
 Additional benefits include:
 
