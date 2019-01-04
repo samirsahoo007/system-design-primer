@@ -242,7 +242,7 @@ Check out the following links to get a better idea of what to expect:
 
 # Principles of Web Distributed Systems Design
 Below are some of the key principles that influence the design of large-scale web systems:
-                                       C R A M P
+                                       C R A M P S
   #### Cost: 
     Cost is an important factor. This obviously can include hardware and software costs,
     but it is also important to consider other facets needed to deploy and maintain the system.
