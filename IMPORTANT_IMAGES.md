@@ -62,6 +62,14 @@ and
 </p>
 
 
+## Asynchronism
+
+<p align="center">
+  <img src="images/asynchronism.png">
+  <br/>
+  <i><a href=http://lethain.com/introduction-to-architecting-systems-for-scale/#platform_layer>Source: Intro to architecting systems for scale</a></i>
+</p>
+
 ## Load balancer
 
 <p align="center">
@@ -69,18 +77,6 @@ and
   <br/>
   <i><a href=http://horicky.blogspot.com/2010/10/scalable-system-design-patterns.html>Source: Scalable system design patterns</a></i>
 </p>
-
-
-## Reverse proxy (web server)
-
-<p align="center">
-  <img src="images/reverse_proxy.png">
-  <br/>
-  <i><a href=https://upload.wikimedia.org/wikipedia/commons/6/67/Reverse_proxy_h2g2bob.svg>Source: Wikipedia</a></i>
-  <br/>
-</p>
-
-
 
 ## Cache
 
@@ -90,14 +86,6 @@ and
   <i><a href=http://horicky.blogspot.com/2010/10/scalable-system-design-patterns.html>Source: Scalable system design patterns</a></i>
 </p>
 
-
-## Asynchronism
-
-<p align="center">
-  <img src="images/asynchronism.png">
-  <br/>
-  <i><a href=http://lethain.com/introduction-to-architecting-systems-for-scale/#platform_layer>Source: Intro to architecting systems for scale</a></i>
-</p>
 
 ### Real world architectures
 
@@ -132,3 +120,14 @@ and
   <br/>
   <i><a href=http://www.slideshare.net/jboner/scalability-availability-stability-patterns/>Source: Scalability, availability, stability, patterns</a></i>
 </p>
+
+
+## Reverse proxy (web server)
+
+<p align="center">
+  <img src="images/reverse_proxy.png">
+  <br/>
+  <i><a href=https://upload.wikimedia.org/wikipedia/commons/6/67/Reverse_proxy_h2g2bob.svg>Source: Wikipedia</a></i>
+  <br/>
+</p>
+
