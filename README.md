@@ -288,6 +288,10 @@ Example: Image Hosting Application
 For big sites that host and deliver lots of images, there are challenges in building an
 architecture that is cost-effective, highly available, and has low latency (fast retrieval).
 
+<p align="center">
+<img src="images/intro-scalable-arch.png">
+  <br/>
+</p>
 # Introduction to architecting systems for scale.
 April 4, 2011. Filed under [infrastructurearchitecture](https://lethain.com/tags/infrastructure/)
 
