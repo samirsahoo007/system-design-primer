@@ -14,7 +14,7 @@
 </p>
 
 
-## Application vs. 
+## Application caching 
 
 <p align="center">
 <img src="images/app_cache.png">
@@ -51,11 +51,14 @@
   <br/>
 </p>
 
+## Application layer
+and
 ## Platform layer
 
 <p align="center">
-<img src="images/platform_layer.png">
+  <img src="images/application_layer.png">
   <br/>
+  <i><a href=http://lethain.com/introduction-to-architecting-systems-for-scale/#platform_layer>Source: Intro to architecting systems for scale</a></i>
 </p>
 
 
@@ -77,14 +80,6 @@
   <br/>
 </p>
 
-
-## Application layer
-
-<p align="center">
-  <img src="images/application_layer.png">
-  <br/>
-  <i><a href=http://lethain.com/introduction-to-architecting-systems-for-scale/#platform_layer>Source: Intro to architecting systems for scale</a></i>
-</p>
 
 
 ## Cache
