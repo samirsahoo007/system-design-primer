@@ -880,9 +880,15 @@ Load balancers can also help with horizontal scaling, improving performance and 
 ## Reverse proxy (web server)
 
 <p align="center">
-  <img src="http://i.imgur.com/n41Azff.png">
+  <img src="images/forward_proxy.png">
   <br/>
-  <i><a href=https://upload.wikimedia.org/wikipedia/commons/6/67/Reverse_proxy_h2g2bob.svg>Source: Wikipedia</a></i>
+  <i><a href=https://www.jscape.com/blog/bid/87783/Forward-Proxy-vs-Reverse-Proxy>forward proxy</a></i>
+  <br/>
+</p>
+<p align="center">
+  <img src="images/reverse_proxy-resized-600.png">
+  <br/>
+  <i><a href=https://www.jscape.com/blog/bid/87783/Forward-Proxy-vs-Reverse-Proxy>reverse proxy</a></i>
   <br/>
 </p>
 
@@ -912,6 +918,30 @@ Additional benefits include:
 
 * Introducing a reverse proxy results in increased complexity.
 * A single reverse proxy is a single point of failure, configuring multiple reverse proxies (ie a [failover](https://en.wikipedia.org/wiki/Failover)) further increases complexity.
+
+## Proxy vs reverse proxy
+
+* forward proxy is used by the client such as a web browser whereas reverse proxy is used by the server such as a web server.
+<p align="center">
+  <img src="images/f_proxy.png">
+  <br/>
+  <i><a href=https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/>forward proxy</a></i>
+  <br/>
+</p>
+In a standard Internet communication, computer A would reach out directly to computer C, with the client sending requests to the origin server and the origin server responding to the client. When a forward proxy is in place, A will instead send requests to B, which will then forward the request to C. C will then send a response to B, which will forward the response back to A.
+
+<p align="center">
+  <img src="images/r_proxy.png">
+  <br/>
+  <i><a href=https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/>forward proxy</a></i>
+  <br/>
+</p>
+Typically all requests from D would go directly to F, and F would send responses directly to D. With a reverse proxy, all requests from D will go directly to E, and E will send its requests to and receive responses from F. E will then pass along the appropriate responses to D.
+
+## How to implement a reverse proxy
+
+* Some companies build their own reverse proxies, but this requires intensive software and hardware engineering resources, as well as a significant investment in physical hardware. One of the easiest and most cost-effective ways to reap all the benefits of a reverse proxy is by signing up for a CDN service. For example, the Cloudflare CDN provides all the performance and security features listed above, as well as many others.
+* web developers often put the builtin Node.js web server behind another web server like Nginx, so Nginx is the reverse proxy. One example is the Ghost blog platform.
 
 ### Source(s) and further reading
 
