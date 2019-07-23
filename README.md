@@ -886,6 +886,9 @@ Load balancers can also help with horizontal scaling, improving performance and 
   <br/>
 </p>
 <p align="center">
+<br/>
+</p>
+<p align="center">
   <img src="images/reverse_proxy-resized-600.png">
   <br/>
   <i><a href=https://www.jscape.com/blog/bid/87783/Forward-Proxy-vs-Reverse-Proxy>reverse proxy</a></i>
@@ -923,25 +926,36 @@ Additional benefits include:
 
 * forward proxy is used by the client such as a web browser whereas reverse proxy is used by the server such as a web server.
 <p align="center">
+  <br/>
   <img src="images/f_proxy.png">
   <br/>
   <i><a href=https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/>forward proxy</a></i>
   <br/>
+  <br/>
 </p>
+
 In a standard Internet communication, computer A would reach out directly to computer C, with the client sending requests to the origin server and the origin server responding to the client. When a forward proxy is in place, A will instead send requests to B, which will then forward the request to C. C will then send a response to B, which will forward the response back to A.
 
 <p align="center">
+  <br/>
   <img src="images/r_proxy.png">
   <br/>
-  <i><a href=https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/>forward proxy</a></i>
+  <i><a href=https://www.cloudflare.com/learning/cdn/glossary/reverse-proxy/>reverse proxy</a></i>
   <br/>
 </p>
+
 Typically all requests from D would go directly to F, and F would send responses directly to D. With a reverse proxy, all requests from D will go directly to E, and E will send its requests to and receive responses from F. E will then pass along the appropriate responses to D.
 
 ## How to implement a reverse proxy
 
 * Some companies build their own reverse proxies, but this requires intensive software and hardware engineering resources, as well as a significant investment in physical hardware. One of the easiest and most cost-effective ways to reap all the benefits of a reverse proxy is by signing up for a CDN service. For example, the Cloudflare CDN provides all the performance and security features listed above, as well as many others.
 * web developers often put the builtin Node.js web server behind another web server like Nginx, so Nginx is the reverse proxy. One example is the Ghost blog platform.
+
+## What is the difference between proxy and firewall then?
+
+* Firewalls can block ports and programs that try to gain unauthorized access to your computer, while proxy servers basically hide your internal network from the Internet. It works as a firewall in the sense that it blocks your network from being exposed to the Internet by redirecting Web requests when necessary.
+
+* Just to make sure we're starting off on the same foot, the main purpose of a proxy service (which is the kind of service either of these two provide) is very similar to what a person aims to achieve when he proxies for another person. That is, to act on behalf of that other person. In our case, a proxy server acts on behalf of another machine - either a client or another server. 
 
 ### Source(s) and further reading
 
