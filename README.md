@@ -6,23 +6,23 @@
   <br/>
 </p>
 
-DNS( A Domain Name System ) translates a domain name such as www.example.com to an IP address
-CDN( Content distribution networks ) searves static assets(images, JavaScript files)
-Load balancers distribute incoming client requests to computing resources such as application servers and databases. e.g. nginx, HAProxy
+* DNS( A Domain Name System ) translates a domain name such as www.example.com to an IP address
+* CDN( Content distribution networks ) searves static assets(images, JavaScript files)
+* Load balancers distribute incoming client requests to computing resources such as application servers and databases.
+  e.g. nginx, HAProxy
 
-Queues: Off-line processing. 
-			- Message queues(RabbitMQ / Redis / Amazon SQS ). In Bigdata environment(Kafka for message queues and streaming)
-				- Scheduling periodic tasks(Cron, puppet, Airflow). In Bigdata environment(Oozie)
-			- Task queues (Celery). In Bigdata environment(Kafka / Pulsar)
+* Queues: Off-line processing. 
+	- Message queues(RabbitMQ / Redis / Amazon SQS ). In Bigdata environment(Kafka for message queues and streaming)
+		- Scheduling periodic tasks(Cron, puppet, Airflow). In Bigdata environment(Oozie)
+	- Task queues (Celery). In Bigdata environment(Kafka / Pulsar)
+		Hive/HBase, Map Reduce/Spark etc are used for processing data in a bigdata environment
 
-			Hive/HBase, Map Reduce/Spark etc are used for processing data in a bigdata environment
 
+* In-memory caches: Caches in memory. Ex. Redis, Memcached
+* Object storage: a specialized type of NoSQL database designed to handle data created by applications that use object-oriented programming techniques, avoiding the Object to Relational Mapping overhead required
+	e.g. storing photos on Facebook, songs on Spotify, or files in online collaboration services, such as Dropbox.
 
-In-memory caches: Caches in memory. Ex. Redis, Memcached
-Object storage: a specialized type of NoSQL database designed to handle data created by applications that use object-oriented programming techniques, avoiding the Object to Relational Mapping overhead required
-				e.g. storing photos on Facebook, songs on Spotify, or files in online collaboration services, such as Dropbox.
-
-NoSQL: collection of data items represented in a key-value store, document-store, wide column store, or a graph database. Data is denormalized, and joins are generally done in the application code. Most NoSQL stores lack true ACID transactions and favor eventual consistency.
+* NoSQL: collection of data items represented in a key-value store, document-store, wide column store, or a graph database. Data is denormalized, and joins are generally done in the application code. Most NoSQL stores lack true ACID transactions and favor eventual consistency.
 	- key-value store : Redis, Memcached, DynamoDB 
 	- Document store: MongoDB, CouchDB, ElasticSearch, DynamoDB 
 	- wide column store: Bigtable, HBase, Cassandra
