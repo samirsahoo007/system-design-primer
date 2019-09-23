@@ -7,7 +7,7 @@
 </p>
 
 * DNS( A Domain Name System ) translates a domain name such as www.example.com to an IP address
-* CDN( Content distribution networks ) searves static assets(images, JavaScript files)
+* CDN( Content distribution networks ) searves static assets(images, JavaScript files).e.g. Cloudflare CDN
 * Load balancers distribute incoming client requests to computing resources such as application servers and databases.
   e.g. nginx, HAProxy
 
