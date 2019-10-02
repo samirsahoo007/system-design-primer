@@ -2053,9 +2053,11 @@ As you can deduce from above table even the smallest application written takes a
 ## Fan-in Fan-Out
 
 Fan-in:  number of modules that call a given module
+
 Fan-out: numbers of modules that called by a given module
 
 ![alt text](https://www.aivosto.com/project/help/pm-sf.gif)
+			
 			SFIN=2. SFOUT=3
 
 SFIN (procedure) = number of procedures that call this procedure
