@@ -2046,7 +2046,7 @@ Special thanks to:
 
 This metric indicates complexity of a program.  It’s computed using control flow graph of a program.  The number of nodes(n)  in control flow graph minus 1 (n-1) is Cyclomatic complexity of  your program. It was invented by Thomas J. McCabe, Sr. in 1976. The table below shows how risk evaluation is done based on Cyclomatic complexity.
 
-	![alt text](https://gauthamprabhuk.files.wordpress.com/2014/12/cyclomatic-complexity-numbers.png)
+![alt text](https://gauthamprabhuk.files.wordpress.com/2014/12/cyclomatic-complexity-numbers.png)
 
 As you can deduce from above table even the smallest application written takes an as whole will be have very high Cyclomatic complexity, so its measured at function level.  Industry standard is not to have any function in your application having Cyclomatic complexity greater than 10.   The advantage of this is a function can have maximum test case of 10 and research has proven that most computer programmers can easily read and modify functions that are having Cyclomatic complexity less than or equal to 10 as cognitive load on human mind is less. This benchmark number can be set to higher values if team members are experienced and also working on same code-base for longer time as familiarity with code-base  reduces cognitive load.
 
@@ -2067,7 +2067,7 @@ The designer should strive for software structure with moderate fan-out in the u
 
 Use factoring to solve the problem of excessive fan-out.  Create an intermediate module to factor out modules with strong cohesion and loose coupling.
 
-	![alt text](https://toolbox.brightspotcdn.com/ce/a5/c56bc4b041eab5db4cbfea26510b/fan-out-model.jpg)
+![alt text](https://toolbox.brightspotcdn.com/ce/a5/c56bc4b041eab5db4cbfea26510b/fan-out-model.jpg)
 	In the example, fan-out is reduced by creating a module X to reduce the number of modules invoked directly by Z.
 
 ## Cohesion
@@ -2092,7 +2092,8 @@ Its expressed as “High cohesion” or “Low cohesion”. High cohesion is pre
 ## Coupling
 
 In software engineering, coupling or dependency is the degree to which each program module relies on each one of the other modules.
-	![alt text](https://gauthamprabhuk.files.wordpress.com/2014/12/coupling3.png)
+
+![alt text](https://gauthamprabhuk.files.wordpress.com/2014/12/coupling3.png)
 
 #### Content coupling :(high) 
 #### Common coupling : 
