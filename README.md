@@ -2040,6 +2040,92 @@ Special thanks to:
 * [A distributed systems reading list](http://dancres.github.io/Pages/)
 * [Cracking the system design interview](http://www.puncsky.com/blog/2016-02-13-crack-the-system-design-interview)
 
+# SOFTWARE METRICS
+	
+## Cyclomatic complexity
+
+This metric indicates complexity of a program.  It’s computed using control flow graph of a program.  The number of nodes(n)  in control flow graph minus 1 (n-1) is Cyclomatic complexity of  your program. It was invented by Thomas J. McCabe, Sr. in 1976. The table below shows how risk evaluation is done based on Cyclomatic complexity.
+
+	![alt text](https://gauthamprabhuk.files.wordpress.com/2014/12/cyclomatic-complexity-numbers.png)
+
+As you can deduce from above table even the smallest application written takes an as whole will be have very high Cyclomatic complexity, so its measured at function level.  Industry standard is not to have any function in your application having Cyclomatic complexity greater than 10.   The advantage of this is a function can have maximum test case of 10 and research has proven that most computer programmers can easily read and modify functions that are having Cyclomatic complexity less than or equal to 10 as cognitive load on human mind is less. This benchmark number can be set to higher values if team members are experienced and also working on same code-base for longer time as familiarity with code-base  reduces cognitive load.
+
+## Fan-in Fan-Out
+
+Fan-in:  number of modules that call a given module
+Fan-out: numbers of modules that called by a given module
+
+ *In object-oriented design, high fan-in generally contributes to a better design of the overall system.  High fan-in shows that an object is being used extensively by other objects, and is indicative of re-use.
+ 
+*As a rule of thumb, the optimum fan-out is seven, plus or minus 2.  This rule of thumb is based on the psychological study conducted by George Miller during which he determined that the human mind has difficulty dealing with more than seven things at once.
+
+This metrics can applied both at module level and function level this metrics just puts a number on how complex is interlinking of different modules or functions. Unlike Cyclomatic complexity you cannot put a number and say it cannot go beyond this number.  This is used just to size up how difficult it will be replace a function or module in your application and how changes to a function or module can impact other functions or modules. Sometimes you can put restriction on number of Fan-Out a function has to avoid cluttering your function but is not a widely accepted practice.
+
+### Designing Modules That Consider Fan-In/Fan-Out
+
+The designer should strive for software structure with moderate fan-out in the upper levels of the hierarchy and high fan-in in the lower levels of the hierarchy.  Some examples of common modules which result in high fan-in are: I/O modules, edit modules, modules simulating a high level command (such as calculating the number of days between two dates).
+
+Use factoring to solve the problem of excessive fan-out.  Create an intermediate module to factor out modules with strong cohesion and loose coupling.
+
+	![alt text](https://toolbox.brightspotcdn.com/ce/a5/c56bc4b041eab5db4cbfea26510b/fan-out-model.jpg)
+	In the example, fan-out is reduced by creating a module X to reduce the number of modules invoked directly by Z.
+
+## Cohesion
+
+Cohesion refers to degree to which elements of a module belong together. Cohesion basically decides how good your application codes are organized allowing developer to change code  confidently.
+
+Its expressed as “High cohesion” or “Low cohesion”. High cohesion is preferred as it increases robustness, reliability, re-usability, and understand-ability of module.  
+
+### Types of Cohesion
+
+#### Coincidental cohesion (worst) :  
+	Is when parts of a module are grouped arbitrarily;  only relationship between the parts is that they have been grouped together (e.g. a “Utilities” class).
+#### Procedural cohesion :  
+	Is when parts of a module are grouped because they always follow a certain sequence of execution (e.g. a function which checks file permissions and then opens the file).
+#### Communicational cohesion :  
+	Is when parts of a module are grouped because they operate on same data (e.g. A module which operates on same record of information)
+#### Sequential cohesion :  
+	Is when parts of a module are grouped because output from one part is input to another part like an assembly line (e.g.  A function which reads data from a file and processes data).
+#### Functional cohesion (best) : 
+	Is when parts of a module are grouped because they all contribute to a single well-defined task of the module(e.g. tokenizing a string of XML).
+
+## Coupling
+
+In software engineering, coupling or dependency is the degree to which each program module relies on each one of the other modules.
+	![alt text](https://gauthamprabhuk.files.wordpress.com/2014/12/coupling3.png)
+
+#### Content coupling :(high) 
+#### Common coupling : 
+	Two or more modules share same global data.
+#### External coupling : 
+	External coupling occurs when two modules share an externally imposed data format, communication protocol, or device interface
+#### Control coupling : 
+	Control coupling is one module controlling the flow of another, by passing it information.
+#### Stamp coupling (Data-structured coupling): 
+	Stamp coupling is when modules share a composite data structure and use only a part of it, possibly a different part (e.g., passing a whole record to a function that only needs one field of it).
+#### Data coupling
+	Data coupling is when modules share data through.(e.g., passing an integer to a function that computes a square root).
+#### Message coupling (low): 
+	This is the loosest type of coupling. It can be achieved by state decentralization (as in objects) and component communication is done via parameters or message passing.
+#### No coupling : 
+	Modules do not communicate at all with one another.
+	
+## Code Churn
+
+It gives total added, modified and deleted LOC over a period of time. It records software change history. It can indicate  how large the recent changes where  number of consecutive edits done in your application which source files have seen large changes.
+
+# Advantages of measuring metrics
+
+* Allows Architects, Project Manager and Stakeholders to control software development process and its quality. For example a high code churn happening at end of software cycle even though the change requests or bug fixes are simple  can be an indication of poor design.
+* Allows a developer(s) to customize best practices for their project.  For example an experienced team members can decide to have higher cyclometric complexity than 10 per function which is recommended to prevent from having to creating to many functions.
+* By analyzing trend the team can see how changes they are doing is impacting overall software quality.
+
+# Disadvantages of measuring metrics
+
+* How metrics are interpreted  can have great impact on software development, same metrics are interpreted  in different ways by people and will depend on their experience. Wrong understanding of metrics can create chaos and may lead to bad quality of * software as process changes made will be wrong.
+* Developers can sometimes become obsessed with metrics and may try to keep in benchmark. This might lead to situation where a developer focus is more on metrics than on solving business problems.
+* Software is very complex entity and scales used are defined based on experience of different computer scientist. Some times a metrics may not reflect actual situation in project. In one for my projects the average Cyclomatic complexity showed very less but the source code turned out to be having too many classes and functions making it hard to modify and do changes.
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
