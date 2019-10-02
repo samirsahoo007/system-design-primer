@@ -2138,7 +2138,6 @@ It gives total added, modified and deleted LOC over a period of time. It records
 * How metrics are interpreted  can have great impact on software development, same metrics are interpreted  in different ways by people and will depend on their experience. Wrong understanding of metrics can create chaos and may lead to bad quality of * software as process changes made will be wrong.
 * Developers can sometimes become obsessed with metrics and may try to keep in benchmark. This might lead to situation where a developer focus is more on metrics than on solving business problems.
 * Software is very complex entity and scales used are defined based on experience of different computer scientist. Some times a metrics may not reflect actual situation in project. In one for my projects the average Cyclomatic complexity showed very less but the source code turned out to be having too many classes and functions making it hard to modify and do changes.
-
 ![alt text](https://www.aivosto.com/project/help/pm-main.gif)
 
 
