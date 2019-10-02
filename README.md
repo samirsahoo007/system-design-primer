@@ -2068,7 +2068,8 @@ The designer should strive for software structure with moderate fan-out in the u
 Use factoring to solve the problem of excessive fan-out.  Create an intermediate module to factor out modules with strong cohesion and loose coupling.
 
 ![alt text](https://toolbox.brightspotcdn.com/ce/a5/c56bc4b041eab5db4cbfea26510b/fan-out-model.jpg)
-	In the example, fan-out is reduced by creating a module X to reduce the number of modules invoked directly by Z.
+
+In the example, fan-out is reduced by creating a module X to reduce the number of modules invoked directly by Z.
 
 ## Cohesion
 
