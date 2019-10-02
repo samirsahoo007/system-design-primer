@@ -2055,6 +2055,15 @@ As you can deduce from above table even the smallest application written takes a
 Fan-in:  number of modules that call a given module
 Fan-out: numbers of modules that called by a given module
 
+![alt text](https://www.aivosto.com/project/help/pm-sf.gif)
+			SFIN=2. SFOUT=3
+
+SFIN (procedure) = number of procedures that call this procedure
+SFOUT (procedure) = number of procedures this procedure calls
+
+SFIN (file) = number of files that depend on this file
+SFOUT (file) = number of files this file depends on
+
  *In object-oriented design, high fan-in generally contributes to a better design of the overall system.  High fan-in shows that an object is being used extensively by other objects, and is indicative of re-use.
  
 *As a rule of thumb, the optimum fan-out is seven, plus or minus 2.  This rule of thumb is based on the psychological study conducted by George Miller during which he determined that the human mind has difficulty dealing with more than seven things at once.
