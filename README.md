@@ -2140,6 +2140,68 @@ It gives total added, modified and deleted LOC over a period of time. It records
 * Software is very complex entity and scales used are defined based on experience of different computer scientist. Some times a metrics may not reflect actual situation in project. In one for my projects the average Cyclomatic complexity showed very less but the source code turned out to be having too many classes and functions making it hard to modify and do changes.
 ![alt text](https://www.aivosto.com/project/help/pm-main.gif)
 
+# Microservices
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/microservice.png)
+	
+	Simple Social App
+
+Client-side: Front-end App and Browser Extension.
+
+API Gateways: Auth API and Main API
+
+Microservices: Photos, Chats and Friends Microservices
+
+
+I’ve been using draw.io pretty much all the time for any kind of UML diagrams, charts or graphs.
+
+I got my inspiration from Terraform(terraform.io) - a tool for creating and maintaining your production infrastructure. It has an interesting terraform graph command which generates a visual representation of your config using DOT language for Graphviz.(e.g. https://gist.github.com/samirsahoo007/e30393c74f3926394b526a9bab5e7d43)
+
+## Key Concepts of Microservice Architecture
+
+Following are some guidelines to be followed while discussing microservices.
+
+* As a developer, when you decide to build an application separate the domains and be clear with the functionalities.
+
+* Each microservice you design shall concentrate only on one service of the application.
+
+* Ensure that you have designed the application in such a way that each service is individually deployable.
+
+* Make sure that the communication between microservices is done via a stateless server.
+
+* Each service can be furthered refactored into smaller services, having their own microservices.
+
+## How Does Microservice Architecture Work?
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/Architecture-Of-Microservices.png)
+
+A typical microservice architecture (MSA) should consist of the following components:
+
+* Clients
+
+* Identity Providers	=> who authenticate the requests of clients and communicate the requests to API Gateway
+
+* API Gateway		=> API Gateway acts as an entry point for the clients to forward requests to appropriate microservices(can provide security, load balancing etc)
+
+* Messaging Formats	=> Synchronous, Asynchronous(See below)
+
+* Databases		=> each microservice owns a private database to capture their data and implement the respective business functionality
+
+* Static Content	=> After the microservices communicate within themselves, they deploy the static content to a cloud-based storage service that can deliver them directly to the clients via Content Delivery Networks (CDNs)
+
+* Management		=> component is responsible for balancing the services on nodes and identifying failures
+
+* Service Discovery	=> find the route of communication between them as it maintains a list of services on which nodes are located
+
+
+### Messaging Formats
+There are two types of messages through which they communicate:
+
+Synchronous Messages: In the situation where clients wait for the responses from a service, microservices usually tend to use REST (Representational State Transfer) as it relies on a stateless, client-server, and the HTTP protocol. This protocol is used as it is a distributed environment each and every functionality is represented with a resource to carry out operations
+
+Asynchronous Messages: In the situation where clients do not wait for the responses from a service, microservices usually tend to use protocols such as AMQP, STOMP, MQTT.These protocols are used in this type of communication since the nature of messages is defined and these messages have to be interoperable between implementations.
+
+
 
 ## Contact info
 
