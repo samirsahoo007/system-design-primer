@@ -2177,9 +2177,9 @@ Following are some guidelines to be followed while discussing microservices.
 
 A typical microservice architecture (MSA) should consist of the following components:
 
-* Clients
+* Clients		=>  Different users from various devices send requests
 
-* Identity Providers	=> who authenticate the requests of clients and communicate the requests to API Gateway
+* Identity Providers	=>  Authenticates user or clients identities and issues security tokens
 
 * API Gateway		=> API Gateway acts as an entry point for the clients to forward requests to appropriate microservices(can provide security, load balancing etc)
 
@@ -2193,6 +2193,7 @@ A typical microservice architecture (MSA) should consist of the following compon
 
 * Service Discovery	=> find the route of communication between them as it maintains a list of services on which nodes are located
 
+* Remote Service	=> Enables the remote access information that resides on a network of IT devices.
 
 ### Messaging Formats
 There are two types of messages through which they communicate:
@@ -2241,6 +2242,64 @@ For Example: If you want to change anything in the billing microservices, then y
 
 * All the features were now scaled individually i.e. The interdependency between each and every feature was removed.
 For Example, we all know that the number of people searching for cabs is more comparatively more than the people actually booking a cab and making payments. This gets us an inference that the number of processes working on the passenger management microservice is more than the number of processes working on payments.
+
+### Mediamore case study
+
+Alice is an avid user of Mediamore. She uses Mediamore regularly to watch her favorite series online. She recently missed watching an episode of her favorite TV show.
+When Alice logs in to the application, she sees the most recommended content on her home page. After some searching, she finally finds her TV show.
+But, what if Alice wants to get her TV show with a single click? How will the developers work together to fulfill Alice's request?
+
+Alice's request is passed on to the Identity Provider. The identity provider thus authenticates Alice's request by identifying her as a regular user on Mediamore.
+These requests are passed to the API Gateway which acts as an entry point for Alice to forward her requests to the appropriate microservices.
+Each feature has its own working microservice, handling their own data. These microservices also have their own load balancers and execution environments to function properly.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/Microservice-Architecture-Of-Use-Case-mediamore.png)
+	
+		Microservices Architecture of Mediamore
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/Different-Teams-Microservices.png)
+
+		Division of teams at Mediamore
+
+* The content team consists of millions of TV shows that the application provides.
+
+* The video uploading team have the responsibility to upload all the content into the application
+
+* The most trending team houses the most trending shows according to the geographical location of users and so on.
+
+* These small teams of developers relate each and every piece of content with the metadata that describes the searched content. Then, metadata is fed into another microservice i.e. the search function which ensures Alice's search results are captures into the content catalog.
+
+Then, the third microservice, the most trending microservice, captures the trending content among all the Mediamore users according to their geographical locations.
+
+The content from this microservice is what Alice sees when she first logs into Mediamore.
+
+These individually deployable microservices are put in specific containers to join the application. Containers are used to deliver the code to the sector where deployment is required.
+
+But before they join the application to work together, they have to find each other to fulfil Alice's request.
+
+#### How Do These Microservices Find One Another?
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ServicesVer1.4-1.png)
+
+	Communication between microservices.
+
+Microservices use service discovery which acts as a guide to find the route of communication between each of them. Microservices then communicate with each other via a stateless server i.e. either by HTTP Request/Message Bus.
+These microservices communicate with each other using an Application Program Interface(API). After the Microservices communicate within themselves, they deploy the static content to a cloud-based storage service that can deliver them directly to the clients via Content Delivery Networks (CDNs).
+
+So, when Alice searches for her TV Show, the search microservice communicates with the content catalog service in API about what is Alice searching for and then these microservices compare the typed words with the metadata they already have.
+
+Once the teams of developers capture the most typed words by Alice, the analytics team update the code in recommendations microservice and compare Alice's most viewed content and preferences to popular content among other users in the same geographical region.
+
+This means that the next time Alice logs on to the application, she not only sees the most popular content but also finds a personalized playlist which contains the shows she has previously viewed.
+
+In this way, Alice's request is fulfilled by the development team in a quick manner as they did not have to build the complete application again and just had to update the code to deploy this new functionality.
+
+So this way microservices invoke parallel environments to satisfy millions of customers with varying interests.	
+##### Example
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/microservice_ecommerce_application.png)
+
+Ref: https://dzone.com/articles/microservice-architecture-learn-build-and-deploy-a
 
 ## Contact info
 
