@@ -2201,7 +2201,46 @@ Synchronous Messages: In the situation where clients wait for the responses from
 
 Asynchronous Messages: In the situation where clients do not wait for the responses from a service, microservices usually tend to use protocols such as AMQP, STOMP, MQTT.These protocols are used in this type of communication since the nature of messages is defined and these messages have to be interoperable between implementations.
 
+### Uber Case Study
+#### Uber's Previous Architecture
+Like many startups, Uber began its journey with a monolithic architecture built for a single offering in a single city. Having one codebase seemed cleaned at that time, and solved Uber's core business problems. However, as Uber started expanding worldwide they rigorously faced various problems with respect to scalability and continuous integration.
 
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/Monolithic-Architecture-Of-UBER-Microservice-Architecture.png)
+
+		Monolithic Architecture of Uber
+
+A REST API is present with which the passenger and driver connect.
+
+Three different adapters are used with API within them, to perform actions such as billing, payments, sending emails/messages that we see when we book a cab.
+
+A MySQL database to store all their data.
+
+So, if you notice here all the features such as passenger management, billing, notification features, payments, trip management and driver management were composed within a single framework.
+
+##### Problem Statement
+
+While Uber started expanding worldwide this kind of framework introduced various challenges like...
+
+All the features had to be re-built, deployed and tested again and again to update a single feature.
+
+Fixing bugs became extremely difficult in a single repository as developers had to change the code again and again.
+
+Scaling the features simultaneously with the introduction of new features worldwide was quite tough to be handled together.
+
+##### Solution
+To avoid such problems Uber decided to change its architecture and follow the other hyper-growth companies like Amazon, Netflix, Twitter and many others. Thus, Uber decided to break its monolithic architecture into multiple codebases to form a microservice architecture.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/Microservice-Architecture-Of-UBER.png)
+
+	Microservice Architecture of Uber 
+
+* The major change that we observe here is the introduction of API Gateway through which all the drivers and passengers are connected. From the API Gateway, all the internal points are connected such as passenger management, driver management, trip management and others.
+
+* The units are individual separate deployable units performing separate functionalities.
+For Example: If you want to change anything in the billing microservices, then you just have to deploy only billing microservices and don’t have to deploy the others.
+
+* All the features were now scaled individually i.e. The interdependency between each and every feature was removed.
+For Example, we all know that the number of people searching for cabs is more comparatively more than the people actually booking a cab and making payments. This gets us an inference that the number of processes working on the passenger management microservice is more than the number of processes working on payments.
 
 ## Contact info
 
