@@ -2532,6 +2532,9 @@ A master media file which needs to be converted into multiple formats.
 
 ##3. Real-Time Data Processing Example using AWS Lambda
 
+<details>
+  <summary>Click to expand!</summary>
+
 >! Processing data in real time and responding to them is highly imperative for modern business requirements. To enable this, analyzing the metrics data in real time is critical. But Amazon Kinesis Stream and AWS Lambda have made it possible!
 
 Real Time Data Processing Example using AWS Lambda
@@ -2557,6 +2560,7 @@ Event structure model where your Lambda function receives data as a collection o
 For example, there are thousands of IoT devices sending data logs. In some cases, you need to execute an operation when a condition is matched, Lambda & Kinesis works best for you! Also, check out how Dubsmash used Kinesis + Lambda while they were scaling for 200 million users.
 
 Bustle processes high volume of site metric data in real time. This allows them to capture more data quickly. Which in turn helps them in analyzing how new features are affecting the website audience. Not only that, they have been able to monitor user engagement which has empowered marketing to make decisions driven by data.
+</details>
 
 #4. Custom Logic Workflows using AWS Lambda
 We have often come across complex applications (e-commerce, analytics software, ERP, etc) which consists of complex repeatable scenarios that need to be executed in a response to some event. In other words, workflows.
