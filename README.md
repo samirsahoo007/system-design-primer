@@ -2295,9 +2295,24 @@ This means that the next time Alice logs on to the application, she not only see
 In this way, Alice's request is fulfilled by the development team in a quick manner as they did not have to build the complete application again and just had to update the code to deploy this new functionality.
 
 So this way microservices invoke parallel environments to satisfy millions of customers with varying interests.	
-##### Example
+## Example
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/microservice_ecommerce_application.png)
+
+### Cinema-MicroServices-Nodejs
+Backend for a Cinema web application based on MicroServices Architecture using Nodejs | Express | Docker |  Docker Swarm
+
+#### Objective
+* The goal is to build a Backend for a Cinema web application based on MicroServices Architecture.
+* The project was developed using Nodejs & Express for REST API's, Containerized in Docker and clustered and scheduled by Docker Swarm.
+
+#### System Design
+![](https://github.com/samirsahoo007/microservices/blob/master/Cinema-MicroServices-Nodejs/images/3.png)
+
+#### Screenshots
+![](https://github.com/samirsahoo007/microservices/blob/master/Cinema-MicroServices-Nodejs/images/7.png)
+
+![](https://github.com/samirsahoo007/microservices/blob/master/Cinema-MicroServices-Nodejs/images/8.png)
 
 Ref: https://dzone.com/articles/microservice-architecture-learn-build-and-deploy-a
 
