@@ -2530,12 +2530,13 @@ Processing the data logs to produce multiple result derivatives which can be use
 Transforming the content from one format to another, for example, Microsoft Word to PDF.
 A master media file which needs to be converted into multiple formats.
 
-##3. Real-Time Data Processing Example using AWS Lambda
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Real-Time-Data-Processing-Example-using-AWS-Lambda-2.png)
 
 <details>
-  <summary>Click to expand!</summary>
+  <summary>##3. Real-Time Data Processing Example using AWS Lambda</summary>
 
->! Processing data in real time and responding to them is highly imperative for modern business requirements. To enable this, analyzing the metrics data in real time is critical. But Amazon Kinesis Stream and AWS Lambda have made it possible!
+
+ Processing data in real time and responding to them is highly imperative for modern business requirements. To enable this, analyzing the metrics data in real time is critical. But Amazon Kinesis Stream and AWS Lambda have made it possible!
 
 Real Time Data Processing Example using AWS Lambda
 
