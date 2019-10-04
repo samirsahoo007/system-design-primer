@@ -2338,6 +2338,152 @@ Bustle.com is a news, entertainment, lifestyle, and fashion website catering to 
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/bustle_arch-diagram.83ec175bd8853ea8fbcc777a0f91a9c15125c39e.png)
 
+##2. Serverless Authentication Example Using AWS Cognito
+Whether you’re running New York Times or a personal blog, personalization plays a huge role when you interact with your users. Amazon Cognito when used with AWS Lambda, can empower you to add pre and post-login hooks to execute your custom logic.
+
+After creating an AWS Lambda function, you can trigger it based on various user pool operations such as user sign-up, user confirmation, sign-in, etc. Not only that, you can experiment with your authentication procedure and make it more challenging, migrate the users and send out personalized verification messages, to name a few.
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Serverless-Authentication-Example-Using-AWS-Cognito.png)
+
+The following are the common triggering sources from where you can hook your Lambda function:
+
+Sign-up, confirmation and sign-in
+Pre and post authentication
+Custom authentication challenge
+Pre token generation
+Migrate user
+Custom message
+
+Let’s understand how custom message works. Amazon Cognito will trigger your Lambda function before sending an email or phone verification text or multi-factor authentication which allows you to customize the message as per the requirements. The triggering source for the custom message are:
+
+Confirmation code post-sign-up
+Temporary password for new users
+Resending confirmation code
+Confirmation code to forget password request
+Manual request for new email/phone
+Multi-factor authentication
+
+##3. AWS Lambda Use Case for Multi-Location Media Transformation
+With the rising number of global viewership, we all know how difficult a task it is to facilitate media files in multiple formats on multiple locations. With the prerequisite of least processing time, reducing the latency and minimizing the bandwidth is important than ever. Here are some common scenarios which you might have come across:
+
+Resizing image based on the query parameter
+Serving appropriate file format based on browser characteristics, for example, WebP for Chrome/Android browsers and JPEG for the rest
+Defining whitelist of dimensions to be generated
+This problem can be simplified with the help of Lambda@Edge and CloudFront. This process can be executed by adding four Lambda triggers to CloudFront. Here’s how it works:
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/AWS-Lambda-Edge-Multi-Location-Media-Transform-Example.png)
+
+Lambda 1 (viewer request): This function is executed to serve the media file in the requested format from the CloudFront cache. No further functions will be executed.
+
+Lambda 2 (origin request): If the requested format is not available, this function fetches the media file with requested configurations from the Amazon S3 bucket and cache it to CloudFront. If the file doesn’t exist, Lambda 3 executed.
+
+Lambda 3 (origin response): This function makes a network call which fetches the original image from the S2 bucket, transforms it as per the requirement and uploads it back.
+
+Lambda 4 (viewer response): This function serves the requested media file from the CloudFront cache.
+
+Note: Lambda 2,3 and 4 are executed only when the requested media file isn’t available in the cache. Here’s more you can do with Lambda@Edge:
+
+##4. Mass Emailing using AWS Lambda & SES
+New York Times sends our 4 Billion emails per year which includes newsletters, breaking news and transactional emails. 
+
+With AWS Lambda and Simple Email Service SES, you can build a cost-effective and in-house serverless email platform. Along with S3 (where your mailing list will be stored) you can quickly send HTML or text-based emails to a large number of recipients.
+
+Whenever a user uploads a CSV file, it triggers an S3 event. This event triggers another Lambda function which imports the file into the database and will start sending email to all the addresses. For sending our scheduled newsletters, you can integrate it with CloudWatch Events.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Serverless-Email-Example-using-SES.png)
+
+
+##5. AWS Lambda Use Case for Real-time Data Transformation
+
+Amazon Kinesis Firehose is basically used for writing real-time streaming data to Amazon S3, Redshift or Elasticsearch. But business requirements have changed over the time.
+
+Sometimes it is required to amend or restructure the raw data for before writing it to the destination. Some of the common use cases that have emerged over the time are:
+
+Normalize the data acquired from different touchpoints
+Adding metadata to the recorded data
+Converting or restructuring the data as per the destination prerequisites
+Performing ETL functionality
+Combine data from another data source
+Fulfilling such requirements is now possible with AWS Lambda use cases. It helps you create a powerful and scalable way to execute data transformations on the clickstream data.
+
+After buffering the incoming data from the source destinations, Firehose invokes a Lambda function asynchronously over a specified batch period. This Lambda function transforms the data as per the custom logic and sends it back to Firehose. From here, the data is written to the specified destination.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Real-time-Data-Transform-AWS-Lambda-Kinesis-Firehose.png)
+
+Along with this, you also have an option to store the raw data (source data backup) to S3 and create a raw data lake before transforming. This process happens concurrently along with your data transformation.
+
+To help you get started with this functionality, AWS provides you with predefined Lambda blueprints in the following format.
+
+Syslog to JSON
+Syslog to CSV
+Apache Log to JSON
+Apache Log to CSV
+General Firehose Processing
+With 5 more use cases left in the Serverless journey, I expect some of you to be slightly anxious of the cost of running a serverless application.
+
+
+##6. Serverless CRON Jobs Example
+
+CloudWatch Events now supports cron-like expressions which can be used to trigger a Lambda function periodically.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Serverless-CRON-Jobs-Example.png)
+
+Simply create a Lambda function and direct AWS Lambda to execute it on a regular schedule by specifying a fixed rate or cron expression. While creating your Lambda function,  you need to provide CloudWatch Events as an event source and specify a time interval. For example, create a new event every y and invoke this Lambda function with it. Some real-life use case could be:
+
+If you are running a membership site where accounts have an expiration date, you can schedule a cron job to regularly deactivate the expired account
+Sending out the newsletter on fixed timings
+Cleaning up the database cache on the regular interval
+
+##7. AWS Lambda Use Case for Efficient Monitoring
+
+By creating CloudWatch Event rules, you can monitor and create Lambda functions for processing. Two general scenarios where you can use this possibility:
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/AWS-Lambda-Triggers-using-CloudWatch-Metrics.png)
+
+Alarm Threshold Breaches: Let’s imagine where your CPU is running beyond its specified limits or you’re seeing more/ fewer events than what you’re expecting, CloudWatch can trigger a Lambda function for you which will notify the team through an email or terminate the underperforming resources.
+Cloudwatch Logs: To monitor the incoming CloudWatch logs in realtime, by integrating it with a function which will keep track of any anomaly and notify the team if detected or you can program it to write these logs to your database for a backup.
+
+##8. Real-time Notifications with AWS Lambda & SNS
+
+Real-time notification saves a lot of our manual work and we all know how inevitable they are in our hyper-connected world.  ChatOps is becoming the most effective procedure to DevOps. Saying that it’d be an added advantage to receive real-time notifications on 3rd-party platforms like Slack.
+
+When using SNS, you create a topic and control access to it by defining policies that determine the subscribers and publishers to be communicated with the topic. When an SNS topic has Lambda function subscribed to it, it invokes the function with the payload of a published message.
+
+Upon invocation, the function can manipulate the information in the message, publish the message to the other SNS topics and/or send the message to other AWS services or endpoints.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Serverless-SNS-Example-for-Real-time-Notifications.png)
+
+An interesting example is to receive your infrastructural alerts as a Slack notification. Whenever a CloudWatch alarms trigger, it will send a message to the SNS topic. Upon receiving the message, SNS topic will invoke a Lambda function which will call the Slack API to post a message to Slack channel.
+
+##9. AWS Lambda Use Case for Building Serverless Chatbot
+Building and running chatbots is not only time consuming but expensive also. Developers must provision, run and scale the infrastructural resources that run the chatbot code. However, with AWS Lambda you can run a scalable chatbot architecture. Here’s how to get started:
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/AWS-Lambda-Chatbot.png)
+
+Enter your code logic to the Lambda function.
+Set up your code to trigger when user commands are sent to the bot. The commands are API requests (from Slack, Messenger, etc) routed through API Gateway to Lambda function.
+Lambda runs only when it is commanded and hence using the resources when needed. You pay for the time it runs your code.
+
+#10. Serverless IoT Backend
+Scaling an IoT device fleet to hundreds and thousands of devices isn't an easy job. Along with that, it is somewhat challenging to extract the details for multiple devices in a single solution.
+
+Suppose your fleet of devices here are smart light bulbs,  internet-connected robot, music player, etc. and you want to register specific information for all of them in your database.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Serverless-IoT-Backend-Example.png)
+
+As shown in the above diagram, you can create AWS IoT rules to trigger specific device registration logic using Lambda function to the DynamoDB table. Along with this, you can use an another Lambda function which will search the database for device-specific serial number and a randomly generated activation code to activate your device.
+
+In this similar manner, you can create your own IoT backend solution and logic instead of managing the infrastructure.
+
+Also, you can use AWS IoT 1-Click with AWS Lambda use cases to create business logic as per your requirements. This was launched at AWS re-Invent 2017 and since then people have been coming up with creative ways to use it. This works over the common WiFi platform and executes a customized Lambda function on triggering.
+
+AWS Lambda pricing
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/total-app-cost.png)
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
