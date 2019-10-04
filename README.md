@@ -2533,7 +2533,7 @@ A master media file which needs to be converted into multiple formats.
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Real-Time-Data-Processing-Example-using-AWS-Lambda-2.png)
 
 <details>
-  <summary>		3. Real-Time Data Processing Example using AWS Lambda</summary>
+  <summary>3. Real-Time Data Processing Example using AWS Lambda</summary>
 
 
  Processing data in real time and responding to them is highly imperative for modern business requirements. To enable this, analyzing the metrics data in real time is critical. But Amazon Kinesis Stream and AWS Lambda have made it possible!
@@ -2563,14 +2563,16 @@ For example, there are thousands of IoT devices sending data logs. In some cases
 Bustle processes high volume of site metric data in real time. This allows them to capture more data quickly. Which in turn helps them in analyzing how new features are affecting the website audience. Not only that, they have been able to monitor user engagement which has empowered marketing to make decisions driven by data.
 </details>
 
-#4. Custom Logic Workflows using AWS Lambda
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Custom-Logic-Workflows-Example-using-AWS-Lambda-2.png)
+
+<details>
+  <summary>4. Custom Logic Workflows using AWS Lambda</summary>
+
 We have often come across complex applications (e-commerce, analytics software, ERP, etc) which consists of complex repeatable scenarios that need to be executed in a response to some event. In other words, workflows.
 
 Earlier, it was not possible to include Lambdas in such workflows. Coordinating these functions, chaining them and checking conditions for deciding what to do was a responsibility of a developer.
 
 However, with Step Functions, coordinating AWS Lambda is possible. These functions will be short, easy to test and will accommodate a single responsibility.
-
-Custom Logic Workflows Example using AWS Lambda
 
 As shown in the image, you can apply custom logic before you invoke your subsequent functions, for example, delay of 10 seconds. Some of the potential scenarios where you can use Step Functions and Lambda are:
 
@@ -2578,6 +2580,7 @@ Customer onboarding
 Shopping Cart Management
 Drip Marketing
 Loyalty programmes
+
 For Coke Vending Pass Program, developers used a combination of SNS and Lambda. But eventually, it was slow to react and prolonged timing dependencies. This lead to confusing updates to the vending machine. As a potential solution, 90 seconds of time delay would work fine and hence they added a delay to the first Lambda function.
 
 As you might have guessed it, this increased the execution time of the function which resulted in an increased bill. In order to make this solution more cost-effective, they turned to Step Functions to coordinate their components of microservice at scale.
@@ -2585,8 +2588,13 @@ As you might have guessed it, this increased the execution time of the function 
 Similarly, FoodPanda, the popular food delivery giant uses Step Functions along with AWS Lambda to improve their food delivery application workflow and continually improve their delivery times.
 
 Here’s another interesting example by Alex Casalboni where he developed a state machine which estimates the best power configuration to minimize the cost for any given Lambda function.
+</details>
 
-#5. Change Data Capture with AWS Lambda
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Change-Data-Capture-CDC-Example-with-AWS-Lambda.png)
+
+<details>
+  <summary>5. Change Data Capture with AWS Lambda</summary>
+
 Many times it is required to analyze and keep track of the changes made in the database. Or maybe you want to process data before it is stored in the database. With AWS Lambda & DynamoDB Streams this is possible.
 
 Amazon DynamoDB, when integrated with AWS Lambda, can help you trigger a piece of code that automatically responds to the events in the DynamoDB Streams. These triggers can help you build an application that reacts to the data modification in DynamoDB tables.
@@ -2612,14 +2620,12 @@ Another example, you can use AWS Lambda to notify SNS for multiple use cases. Su
 
 For this, whenever new books are added to the database, an AWS Lambda function will trigger which will notify SNS. This, in turn, will send mass emails to the students.
 
-Is running a serverless application cost effective. Let find out!!
+</details>
 
-AWS Lambda pricing
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Examples-of-Custom-Alexa-Skills-with-AWS-Lambda.png)
 
-I recently wrote this blog – ‘AWS Lambda Pricing: How much does it cost to run a serverless application?‘ which covers the price structure of AWS Lambda, how to monitor lambda functions, strategies to optimize the cost and case studies.
-
-#6. AWS Lambda Example showing Custom Alexa Skills
-Most of us are familiar with Alexa, popularized with Amazon’s multiple lines of Echo smart speakers and devices.
+<details>
+  <summary>6. AWS Lambda Example showing Custom Alexa Skills</summary>
 
 We are accustomed to using voice-enabled searches and interacting with voice assistants in-built in our smartphones.
 
@@ -2632,15 +2638,20 @@ Examples of Custom Alexa Skills with AWS Lambda
 Custom Alexa Skill Set: This is an object embedded inside AWS Console which invokes your handler function in response to the voice command from the Alexa enabled devices.
 Alexa Skill Handler Function: This is an AWS Lambda function which provides us with the custom logic that we want our command to execute. This handles the task of fulfilling the user’s request.
 Third Party Functions: These functions are hosted outside of the Alexa skill. These provide us with the functionality of interfacing with the 3rd party services like interacting with a Database, call to a 3rd party services, etc.
+
 Some of the Alexa skills that you can write for yourself are:
 
 Adding a meeting to the calendar
 Finding out the nearest coffee shop
 Create a reminder
 Playing the music
-Need some more inspiration? Check out this list of 50 most useful Alexa Skills.
+</details>
 
-#7. Automated Stored Procedures using AWS Lambda
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Automated-Stored-Procedures-using-AWS-Lambda-2.png)
+
+<details>
+  <summary>7. Automated Stored Procedures using AWS Lambda</summary>
+
 To derive multiple formats of data, sometimes users need to do compute work. This compute work is based on the data which is being inserted, updated or deleted to the database. However, oftentimes they do not want the compute work to be done on the compute resources but on the database itself.
 
 Amazon Aurora MySQL has the ability to invoke Lambda as a “storage/stored procedure”. This functionality triggers the function before/after some operations of interest are performed on the particular database table.
@@ -2672,7 +2683,14 @@ Single region multiple copies
 Creating multiple copies of redshift clusters
 Responding to failures/incidents
 Number of automotive capabilities
-#8. Serverless Image Recognition Engine
+</details>
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Serverless-Image-Recognition-Engine-1.png)
+
+<details>
+  <summary>8. Serverless Image Recognition Engine</summary>
+
 Imagine you have a website where people can upload images. As soon as the images are uploaded, you want the images to go through a set of workflow actions.
 
 For example, a workflow where a user uploads an image which is stored in the S3 bucket triggers a Lambda function 1. This function invokes the state function workflow, as shown in the image.
@@ -2695,7 +2713,13 @@ Using AWS Lambda example and Rekognition helped them in two ways:
 
 Personalizing not just the content but images as well
 Cropping mechanism where the system identifies the focal point and crops automatically
-#9 Serverless Text-to-Speech Example
+</details>
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Serverless-Text-to-Speech-Example.png)
+
+<details>
+  <summary>9 Serverless Text-to-Speech Example</summary>
+
 With the advent of AI enabled devices, text-to-speech has become imperative for modern applications. Medium being the latest one in facilitating TTS functionality. More to that, speech synthesis is a tricky subject and the list of interpretation challenges is endless.
 
 With AWS Lambda & Amazon Polly, you can harness the power of lifelike speech synthesis application. Amazon Polly uses advance deep learning technologies to synthesize speech that resembles the human voice.
@@ -2716,7 +2740,16 @@ Whenever a new post is added to the S3 bucket, a dedicated API Gateway triggers 
 Lambda function 1 stores the copy of the information in DynamoDB where information about all posts is stored.
 Meanwhile, Lambda function 1 is publishing a message to SNS which trigger Lambda function 2. This function along with Amazon Polly converts the text into the audio in the same language as the text.
 After that, an MP3 file is stored in the S3 bucket with the reference URL and the information about the same will be stored in the DynamoDB.
-#10 Personalized Content Delivery through AWS Lambda
+</details>
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Personalized-Content-Delivery-through-AWS-Lambda.png)
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Personalized-Content-Delivery-through-AWS-Lambda-2.png)
+
+<details>
+  <summary>10 Personalized Content Delivery through AWS Lambda</summary>
+
 Today most of the application facilitates the personalized content and news feed. This is possible because the personalized user experience is becoming an inevitable feature and accessing & monitoring of user touch points is becoming easy.
 
 However, setting up and managing a complex architecture isn’t a requirement. AWS Lambda has made it possible to get started easily with a personalized content platform with the possibility to make changes on the go. Let’s take an example of our reference architecture.
@@ -2738,6 +2771,7 @@ User API: This keeps track of what users are browsing in the application, monito
 Read/Write API: This is mostly pushing back and forth the data gathered into the DynamoDB
 Admin API: This is for the editors to manage things manually from the backend, for example, change the tagging, turn off if it’s unsuitable for the students, etc.
 For understanding some simple use cases of serverless technology read my previous blog
+</details>
 
 # AWS Lambda pricing
 
