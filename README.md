@@ -2301,6 +2301,43 @@ So this way microservices invoke parallel environments to satisfy millions of cu
 
 Ref: https://dzone.com/articles/microservice-architecture-learn-build-and-deploy-a
 
+# Serverless Microservice Architecture
+
+A serverless architecture is a way to build and run applications and services without having to manage infrastructure. Your application still runs on servers, but all the server management is done by cloud provider(e.g. AWS).
+
+Serverless computing is a cloud-computing execution model in which the cloud provider runs the server, and dynamically manages the allocation of machine resources. Pricing is based on the actual amount of resources consumed by an application, rather than on pre-purchased units of capacity.
+
+
+All of the static HTML, CSS and JS files for our application can be served from S3. Lambda functions (FaaS) — They are the key enablers in Serverless architecture. Some popular examples of FaaS are AWS Lambda, Google Cloud Functions and Microsoft Azure Functions. AWS Lambda is used in this framework.
+
+Netflix, Mapbox, A Cloud Guru, BlackBoard, Conde Nast, and New York Times etc migrated to serverless architecture and have immensely benefitted from this decision.
+
+At the recently held ServerlessConf, ‘A Cloud Guru’ gave a proof of serverless promise saying they were never required to change their architecture due to performance reasons. They are running 287 Lambda functions, 19 microservices with 3.68 TB of data at the mere cost of $580 per month. 
+
+##### Why we use AWS Lambda(Serverless architecture)?
+By using a serverless architecture, your developers can focus on their core product instead of worrying about managing and operating servers or runtimes, either in the cloud or on-premises. This reduced overhead lets developers reclaim time and energy that can be spent on developing great products which scale and that are reliable.
+AWS Lambda removes the need for the traditional compute services, thus reducing operational costs and complexity. This results in many benefits such as faster development, easier operational management, scaling, and reduction in operational costs.
+
+Moreover if you have frequent changes in memory usage, Lambda takes care of that as well. It has “Pay as you go” model whose billing is based on used memory, number of request and execution duration rounded up to nearest 100 milliseconds. Its huge leap forward in comparison to EC2.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Serverless-Examples-with-AWS-Lambda-Use-Cases.png)
+
+##1. Serverless Website Example with AWS Lambda
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/Serverless-Website-Example.png)
+
+* DynamoDB is a NoSQL database which is used for storing data through API’s Lambda function.
+
+* Amazon Cognito is used for user authentication and management with the help of secured backend API.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/cover-image-1.png)
+
+#### Bustle case study
+
+Bustle.com is a news, entertainment, lifestyle, and fashion website catering to women. Bustle also operates Romper.com, a website focused on motherhood. Bustle is based in Brooklyn, NY and is read by 50 million people each month.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/bustle_arch-diagram.83ec175bd8853ea8fbcc777a0f91a9c15125c39e.png)
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
