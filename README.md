@@ -2824,6 +2824,114 @@ Ref: https://www.simform.com/serverless-aws-lambda-examples/
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/serverless/total-app-cost.png)
 
+# To understand how and why SSDs are different from spinning discs, 
+
+we need to talk a little bit about hard drives. A hard drive stores data on a series of spinning magnetic disks called platters. There’s an actuator arm with read/write heads attached to it. This arm positions the read-write heads over the correct area of the drive to read or write information.
+
+Because the drive heads must align over an area of the disk in order to read or write data (and the disk is constantly spinning), there’s a non-zero wait time before data can be accessed. The drive may need to read from multiple locations in order to launch a program or load a file, which means it may have to wait for the platters to spin into the proper position multiple times before it can complete the command. If a drive is asleep or in a low-power state, it can take several seconds more for the disk to spin up to full power and begin operating.
+
+From the very beginning, it was clear that hard drives couldn’t possibly match the speeds at which CPUs could operate. Latency in HDDs is measured in milliseconds, compared with nanoseconds for your typical CPU. One millisecond is 1,000,000 nanoseconds, and it typically takes a hard drive 10-15 milliseconds to find data on the drive and begin reading it. The hard drive industry introduced smaller platters, on-disk memory caches, and faster spindle speeds to counteract this trend, but there’s only so fast drives can spin. Western Digital’s 10,000 RPM VelociRaptor family is the fastest set of drives ever built for the consumer market, while some enterprise drives spun up to 15,000 RPM. The problem is, even the fastest spinning drive with the largest caches and smallest platters are still achingly slow as far as your CPU is concerned.
+
+## Non-Volatile NAND Flash Memory
+
+One of the benefits of NAND Flash is its non-volatile storage of data. Unlike DRAM memory which must be powered continuously to retain data, NAND memory retains data even when the power is off — making it ideal as storage for portable devices.
+
+## Types of NAND Flash
+
+There are primarily two types of NAND Flash widely used today, Single-Level Cell (SLC) and Multi-Level Cell (MLC). NAND Flash stores data in a large array of cells. Each cell can store data — one bit for cell for SLC NAND, and two bits per cell for MLC. So, SLC NAND would store a “0” or “1” in each cell, and MLC NAND would store “00”, “01”, “10”, or “11” in each cell. SLC and MLC NAND offer different levels of performance and endurance characteristics at different price points, with SLC being the higher performing and more costly of the two.
+SLC is available in smaller capacities as compared to MLC which is smaller as compared to TLC in capacity.
+
+## How SSDs Are Different
+
+Solid-state drives are called that specifically because they don’t rely on moving parts or spinning disks. Instead, data is saved to a pool of NAND flash. NAND itself is made up of what are called floating gate transistors. Unlike the transistor designs used in DRAM, which must be refreshed multiple times per second, NAND flash is designed to retain its charge state even when not powered up. This makes NAND a type of non-volatile memory.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ssd/Flash_cell_structure.svg_1.png)
+
+The diagram above shows a simple flash cell design. Electrons are stored in the floating gate, which then reads as charged “0” or not-charged “1.” Yes, in NAND flash, a 0 means data is stored in a cell — it’s the opposite of how we typically think of a zero or one. NAND flash is organized in a grid. The entire grid layout is referred to as a block, while the individual rows that make up the grid are called a page. Common page sizes are 2K, 4K, 8K, or 16K, with 128 to 256 pages per block. Block size therefore typically varies between 256KB and 4MB.
+
+Because SSDs have no moving parts, they can operate at speeds far above those of a typical HDD. The following chart shows the access latency for typical storage mediums given in microseconds.
+
+NAND is nowhere near as fast as main memory, but it’s multiple orders of magnitude faster than a hard drive. While write latencies are significantly slower for NAND flash than read latencies, they still outstrip traditional spinning media.
+
+There are two things to notice in the below chart. First, note how adding more bits per cell of NAND has a significant impact on the memory’s performance. It’s worse for writes as opposed to reads — typical triple-level-cell (TLC) latency is 4x worse compared with single-level cell (SLC) NAND for reads, but 6x worse for writes. Erase latencies are also significantly impacted. The impact isn’t proportional, either — TLC NAND is nearly twice as slow as MLC NAND, despite holding just 50% more data (three bits per cell, instead of two). This is also true for QLC drives, which store even more bits at varying voltage levels within the same cell.
+
+The reason TLC NAND is slower than MLC or SLC has to do with how data moves in and out of the NAND cell. With SLC NAND, the controller only needs to know if the bit is a 0 or a 1. With MLC NAND, the cell may have four values — 00, 01, 10, or 11. With TLC NAND, the cell can have eight values, and QLC has 16. Reading the proper value out of the cell requires the memory controller to use a precise voltage to ascertain whether any particular cell is charged.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ssd/SSD-Latency.png)
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ssd/qlc_nand_density.png)
+
+
+<details>
+  <summary>We know what is Cache</summary>
+
+Before we get into talking about SSD caches, let’s first define what a cache is...
+
+You can think of a cache as being like a stock room where items are stored for future use.
+
+In the case of a computer cache, it’s a space in your computer’s hardware (RAM, CPU, Hard Drive, SSD) that stores both recently and frequently used programs so your computer can pull it up easily the next time you need it. Essentially, this cuts the loading times and helps programs execute much faster.
+
+A good example of cache is your web browser’s cache. Images, HTML, Javascript, and other data are cached locally as you browse the internet so that pages that you frequent will load faster the next time you open it.
+</details>
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ssd/SSD-Cache.jpg)
+
+# What is a SSD Cache?
+
+An SSD cache is when you utilize part of, or the entirety of, an SSD as a cache (with a minimum of 18.6GBs). So, SSD caching, also commonly known as flash caching, is the process of storing temporary data on the SSD’s flash memory chips. And because SSDs use fast NAND flash memory cells, data requests and overall computing performance will be dramatically faster.
+
+In fact, if you’re using the conventional HDD alone, then SSD caching is one of the most cost-effective upgrades you can make in exchange for faster boot and loading times. We’re talking about going from 30 second boot times (or longer) to a mere 8 seconds (more or less) and you get a more responsive system overall. 
+
+However, if you’re already using an SSD as your sole means of storage, then you don’t really stand to gain anything from SSD caching.
+
+# Types of SSD Caching
+
+There are different types of SSD caching that can be used, which benefits different circumstances, respectively:
+
+Read caching
+Write-around SSD caching
+Write-back SSD caching
+Write-through SSD caching
+
+Read SSD caching: stores copies of data in fast SSD memory cells; usually NAND and/or DRAM. The caching software uses the cached read data to populate the cache. Read caches from different manufacturers may use algorithm variants, such as coupling DRAM and NAND memory cells on SSDs to produce even faster caching performance.
+
+Write-around SSD Caching is the process of directly writing the data to the primary storage by initially bypassing the cache. However, since the data that is eventually cached is first sent to the actual SSD, the process of moving this data back to the cache will be slower. After all, there is no cache to help move things to the cache (it’s just caches all the way down...).
+
+Still, this system is incredibly efficient because the data is copied back to the cache only when the data is recognized as “hot” (in others word, when the data is identified to be used frequently). This means the cache won’t be flooded with irrelevant data and will only cache the data that would benefit from being cached the most.
+
+Write-back SSD Caching first writes the data to the SSD cache and then sends it to the primary storage device only once the data has been completely written to the SSD cache.
+
+Write-through SSD Caching writes data to both the SSD cache and the primary device storage at the same time. It’s also the commonly used caching and hybrid storage solutions these days.
+
+The data will only be made available from the SSD cache when the host confirms that the write operation is completed on both the SSD cache and primary storage device.
+
+
+Remember, caching is a lot better than normal read-write operations, so this leads to low latency for both write and read operations. But in the event of a cache failure, cached data will be lost. This is why manufacturers that use this type of caching invest in products that make duplicate writes to go around the problem.
+
+# Which Type of SSD Caching is Best for You?
+
+Write-around SSD caching is best if you don’t want to flood your cache with data that you won’t be using very often. However, this leads to higher latency when loading the recognized “hot” data back to the cache.
+Write-back SSD caching is the fastest since it doesn’t have to wait for the underlying storage to complete. But even though this solves latency problems, the data will always be put at risk since power failure could corrupt the data.
+Write-through SSD caching is the most common type of caching today. Data is written both to the cache and the underlying storage at the same time and the write is only considered complete when it is written to your storage. This makes it the safest method, but also the slowest.
+
+# Reads, Writes, and Erasure
+
+One of the functional limitations of SSDs is while they can read and write data very quickly to an empty drive, overwriting data is much slower. This is because while SSDs read data at the page level (meaning from individual rows within the NAND memory grid) and can write at the page level, assuming surrounding cells are empty, they can only erase data at the block level. This is because the act of erasing NAND flash requires a high amount of voltage. While you can theoretically erase NAND at the page level, the amount of voltage required stresses the individual cells around the cells that are being re-written. Erasing data at the block level helps mitigate this problem.
+
+The only way for an SSD to update an existing page is to copy the contents of the entire block into memory, erase the block, and then write the contents of the old block + the updated page. If the drive is full and there are no empty pages available, the SSD must first scan for blocks that are marked for deletion but that haven’t been deleted yet, erase them, and then write the data to the now-erased page. This is why SSDs can become slower as they age — a mostly-empty drive is full of blocks that can be written immediately, a mostly-full drive is more likely to be forced through the entire program/erase sequence.
+
+If you’ve used SSDs, you’ve likely heard of something called “garbage collection.” Garbage collection is a background process that allows a drive to mitigate the performance impact of the program/erase cycle by performing certain tasks in the background.
+
+The next concept I want to discuss is TRIM. When you delete a file from Windows on a typical hard drive, the file isn’t deleted immediately. Instead, the operating system tells the hard drive it can overwrite the physical area of the disk where that data was stored the next time it needs to perform a write. This is why it’s possible to undelete files (and why deleting files in Windows doesn’t typically clear much physical disk space until you empty the recycling bin). With a traditional HDD, the OS doesn’t need to pay attention to where data is being written or what the relative state of the blocks or pages is. With an SSD, this matters.
+
+The TRIM command allows the operating system to tell the SSD it can skip rewriting certain data the next time it performs a block erase. This lowers the total amount of data the drive writes and increases SSD longevity. Both reads and writes damage NAND flash, but writes do far more damage than reads. Fortunately, block-level longevity has not proven to be an issue in modern NAND flash. 
+
+The last two concepts we want to talk about are wear leveling and write amplification. Because SSDs write data to pages but erase data in blocks, the amount of data being written to the drive is always larger than the actual update. If you make a change to a 4KB file, for example, the entire block that 4K file sits within must be updated and rewritten. Depending on the number of pages per block and the size of the pages, you might end up writing 4MB worth of data to update a 4KB file. Garbage collection reduces the impact of write amplification, as does the TRIM command. Keeping a significant chunk of the drive free and/or manufacturer over-provisioning can also reduce the impact of write amplification.
+
+Wear leveling refers to the practice of ensuring certain NAND blocks aren’t written and erased more often than others. While wear leveling increases a drive’s life expectancy and endurance by writing to the NAND equally, it can actually increase write amplification. In other to distribute writes evenly across the disk, it’s sometimes necessary to program and erase blocks even though their contents haven’t actually changed. A good wear leveling algorithm seeks to balance these impacts.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ssd/2006640.jpg)
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
