@@ -2932,6 +2932,15 @@ Wear leveling refers to the practice of ensuring certain NAND blocks aren’t wr
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ssd/2006640.jpg)
 
+# Easily Automate Your CI/CD Pipeline With Jenkins, Helm, and Kubernetes
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/CICD/ci-cd-jenkins-helm-k8s.png)
+
+## A typical CI/CD workflow
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/CICD/general-workflow.png)
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
