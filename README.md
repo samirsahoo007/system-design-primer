@@ -2941,6 +2941,58 @@ Wear leveling refers to the practice of ensuring certain NAND blocks aren’t wr
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/CICD/general-workflow.png)
 
+# MVC Design Pattern
+
+Model is data part.
+View is User Interface part.
+Controller is request-response handler.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/mvc/mvc.jpg)
+
+<details>
+
+	<summary>MVC architecture</summary>
+
+The browser (on the client) sends a request for a page to the controller on the server.
+The controller retrieves the data it needs from the model in order to respond to the request.
+The controller gives the retrieved data to the view.
+The view is rendered and sent back to the client for the browser to display.
+
+* Model: 
+	Model represents the structure of data, the format and the constraints with which it is stored. It maintains the data of the application. Essentially, it is the database part of the application.
+
+* View: 
+	View is what is presented to the user.
+
+* Controller:
+	Controller controls the requests of the user and then generates appropriate response which is fed to the viewer. Typically, the user interacts with the View, which in turn generates the appropriate request, this request will be handled by a controller. The controller renders the appropriate view with the model data as a response.
+
+</details>
+
+# MVT / MTV Pattern
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/mvc/mtv1.jpg)
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/mvc/mtv.jpg)
+
+The View in MTV architecture can look like the controller, but it’s not. The View in this MTV architecture is formatting the data via the model. In turn, it communicates to the database and that data which transfer to the template for viewing.
+
+What Template is doing if everything View achieves in the first place?
+
+Well, the template is making the life of a frontend developer easy that's for sure. It also provides more development speed then the traditional MVC architecture would.
+
+So, how is it doing that?
+
+Template's main goal is to keep everything that browser renders. The model's data that's coming from the server in different parts while integrating the same when the user interacts with the website. Here, the template layer in Django is more similar to the views layer in MVC pattern. This layer is more focused and with Django framework, it provides much more extendibility to the frontend developers than what MVC architecture was giving.
+
+In the MTV / MVT pattern:
+
+Template: This relates to the View in the MVC pattern as it is the presentation layer that handles the presentation logic in the framework and basically controls what should be displayed and how it should be displayed to the user.
+
+View: This part relates to the Controller in the MVC pattern and handles all the business logic that throws down back to the respective templates.It serves as the bridge between the model and the template
+The tiny difference that can constitute as the most confusing part in all this, is how Django suggests that the View should include the business logic instead of the presentation logic alone as it is in the standard MVC pattern and the Template to take care of all of the presentation logic alone while the MVC pattern does not include a Template component at all. As a result of this, when compared to the standard MVC pattern, Django’s design is also referred to as the Model-Template-View + Controller where Controller is often times omitted because it’s already part of the framework.
+
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
