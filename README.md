@@ -6,7 +6,7 @@
   <br/>
 </p>
 
-* DNS( A Domain Name System ) translates a domain name such as www.example.com to an IP address
+* DNS( A Domain Name System e.g. CloudFlare, Route 53 ) translates a domain name such as www.example.com to an IP address
 * CDN( Content distribution networks ) searves static assets(images, JavaScript files).e.g. Cloudflare CDN
 * Load balancers distribute incoming client requests to computing resources such as application servers and databases.
   e.g. nginx, HAProxy
@@ -760,7 +760,27 @@ This topic is further discussed in the [Database](#database) section:
   <i><a href=http://www.slideshare.net/srikrupa5/dns-security-presentation-issa>Source: DNS security presentation</a></i>
 </p>
 
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/dns-5.jpg)
+
 A Domain Name System (DNS) translates a domain name such as www.example.com to an IP address.
+
+The DNS concept is like a phone book for the internet. Without this kind of wayfinding system, you'd have to resort to much more complicated and esoteric means to sift through the virtual open plains and dense cities of data strewn across the global internet ... and you can bet that it wouldn't be nearly as much fun, especially since there are now hundreds of millions of domain names.
+
+Let's say that you type the URL www.howstuffworks.com into your browser. The browser contacts a DNS server to get the IP address. A DNS server would start its search for an IP address by contacting one of the root DNS servers. The root servers know the IP addresses for all of the DNS servers that handle the top-level domains (.COM, .NET, .ORG, etc.). Your DNS server would ask the root for www.howstuffworks.com, and the root would say, "I don't know the IP address for www.howstuffworks.com, but here's the IP address for the .COM DNS server."
+
+Your name server then sends a query to the .COM DNS server asking it if it knows the IP address for www.howstuffworks.com. The DNS server for the COM domain knows the IP addresses for the name servers handling the www.howstuffworks.com domain, so it returns those.
+
+Your name server then contacts the DNS server for www.howstuffworks.com and asks if it knows the IP address for www.howstuffworks.com. It actually does, so it returns the IP address to your DNS server, which returns it to the browser, which can then contact the server for www.howstuffworks.com to get a Web page.
+
+One of the keys to making this work is redundancy. There are multiple DNS servers at every level, so that if one fails, there are others to handle the requests. The other key is caching. Once a DNS server resolves a request, it caches the IP address it receives. Once it has made a request to a root DNS server for any .COM domain, it knows the IP address for a DNS server handling the .COM domain, so it doesn't have to bug the root DNS servers again for that information. DNS servers can do this for every request, and this caching helps to keep things from bogging down.
+
+Even though it is totally invisible, DNS servers handle billions of requests every day and they are essential to the Internet's smooth functioning. The fact that this distributed database works so well and so invisibly day in and day out is a testimony to the design. Be sure to read How Domain Name Servers Work for more information on DNS.
+
+Services such as [CloudFlare](https://www.cloudflare.com/dns/) and [Route 53](https://aws.amazon.com/route53/) provide managed DNS services.  Some DNS services can route traffic through various methods:
+
+<details>
+
+	<summary> more </summary>
 
 DNS is hierarchical, with a few authoritative servers at the top level.  Your router or ISP provides information about which DNS server(s) to contact when doing a lookup.  Lower level DNS servers cache mappings, which could become stale due to DNS propagation delays.  DNS results can also be cached by your browser or OS for a certain period of time, determined by the [time to live (TTL)](https://en.wikipedia.org/wiki/Time_to_live).
 
@@ -768,8 +788,7 @@ DNS is hierarchical, with a few authoritative servers at the top level.  Your ro
 * **MX record (mail exchange)** - Specifies the mail servers for accepting messages.
 * **A record (address)** - Points a name to an IP address.
 * **CNAME (canonical)** - Points a name to another name or `CNAME` (example.com to www.example.com) or to an `A` record.
-
-Services such as [CloudFlare](https://www.cloudflare.com/dns/) and [Route 53](https://aws.amazon.com/route53/) provide managed DNS services.  Some DNS services can route traffic through various methods:
+</details>
 
 * [Weighted round robin](http://g33kinfo.com/info/archives/2657)
     * Prevent traffic from going to servers under maintenance
