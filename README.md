@@ -276,13 +276,9 @@ In N-tier, "N" refers to a number of tiers or layers are being used like – 2-t
 
 Some of the popular sites who have applied this architecture are
 ```
-
 MakeMyTrip.com
-
 Sales Force enterprise application
-
 Indian Railways – IRCTC
-
 Amazon.com, etc.
 ```
 
@@ -303,7 +299,7 @@ It is the simplest one as it is equivalent to running the application on the per
 
 Presentation layer, Business logic layer, and data layer are all located on a single machine.
 
-<details/>
+</details>
 
 These are the 3 separate comonents of a 3 tier architecture of an online service.
 
