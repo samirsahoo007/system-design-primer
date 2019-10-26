@@ -3097,6 +3097,51 @@ Template: This relates to the View in the MVC pattern as it is the presentation 
 View: This part relates to the Controller in the MVC pattern and handles all the business logic that throws down back to the respective templates.It serves as the bridge between the model and the template
 The tiny difference that can constitute as the most confusing part in all this, is how Django suggests that the View should include the business logic instead of the presentation logic alone as it is in the standard MVC pattern and the Template to take care of all of the presentation logic alone while the MVC pattern does not include a Template component at all. As a result of this, when compared to the standard MVC pattern, Django’s design is also referred to as the Model-Template-View + Controller where Controller is often times omitted because it’s already part of the framework.
 
+# Use cases:
+
+I have a use case where I need to store huge number of xml files approximately 10 TB.The size of the each xml files varies from 10kb to 3 mb . I have to make primary key and based on that i have to retrieve full xml files.
+
+gathers system data from clients
+outputs that info into an xml document
+a perl script takes the data in the xml tags and puts it in a mySQL db.
+an apache/php powered website displays the data.
+The purpose of this system is to act as an inventory for servers/chassis/network devices/etc.
+
+
+This has been an okay system, but I have decided to go to a non-relational database because of the advantages I see in using that for the type of data I am storing.
+
+There can be scenario where we might have to fetch some tags from different xml files also . I was planing to use DynamoDB but then it does not directly support xml files and also size of the value in the DynamoDB should not exceed 400kb that makes it not fit for our use case .
+
+## Question:
+
+I was planing to use DynamoDB but then it does not directly support xml files and also size of the value in the DynamoDB should not exceed 400kb that makes it not fit for our use case.
+How can we implement it?
+
+## Solution:
+
+The solution close to what you want is dynamodb db in combination with s3. You will not store any xml files in dynamodb since it is going to cost you a lot, plus there is a kb limit in each dynamodb entry. Instead you will store in s3 the xml file and you will use dynamo to store any information that shall be queried (including metadata) that will fetch your the name of the s3 file.
+
+Then you will use s3 to retrieve the file.
+
+Keep in mind that there is no need to do this with dynamodb if you already use another database.
+
+## Question:
+
+Is it very simple to extract information from xml documents with mongodb?
+Should I rewrite the scripts I have to output a JSON/BSON file instead of XML?
+How do you take the information from files and put it into a mongodb database?
+
+## Ans:
+
+Yes, you can do that.
+
+MongoDB doesn't support xml document. All documents in mongodb are stored in BSON(Binary JSON) format. You can store xml as a String value to the database. like - {xml : "<root><test>Test XML</test></root>"}.
+
+Mongodb drivers are available for many languages. Use them.
+
+* Binary JSON (BSON)
+MongoDB represents JSON documents in binary-encoded format called BSON behind the scenes. BSON extends the JSON model to provide additional data types, ordered fields, and to be efficient for encoding and decoding within different languages.
+
 
 ## Contact info
 
