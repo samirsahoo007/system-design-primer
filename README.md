@@ -262,6 +262,98 @@ Check out the following links to get a better idea of what to expect:
 * [The system design interview](http://www.hiredintech.com/system-design)
 * [Intro to Architecture and Systems Design Interviews](https://www.youtube.com/watch?v=ZgdS0EUmn70)
 
+# N-Tier Architecture
+
+In N-tier, "N" refers to a number of tiers or layers are being used like – 2-tier, 3-tier or 4-tier, etc. It is also called "Multi-Tier Architecture".
+
+## 3-tier architecture:
+
+	* logic tier
+	* presentation tier
+	* data tier
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/N-Tier-Architecture-min.png)
+
+Some of the popular sites who have applied this architecture are
+``
+MakeMyTrip.com
+Sales Force enterprise application
+Indian Railways – IRCTC
+Amazon.com, etc.
+```
+
+<details>
+	<summary> more </summary>
+
+## 2-Tier Architecture:
+
+It is like Client-Server architecture, where communication takes place between client and server.
+
+In this type of software architecture, the presentation layer or user interface layer runs on the client side while dataset layer gets executed and stored on server side.
+
+There is no Business logic layer or immediate layer in between client and server.
+
+## Single Tier or 1-Tier Architecture:
+
+It is the simplest one as it is equivalent to running the application on the personal computer. All of the required components for an application to run are on a single application or server.
+
+Presentation layer, Business logic layer, and data layer are all located on a single machine.
+
+<details/>
+
+These are the 3 separate comonents of a 3 tier architecture of an online service.
+
+A web server's task is to accept a http request and serve the resource with certain http response. But at the backend a server might have to make a lot of other processing to create the desired response. Like it might be using some script like python, php or java servlets to create that resource dynamically on the fly. The application server's task is to understand the script and provide a framework for its execution. Application servers are application platform specific while web servers are http protocol specific.
+
+A database server is specific to connecting to a database using a database client or application client to query and manipulate data on the database.
+
+### Web Server -
+
+Basically HTTP server. Server on which your website is hosted. This server will have installed web servers such as Microsoft IIS, apache, etc. It typically listens on port 80 / 443 and is capable of handling HTTP requests. Incoming requests are forwarded to relevant application. Examples are Apache and Nginx. serves web resources using HTTP protocol. The resource can be anything - a static html, js or css file, a image or some dynamic script generated html or other media type.
+
+### Application Server(Platform layer) -
+
+Server that works between Web server and database server and basically manages, processes the data. Server on which your created applications which are utilizing your database, web service, etc. This application server will host business layer (wrapped with web services), scheduled jobs, windows services, etc. Examples are Apache Tomcat. Application servers respond to any number of protocols depending on the application business logic.
+
+### Database Server -
+
+Database server handles database queries. It runs on MySQL, PostgreSQL, MariaDB, etc.
+
+#### Explanation with example:
+
+Server is anything that is ready to handle requests 24 * 7 as it’s connected with the internet all the time. I will make it as easy as possible to understand the difference. So, we’ll start with an example.
+
+Let’s say you have a website that gets 1000 visitors a day. And your budget to host your website is $10 per month. In that case, you will get one Shared hosting or tiny VPS to host your website.
+
+Now, You are hosting your website on a single server that responds your Web requests (Apache/Nginx), Processes your data(PHP/Python) and handles your database queries(MySQL/MariaDB/Postgres)
+
+All of these softwares are installed in a same machine and a single machine handles Web requests, Application processes and Database queries. It means, a single machine has Web server, Application server and Database server.
+
+Now, you made progress and your website is getting 1,000,000 visitors per month. In this case, to maximize the uptime and to improve monitoring, you will host your database on different machine and call it a Database server. Because it handles all your database queries.
+
+Now, your traffic is 1.5M visitors every month and you want to maximize your revenue by processing their data which will require too much processing. It will increase load on your server that handles your web requests and application processes.
+
+So, you will host your application on another machine that handle requests from the web server. It will become your Application server and the server that is handling your web requests will become your dedicated Web server.
+
+Now, you have one machine that handles your web requests which is called Web server. You have one server that runs all the processes your application requires in order to work properly which is called your Application server. And you have one server that handles database queries and we call it Database server.
+
+Now you get better monitoring and can find out bugs and unusual activities on each and every part of your web application. To wrap it up, I am going to give you differences in a single lines.
+
+Pretty much the platform layer is where your business logic resides. Imagine you have a site for selling cookies.
+
+You have a web server running apache/iis that handles http requests
+You have an application server ( windows/linux/etc. ) that exposes a custom API for handling sales, reports etc - you call a method via http get or some web service to get the report for sales ... etc ... etc ...
+And finally you have a Database server which handles ... data storage.
+Imagine your site grows to the size of amazon.com, then adding new web servers, app servers (platform layer) and db servers get easier.
+
+Scalling out it is called.
+
+## Distributed Network: 
+
+It is a network architecture, where the components located at network computers coordinate and communicate their actions only by passing messages. It is a collection of multiple systems situated at different nodes but appears to the user as a single system.
+It provides a single data communication network which can be managed separately by different networks.
+An example of Distributed Network– where different clients are connected within LAN architecture on one side and on the other side they are connected to high-speed switches along with a rack of servers containing service nodes.
+
 # Principles of Web Distributed Systems Design
 Below are some of the key principles that influence the design of large-scale web systems:
                                        C R A M P S
@@ -488,16 +580,21 @@ Adding a map-reduce layer makes it possible to perform data and/or processing in
 
 For sufficiently small systems you can often get away with adhoc queries on a SQL database, but that approach may not scale up trivially once the quantity of data stored or write-load requires sharding your database, and will usually require dedicated slaves for the purpose of performing these queries (at which point, maybe you'd rather use a system designed for analyzing large quantities of data, rather than fighting your database).
 
-## Platform layer
+## Platform layer / Application layer / Application server / App server
 
 Most applications start out with a web application communicating directly with a database. This approach tends to be sufficient for most applications, but there are some compelling reasons for adding a platform layer, such that your web applications communicate with a platform layer which in turn communicates with your databases.
 
 <p align="center">
 <img src="images/platform_layer.png">
   <br/>
+  <i><a href=http://lethain.com/introduction-to-architecting-systems-for-scale/#platform_layer>Source: Intro to architecting systems for scale</a></i>
 </p>
 
-First, separating the platform and web application allow you to scale the pieces independently. If you add a new API, you can add platform servers without adding unnecessary capacity for your web application tier. (Generally, specializing your servers' role opens up an additional level of configuration optimization which isn't available for general purpose machines; your database machine will usually have a high I/O load and will benefit from a solid-state drive, but your well-configured application server probably isn't reading from disk at all during normal operation, but might benefit from more CPU.)
+Separating out the web layer from the application layer (also known as platform layer) allows you to scale and configure both layers independently.  Adding a new API results in adding application servers without necessarily adding additional web servers.  The **single responsibility principle** advocates for small and autonomous services that work together.  Small teams with small services can plan more aggressively for rapid growth.
+
+Workers in the application layer also help enable [asynchronism](#asynchronism).
+
+If you add a new API, you can add platform servers without adding unnecessary capacity for your web application tier. (Generally, specializing your servers' role opens up an additional level of configuration optimization which isn't available for general purpose machines; your database machine will usually have a high I/O load and will benefit from a solid-state drive, but your well-configured application server probably isn't reading from disk at all during normal operation, but might benefit from more CPU.)
 
 Second, adding a platform layer can be a way to reuse your infrastructure for multiple products or interfaces (a web application, an API, an iPhone app, etc) without writing too much redundant boilerplate code for dealing with caches, databases, etc.
 
@@ -1006,17 +1103,7 @@ Typically all requests from D would go directly to F, and F would send responses
 * [HAProxy architecture guide](http://www.haproxy.org/download/1.2/doc/architecture.txt)
 * [Wikipedia](https://en.wikipedia.org/wiki/Reverse_proxy)
 
-## Application layer
-
-<p align="center">
-  <img src="http://i.imgur.com/yB5SYwm.png">
-  <br/>
-  <i><a href=http://lethain.com/introduction-to-architecting-systems-for-scale/#platform_layer>Source: Intro to architecting systems for scale</a></i>
-</p>
-
-Separating out the web layer from the application layer (also known as platform layer) allows you to scale and configure both layers independently.  Adding a new API results in adding application servers without necessarily adding additional web servers.  The **single responsibility principle** advocates for small and autonomous services that work together.  Small teams with small services can plan more aggressively for rapid growth.
-
-Workers in the application layer also help enable [asynchronism](#asynchronism).
+## Platform layer / Application layer
 
 ### Microservices
 
