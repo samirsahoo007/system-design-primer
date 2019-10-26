@@ -275,10 +275,14 @@ In N-tier, "N" refers to a number of tiers or layers are being used like – 2-t
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/N-Tier-Architecture-min.png)
 
 Some of the popular sites who have applied this architecture are
-``
+```
+
 MakeMyTrip.com
+
 Sales Force enterprise application
+
 Indian Railways – IRCTC
+
 Amazon.com, etc.
 ```
 
