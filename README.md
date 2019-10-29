@@ -3143,6 +3143,104 @@ Mongodb drivers are available for many languages. Use them.
 MongoDB represents JSON documents in binary-encoded format called BSON behind the scenes. BSON extends the JSON model to provide additional data types, ordered fields, and to be efficient for encoding and decoding within different languages.
 
 
+# What is FSM ?
+
+A Finite State Machine is a model of computation based on a hypothetical machine made of one or more states. Only one single state of this machine can be active at the same time. It means the machine has to transition from one state to another in to perform different actions.
+
+The important points here are the following:
+We have a fixed set of states that the machine can be in
+The machine can only be in one state at a time
+A sequence of inputs is sent to the machine
+Every state has a set of transitions and every transition is associated with an input and pointing to a state
+
+## Real world examples
+
+### Coin-operated turnstile
+
+* States: locked, unlocked
+* Transitions: pointing a coin in the slot will unlock the turnstile, pushing the arm of the unlocked turnstile will let the costumer pass and lock the turnstile again
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/Finite-State-Machine.jpg)
+
+### Traffic Light
+
+* States: Red, Yellow, Green
+* Transitions: After a given time, Red will change to Green, Green to Yellow, and Yellow to Red
+
+## Programming example
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/statemachine_game.png)
+
+Knowing what we know, let’s make a simple and basic programming example. Let’s say we have our friend Mario in our favourite video game. So, Mario can do the following actions:
+
+```
+Stand still
+Run
+Jump
+Duck
+```
+
+We can see that Mario can do a lot of things and all of those things should be a specific state. Before writing any single line of code, we should ask ourselves how all of our different states fit together. We need to know exactly what Mario can do and how and when he can do these actions. For example, Mario can stand still then run when we push the corresponding button, but cannot run while he is jumping. So, an input that doesn’t cause a change of state is ignored.
+We could start first by defining a “State Interface”:
+
+```
+interface State
+{
+    void enter(Character character);
+    State handleInput(Character character, Input input);
+    void update(Character character);
+}
+```
+
+Then, we can a create a class for each state:
+
+```
+class RunningState : State
+{
+    void enter(Character character)
+    {
+        // Various operations like
+        // setting the graphics
+    }
+    State handleInput(Character character, Input input)
+    {
+        // Various operations like
+        // checking the input
+        // Returning a state after all the operations
+        return new StandingState();
+    }
+    void update(Character character)
+    {
+        // Various operations
+    }
+}
+```
+
+
+So, our character, here our dear Mario, could have the following code:
+
+```
+class Mario : Character, Player
+{
+    private State _state;
+    void handleInput(Input input)
+    {
+        _state.handleInput(this, input);
+    }
+    void update()
+    {
+        _state.update(this);
+    }
+}
+```
+## Stack-Based FSM
+
+We could go a little further. We could use a Stack-Based FSM. With our previous solution, we have no concept of history. We know our current state, but we can’t go back to the previous state.
+To solve this problem, we could use a Stack, which stores elements in LIFO style (Last In, First Out), to save our different states. That means the current state is the one on the top of the Stack. Then, when we want to transition to a new state, we push that new state onto the Stack and this state becomes the current state. When we are done, we pop this state and the previous state becomes the current state. Of course, it is our responsibility to manage which state we want in the Stack and which we want to discard.
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/Finite-State-Machine.jpg)
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
