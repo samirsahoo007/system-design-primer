@@ -2252,7 +2252,80 @@ It gives total added, modified and deleted LOC over a period of time. It records
 * Software is very complex entity and scales used are defined based on experience of different computer scientist. Some times a metrics may not reflect actual situation in project. In one for my projects the average Cyclomatic complexity showed very less but the source code turned out to be having too many classes and functions making it hard to modify and do changes.
 ![alt text](https://www.aivosto.com/project/help/pm-main.gif)
 
+# REST API
+
+REST stands for REpresentational State Transfer and API stands for Application Program Interface. REST is a software architectural style that defines the set of rules to be used for creating web services. Web services which follow the REST architectural style are known as RESTful web services. It allows requesting systems to access and manipulate web resources by using a uniform and predefined set of rules. Interaction in REST based systems happen through Internet’s Hypertext Transfer Protocol (HTTP).
+
+A Restful system consists of a:
+
+	client who requests for the resources.
+
+	server who has the resources.
+
+### Architectural Constraints of RESTful API: 
+
+There are six architectural constraints which makes any web service are listed below:
+
+	* Uniform Interface
+
+	* Stateless
+
+	* Cacheable
+
+	* Client-Server
+
+	* Layered System
+
+	* Code on Demand
+
+The only optional constraint of REST architecture is code on demand. If a service violates any other constraint, it cannot strictly be referred to as RESTful.
+
+Uniform Interface: It is a key constraint that differentiate between a REST API and Non-REST API. It suggests that there should be an uniform way of interacting with a given server irrespective of device or type of application (website, mobile app).
+
+Stateless: It means that the necessary state to handle the request is contained within the request itself and server would not store anything related to the session. In REST, the client must include all information for the server to fulfill the request whether as a part of query params, headers or URI. Statelessness enables greater availability since the server does not have to maintain, update or communicate that session state. There is a drawback when the client need to send too much data to the server so it reduces the scope of network optimization and requires more bandwidth.
+
+Cacheable: Every response should include whether the response is cacheable or not and for how much duration responses can be cached at the client side. Client will return the data from its cache for any subsequent request and there would be no need to send the request again to the server. A well-managed caching partially or completely eliminates some client–server interactions, further improving availability and performance. But sometime there are chances that user may receive stale data.
+
+Client-Server: REST application should have a client-server architecture. A Client is someone who is requesting resources and are not concerned with data storage, which remains internal to each server, and server is someone who holds the resources and are not concerned with the user interface or user state. They can evolve independently. Client doesn’t need to know anything about business logic and server doesn’t need to know anything about frontend UI.
+
+Layered system: An application architecture needs to be composed of multiple layers. Each layer doesn’t know any thing about any layer other than that of immediate layer and there can be lot of intermediate servers between client and the end server. Intermediary servers may improve system availability by enabling load-balancing and by providing shared caches.
+
+Code on demand: It is an optional feature. According to this, servers can also provide executable code to the client. The examples of code on demand may include the compiled components such as Java applets and client-side scripts such as JavaScript.
+
+![alt text](https://github.com/samirsahoo007/microservices/blob/master/images/SOAP-v-REST.png)
+  
+|                       |          SOAP(Simple Object Access Protocol)    |              REST(REpresentational State Transfer)             |
+------------------------|:-----------------------------------------------:|---------------------------------------------------------------:|
+|Design                 |          protocol                               |                               architectural style                    |
+|Message format         |Only XML                                         | Plain text, HTML, XML, JSON, YAML, and others
+|Approach               |Function-driven (data available as services, e.g.: "getUser")  |Data-driven (data available as resources, e.g. "user")
+|Statefulness           |Stateless by default, but it's possible to make a SOAP API stateful.   |Stateless (no server-side sessions).
+|Caching                |API calls cannot be cached.    |API calls can be cached.
+|Security               |WS-Security with SSL support. |Built-in ACID compliance.
+|Transfer protocol(s)   |       HTTP, SMTP, UDP, and others.    |Only HTTP
+|Performance            |requires more bandwidth and resource than REST.  |              requires less bandwidth and resource than SOAP.   |
+|Advantages             |High security, standardized, extensibility.    |Scalability, better performance, browser-friendliness, flexibility.
+|Disadvantages          |Poorer performance, more complexity, less flexibility. |Less security, not suitable for distributed environments.
+
+SOAP defines its own security.
+RESTful web services inherits security measures from the  underlying transport.
+
+SOAP can't use REST because it is a protocol
+REST can use SOAP web services because it is a concept and can use any protocol like HTTP, SOAP.
+
 # Microservices
+
+Microservices - also known as the microservice architecture - is an architectural style that structures an application as a collection of services that are. Highly maintainable and testable. Loosely coupled. Independently deployable. Organized around business capabilities.
+
+In short a microservices architecture is a term used to describe the practice of breaking up an application into a series of smaller, more specialised parts, each of which communicate with one another across common interfaces such as APIs and REST interfaces like HTTP.
+
+## How is Microservices different from API?
+
+The Difference Between APIs and Microservices. ... Microservices are an architectural style for web applications, where the functionality is divided up across small web services. whereas. APIs are the frameworks through which developers can interact with a web application.
+
+## What is difference between Web service and API?
+
+The only difference is that a Web service facilitates interaction between two machines over a network. An API acts as an interface between two different applications so that they can communicate with each other. ... Web service also uses SOAP, REST, and XML-RPC as a means of communication.
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/microservice.png)
 	
