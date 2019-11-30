@@ -682,6 +682,12 @@ Third, a sometimes underappreciated aspect of platform layers is that they make 
 
 [Youtube](https://www.youtube.com/watch?v=psQzyFfsUGU)
 
+## BOOKMYSHOW System Design, FANDANGO System Design | Software architecture for online ticket booking
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/bookmyshow.png)
+
+[Youtube](https://www.youtube.com/watch?v=lBAwJgoO3Ek&list=PLkQkbY7JNJuBoTemzQfjym0sqbOHt5fnV&index=7)
+
 ## Object-oriented design interview questions with solutions
 
 > Common object-oriented design interview questions with sample discussions, code, and diagrams.
