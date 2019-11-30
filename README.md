@@ -674,6 +674,14 @@ Third, a sometimes underappreciated aspect of platform layers is that they make 
 
 [Solution](https://www.youtube.com/watch?v=umWABit-wbk)
 
+## NETFLIX System design | software architecture for netflix
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/netflix.jpeg)
+
+[Solution](https://www.linkedin.com/pulse/system-design-netflix-narendra-l/?published=t)
+
+[Youtube](https://www.youtube.com/watch?v=psQzyFfsUGU)
+
 ## Object-oriented design interview questions with solutions
 
 > Common object-oriented design interview questions with sample discussions, code, and diagrams.
