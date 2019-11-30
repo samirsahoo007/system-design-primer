@@ -668,6 +668,12 @@ Third, a sometimes underappreciated aspect of platform layers is that they make 
 
 ![Imgur](http://i.imgur.com/jj3A5N8.png)
 
+## UBER System design | OLA system design | LYFT system design | uber architecture
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/uber.jpg)
+
+[Solution](https://www.youtube.com/watch?v=umWABit-wbk)
+
 ## Object-oriented design interview questions with solutions
 
 > Common object-oriented design interview questions with sample discussions, code, and diagrams.
