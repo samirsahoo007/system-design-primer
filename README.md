@@ -626,6 +626,12 @@ Third, a sometimes underappreciated aspect of platform layers is that they make 
 
 ![Imgur](http://i.imgur.com/jrUBAF7.png)
 
+OR
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/twitter.jpg)
+
+[Youtube](https://www.youtube.com/watch?v=wYk0xPP_P_8&list=PLkQkbY7JNJuBoTemzQfjym0sqbOHt5fnV&index=3)
+
 ### Design the data structures for a social network
 
 [View exercise and solution](solutions/system_design/social_graph/README.md)
@@ -687,6 +693,12 @@ Third, a sometimes underappreciated aspect of platform layers is that they make 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/bookmyshow.png)
 
 [Youtube](https://www.youtube.com/watch?v=lBAwJgoO3Ek&list=PLkQkbY7JNJuBoTemzQfjym0sqbOHt5fnV&index=7)
+
+## CRICINFO system design | CRICBUZZ System desing
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/cricinfo.jpg)
+
+[Youtube](https://www.youtube.com/watch?v=exSwQtMxGd4&list=PLkQkbY7JNJuBoTemzQfjym0sqbOHt5fnV&index=2)
 
 ## Object-oriented design interview questions with solutions
 
