@@ -668,6 +668,12 @@ OR
 
 [Youtube 2](https://www.youtube.com/watch?v=fMZMm_0ZhK4)
 
+## Whatsapp System Design: Chat Messaging Systems
+
+[Youtube 1](https://www.youtube.com/watch?v=vvhC64hQZMk)
+
+[Youtube 2](https://www.youtube.com/watch?v=L7LtmfFYjc4)
+
 ### Design Mint.com
 
 [View exercise and solution](solutions/system_design/mint/README.md)
