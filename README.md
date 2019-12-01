@@ -662,6 +662,12 @@ OR
 
 ![Imgur](http://i.imgur.com/4edXG0T.png)
 
+## URL shortener system design | tinyurl system design | bitly system design
+
+[Youtube 1](https://www.youtube.com/watch?v=JQDHz72OA3c)
+
+[Youtube 2](https://www.youtube.com/watch?v=fMZMm_0ZhK4)
+
 ### Design Mint.com
 
 [View exercise and solution](solutions/system_design/mint/README.md)
