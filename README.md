@@ -722,17 +722,13 @@ OR
 
 [Youtube](https://www.youtube.com/watch?v=exSwQtMxGd4&list=PLkQkbY7JNJuBoTemzQfjym0sqbOHt5fnV&index=2)
 
-## Google Docs System design | Part 1| Operational transformation | differentail synchronisation
+## Google Docs System design 
 
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/google_docs1.jpg)
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/google_docs.jpg)
 
-[Youtube](https://www.youtube.com/watch?v=2auwirNBvGg)
+[Part 1| Operational transformation | differentail synchronisation](https://www.youtube.com/watch?v=2auwirNBvGg)
 
-## Google Docs System design | part 2| System components explanation micro services arcitecture
-
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/google_docs2.jpg)
-
-[Youtube](https://www.youtube.com/watch?v=U2lVmSlDJhg)
+[Part 2| System components explanation micro services arcitecture](https://www.youtube.com/watch?v=U2lVmSlDJhg)
 
 ## Object-oriented design interview questions with solutions
 
