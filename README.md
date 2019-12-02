@@ -680,6 +680,14 @@ OR
 
 ![Imgur](http://i.imgur.com/V5q57vU.png)
 
+## Dropbox system design | Google drive system design | System design file share and upload
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/dropbox.jpg)
+
+[Youtube](https://www.youtube.com/watch?v=U0xTu6E2CT8)
+
+[How We've Scaled Dropbox: from Dropbox guys](https://www.youtube.com/watch?v=PE4gwstWhmc)
+
 ### Design a system that scales to millions of users on AWS
 
 [View exercise and solution](solutions/system_design/scaling_aws/README.md)
