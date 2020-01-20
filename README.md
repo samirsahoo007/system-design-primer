@@ -724,6 +724,10 @@ OR
 
 ## Google Docs System design 
 
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/google_docs_simplified.jpg)
+
+OR
+
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/google_docs.jpg)
 
 [Part 1| Operational transformation | differentail synchronisation](https://www.youtube.com/watch?v=2auwirNBvGg)
