@@ -3430,10 +3430,10 @@ GoF is actually a commonly used acronym that stand for Gang of Four. The Gang of
 
 To remember:
 
-Observer is command-ing Mediator to follow Visitors's Strategy Template,
+Observer is command-ing Mediator to follow Visitors's Strategy Template, understand
 --------    -------     --------           --------   -------- --------
-understand Chain of Responsibility and create a Memento for State Iterator
-           -----------------------              ------      ----- --------
+Chain of Responsibility and create a Memento for State Iterator
+-----------------------              ------      ----- --------
 
 Creational Design Patterns
 
