@@ -1291,11 +1291,118 @@ Federation (or functional partitioning) splits up databases by function.  For ex
   <i><a href=http://www.slideshare.net/jboner/scalability-availability-stability-patterns/>Source: Scalability, availability, stability, patterns</a></i>
 </p>
 
+Sharding is a database technique where you break up a big database into many smaller ones. Instead of having 1 million customers on a single, big iron machine, you perhaps have 100,000 customers on 10 different, smaller machines.
+
 Sharding distributes data across different databases such that each database can only manage a subset of the data.  Taking a users database as an example, as the number of users increases, more shards are added to the cluster.
+
+Sharding is the ability to horizontally scale out our database by partitioning our datasets across different servers—the shards. Foursquare and Bitly are two of the most famous early customers for MongoDB that were also using sharding from its inception all the way to the general availability release.
+
+Sharding is a scale-out approach in which database tables are partitioned, and each partition is put on a separate RDBMS server. For MySQL, this means each node is its own separate MySQL RDBMS managing its own separate set of data partitions. This data separation allows the application to distribute queries across multiple servers simultaneously, creating parallelism and thus increasing the scale of that workload. However, this data and server separation also creates challenges, including sharding key choice, schema design, and application rewrites. Additional challenges of sharding MySQL include data maintenance, infrastructure maintenance, and business challenges, and will be delved into in future blogs.
+
+### The bigger problem is writes
+
+Traditionally it hasn’t been read performance that caused people to shard anyway. It has been write performance. Our applications are still very heavy on the reads vs writes, so it’s less of a problem than it is for many others.
+
+But with the rise of SSD, like Fusion-IO’s ioDrive that can do 120K IOPS, it seems that we’re going to be saved by the progress of technology once again by the time we’ll need it.
 
 Similar to the advantages of [federation](#federation), sharding results in less read and write traffic, less replication, and more cache hits.  Index size is also reduced, which generally improves performance with faster queries.  If one shard goes down, the other shards are still operational, although you'll want to add some form of replication to avoid data loss.  Like federation, there is no single central master serializing writes, allowing you to write in parallel with increased throughput.
 
 Common ways to shard a table of users is either through the user's last name initial or the user's geographic location.
+
+## Sharding setup in MongoDB
+
+The primary shard is automatically selected by MongoDB when we create a new database in a sharded environment. MongoDB will pick the shard that has the least data stored at the moment of creation.
+
+If we want to change the primary shard at any other point, we can issue the following command:
+
+> db.runCommand( { movePrimary : "mongo_books", to : "UK_based" } )
+
+We thus move the database named mongo_books to the shard named UK_based.
+
+![youtube](https://www.youtube.com/watch?v=f7HPQTqaXxI)
+## Design Challenges of Sharding MySQL
+
+Before an RDBMS can be sharded, several design decisions must be made. Each of these is critical to both the performance of the sharded array, as well as the flexibility of the implementation going forward. These design decisions include the following:
+
+    Sharding key must be chosen.
+
+    Schema changes.
+
+    Mapping between sharding key, shards (databases), and physical servers.
+
+## Choosing a Sharding Key
+
+The sharding key controls how data is distributed across the shards. When sharding a MySQL database, care must be taken when choosing the sharding key, because that decision can later cause system inflexibility. For example, referential integrity, the parent/child relationship between tables usually maintained by an RDBMS, won’t be automatically maintained if the parent and child rows are on separate databases. This is such a significant challenge that even Google Spanner (which internally shards) avoids the issue by requiring parent/child referential integrity decisions to be made at table design time.
+
+### There are two main choices for a sharding key:
+
+    Intelligent sharding keys help avoid cross-node transactions but can be more exposed to skew. For instance, if the user table is sharded by user_id, then it’s a good idea to put all associated information about that user, including user interactions, user contact points, etc., all on the same shard, avoiding cross-node JOINs. This can work well if a range of users is associated with each other; for instance, if they’re all users of the same game (i.e. “all new gaming users go to shard x”). But this can create hotspots because new users often spike usage.
+    Hashed sharding keys are automatically distributed across the shards but can be more exposed to cross-node transactions. For instance, if the sharding key is hash-distributed, then all associated information about the users will also be hash-distributed. This works well to spread out load, especially as new users can spike growth. However, groups of users who interact frequently will require cross-node JOINs, and/or cross-node replication to be in place, creating ongoing latency, and/or potentially stale data when there’s replication lag.
+
+Another reason choosing the sharding key is critical is because changing an in-place sharding key can be very involved and troublesome. Since sharding key changes can have a knock-on effect across application, data location, and transactionality (ACID as well) across nodes, they are usually avoided if at all possible.
+Challenges of Schema Changes
+
+That’s not to say that schema changes can’t be made later. Each MySQL shard can definitely deploy an online schema change, allowing no lost transactions. But the question isn’t one of RDBMS support; instead, it’s that of coordinating all the shards’ DDL updates with the application state.
+
+Each of the shards has to successfully complete their online schema change(s) before the application code leveraging the new schema(s) can be enabled. If even one of the shards hasn’t completed the change, then data inconsistencies can occur, if not application errors. This kind of coordination across multiple separate MySQL instances is a very involved process, exposing the application to potential errors and downtime. As a result, most administrators of sharded arrays seek to avoid schema changes if at all possible.
+
+For example, at Pinterest, online schema changes were found to be so costly they chose to handle attribute type changes via JSON. Instead of saving new attributes in their own column(s), requiring schema changes to all the shards, Pinterest creates, modifies, and captures new attribute types ad hoc in JSON objects. In other words, the performance tradeoff is beneficial compared to changing the schema, especially across a high number of shards.
+
+Part of sharding is creating and maintaining the mapping between sharding keys, data partitions, databases, and nodes. This really shouldn’t be done in application code, because this mapping will change often, especially in a growing sharded array. Shard splits, shard migrations, instance replacement, and sharding key changes all will change this mapping. Ideally, this mapping should be done in a very fast lookup because potentially, this information is needed for each query. Thus, this information is often located in an in-memory NoSQL database such as Redis or Memcache.
+
+### Application Changes Required for MySQL Sharding
+
+Sharding usually requires significant application changes as well. Applications moving to a MySQL sharded array now have to handle the following:
+
+    Application query routing to the correct shard.
+
+    Cross-node transactions and ACID transactionality.
+
+Application Queries Need to Route to Correct the Shard(s)
+
+Since a MySQL application expects a single RDBMS, sharding that single RDBMS requires that the application is able to fan out queries across multiple separate MySQL RDBMSs. Specifically, queries have to be modified to leverage sharding key, and the mapping between that sharding key, shard id, and the server on which that shard currently resides. As described before, the latter information is typically contained in a lookup, requiring additional code to keep up-to-date local version(s) of that mapping data in the application.
+Cross-Node Transactions and ACID Transactionality
+
+Having the query access the correct shard is only part of the challenge. Application queries typically need to access lots of data in many different tables, not all of which will be local to the shard. Some of that data will reside in very large tables, which are partitioned and housed on different shards. This affects queries between those large tables, or even between a very large table and itself (what is called a “self-JOIN”). And some of the data resides in smaller tables, which can either be stored locally or sharded across a smaller subset of the shard array.
+
+Does the application need to access data from multiple shards in a single database transaction? And furthermore, do those transactions need to have ACID compliance? If the application needs to support cross-node transactions, then all the JOIN functionality which automatically works in a single-node MySQL JOIN transaction will have to be (re)created in the application itself. The application will have to query one shard, then query a different shard, and then build its own relational logic between the two. If there are uniqueness or parent/child constraints needing to be enforced, those have to be (re)created in the application. And finally, if transactions updating two or more different shards in the same transaction are required, all of that (Atomicity, Consistency, Isolation, and Durability) will have to be (re)created in the application as well. Basically, “cross-server RDBMS functionality” must be (re)created at the application level, requiring a lot of time and effort and exposing the application to a lot of risk of data inconsistencies and/or corruption.
+
+Another option is to create an array of cross-node replication between the shards, allowing each shard to have a local copy of data it needs to access. But this is limited to read-only access of that data and has the potential of being stale due to replication lag. All of the options for implementing or avoiding cross-node transactions have concomitant effects on the workload and the business rules which can be supported. Each of these will be explored in a future blog.
+Application Challenges of Sharding MySQL Summary
+
+Sharding MySQL provides scale for MySQL applications, allowing the applications to fan-out queries across multiple servers in parallel. But there are challenges of sharding MySQL in order to achieve this scale. By not having a single RDBMS managing ACID transactionality across the shards, this functionality either has to be avoided (limiting workload and business flexibility), or has to be (re)built at the application level (at high cost and potential data risk).
+
+Tune in for our following blogs when we explore additional challenges of sharding MySQL, including data maintenance, infrastructure, and HA considerations, business rule (in)flexibility, and other MySQL sharding options.
+
+# MongoDB Shard Key Examples 
+
+1. E-Commerce Shopping Order/Cart.
+
+If you are working on an e-commerce application that stores the user orders in MongoDB (also known as a cart), then generally you have to retrieve the data by the user. Hence, you want all orders related to a given user to be in one shard. For this case, user_key would be a good shard key.
+2. B2B Order Management
+
+If your application manages orders or purchases by another organization, then you will generally retrieve all orders placed by that organization in one query. The user who actually placed the order may not matter to you.
+
+Example: If there are three users from Organization A who make purchases on the organization's behalf, while displaying on the dashboard, you might be retrieving data only by organization key and not by individual user key. In this scenario, organization_key, would be a good choice.
+
+But consider if you need to query data based on organization for a few reports or also based on user for a few other reports. If the user belongs to only one organization, then sharding by organization_key is fine. But if the user belongs to multiple organizations, then shard by user_key.
+3. Product Data
+
+If you have a lot of product data, then you can shard it using category or product type. This will help if you query based on a particular product type. But if your category list is very limited, then it is not advisable to use it as a shard key. In such scenarios, you should use hash_id as the shard key.
+4. Blogs or Posts
+
+If it's an application that has only one or two bloggers, then I believe you don't need to consider sharding. I don't think one person can create 10 million blogs. I checked with Superman, he is not interested in blogging.
+
+So, if you have a blogging platform, then the shard key for the blog collection can be user_key again. All the shards by a particular user will be on one shard and can easy retrieved to show all blogs by a given user.
+5. Page Access
+
+If you are collecting page access details like time series and appending the information in MongoDB, the ideal shard key would be page_id. I am suggesting page_id here based on what reports and analytics I can think of. If your use case is user specific, then page_id may not fit. For me, such data is more useful to analyze the page performance, popularity etc.
+6. Invoices or Payments
+
+Invoices and payments are generally by user, if your application is B2C, or by organization, if your application is B2B. So, if it is B2C, use user_key as the shard key and if its B2B, use organization_key as shard key.
+7. Hotel or Flight Reservations
+
+Hotel or flight reservations can be tricky, as the reservation can be done by anonymous users and you may not have a user_key. The other option is hash_id, which randomly distributes the data across the shards. But a few performance runs have shown that sharding by hotel_property_id or flight_id is more efficient than hash_id. Most of the business use case requires the data to be fetched by hotel_id. Since user_key is not available for anonymous users, hotel_id or flight_id would be a better choice from my perspective.
 
 ##### Disadvantage(s): sharding
 
@@ -1304,6 +1411,21 @@ Common ways to shard a table of users is either through the user's last name ini
     * Rebalancing adds additional complexity.  A sharding function based on [consistent hashing](http://www.paperplanes.de/2011/12/9/the-magic-of-consistent-hashing.html) can reduce the amount of transferred data.
 * Joining data from multiple shards is more complex.
 * Sharding adds more hardware and additional complexity.
+
+# How to choose a shard key for MongoDB
+
+# Conceptually, how does database sharding differ from a federation
+
+At a high level, they are similar.
+
+    In MongoDB you have a multiple "replica sets" and you "shard" the data across these sets for horizontal scalability.
+    In SQL Server you have use "replication" across servers and then provide a "partitioned view" across replicated servers to allow for horizontal scalability.
+
+The big differences are in the implementation and the technologies themselves. For example SQL Server supports joins and actually has some logic for joining across servers. MongoDB has no notion of a join and provides none of this logic.
+
+Both systems use some form of partition key for partitioning the data. SQL Server requires application-level logic for sending queries to the best node (colocating). MongoDB provides a router program mongos that will correctly route sharded queries without extra application logic.
+
+There's also the issue of balancing. MongoDB provides automatic balancing, so if one shard becomes overloaded with data, some of that data will be sent to other nodes. With SQL Server you have to manually define the partitions and the servers on which they reside.
 
 ##### Source(s) and further reading: sharding
 
