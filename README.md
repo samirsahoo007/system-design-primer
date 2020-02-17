@@ -3305,6 +3305,14 @@ Wear leveling refers to the practice of ensuring certain NAND blocks aren’t wr
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ssd/2006640.jpg)
 
+# What is the differnce between DAS, SAN & NAS?
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/nas_san_das.jpg)
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/nas_san_das2.jpg)
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/das-raid-nas-san.jpg)
+
 # Easily Automate Your CI/CD Pipeline With Jenkins, Helm, and Kubernetes
 
 
