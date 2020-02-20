@@ -3543,6 +3543,26 @@ Sleuth adds two types of IDs to the log file, one called a trace ID and the othe
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/distributed_tracing_microservices)
 
+# SQL and NoSQL
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/SQLvsNoSQL.jpg)
+
+CRUD stands for create, read, update and delete.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/ACID-Properties.jpg)
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/Difference-between-SQL-and-NOSQL-2.png)
+
+
+e.g. 
+SQL: Oracle, MSSQL, MySQL, DB2
+NoSQL:Hbase, Cassandra, Mongo, Neo4j
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/SQLvsNoSQL.jpg)
+
+
+
 For installation and setup refer: https://medium.com/swlh/distributed-tracing-in-micoservices-using-spring-zipkin-sleuth-and-elk-stack-5665c5fbecf
 
 # What is SOLID?
