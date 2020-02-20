@@ -3562,6 +3562,7 @@ NoSQL:Hbase, Cassandra, Mongo, Neo4j
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/SQLvsNoSQL.jpg)
 
 
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/morpic.gif)
 
 For installation and setup refer: https://medium.com/swlh/distributed-tracing-in-micoservices-using-spring-zipkin-sleuth-and-elk-stack-5665c5fbecf
 
