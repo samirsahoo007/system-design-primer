@@ -1208,6 +1208,8 @@ A relational database like SQL is a collection of data items organized in tables
 
 **ACID** is a set of properties of relational database [transactions](https://en.wikipedia.org/wiki/Database_transaction).
 
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/ACID-Properties.jpg)
+
 * **Atomicity** - a transaction must be treated as an atomic unit, that is, either all of its operations are executed or none. There must be no state in a database where a transaction is left partially complete
 * **Consistency** - The database must remain in a consistent state after any transaction. No transaction should have any adverse effect on the data residing in the database.
 * **Isolation** - In a database system where more than one transaction are being executed simultaneously and in parallel, the property of isolation states that all the transactions 
@@ -1216,6 +1218,30 @@ A relational database like SQL is a collection of data items organized in tables
 		   then the database will hold the modified data. If a transaction commits but the system fails before the data could be written on to the disk, then that data will be updated once the system springs back into action.
 
 There are many techniques to scale a relational database: **master-slave replication**, **master-master replication**, **federation**, **sharding**, **denormalization**, and **SQL tuning**.
+
+# SQL and NoSQL
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/SQLvsNoSQL.jpg)
+
+CRUD stands for create, read, update and delete.
+
+The CAP theorem (also called Brewer's theorem) states that a distributed database system can only have 2 of the 3 characteristics: Consistency, Availability and Partition Tolerance.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/cap.jpeg)
+for more details see above
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/Difference-between-SQL-and-NOSQL-2.png)
+
+
+e.g. 
+SQL: Oracle, MSSQL, MySQL, DB2
+NoSQL:Hbase, Cassandra, Mongo, Neo4j
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/SQLvsNoSQL.jpg)
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/morpic.gif)
+
 
 #### Master-slave replication
 
@@ -3542,27 +3568,6 @@ Sleuth adds two types of IDs to the log file, one called a trace ID and the othe
 
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/distributed_tracing_microservices)
-
-# SQL and NoSQL
-
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/SQLvsNoSQL.jpg)
-
-CRUD stands for create, read, update and delete.
-
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/ACID-Properties.jpg)
-
-
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/Difference-between-SQL-and-NOSQL-2.png)
-
-
-e.g. 
-SQL: Oracle, MSSQL, MySQL, DB2
-NoSQL:Hbase, Cassandra, Mongo, Neo4j
-
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/SQLvsNoSQL.jpg)
-
-
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/morpic.gif)
 
 For installation and setup refer: https://medium.com/swlh/distributed-tracing-in-micoservices-using-spring-zipkin-sleuth-and-elk-stack-5665c5fbecf
 
