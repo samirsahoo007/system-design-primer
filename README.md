@@ -1223,9 +1223,12 @@ There are many techniques to scale a relational database: **master-slave replica
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/SQLvsNoSQL.jpg)
 
-CRUD stands for create, read, update and delete.
+SQL follows ACID properties
 
+NoSQL follows
 The CAP theorem (also called Brewer's theorem) states that a distributed database system can only have 2 of the 3 characteristics: Consistency, Availability and Partition Tolerance.
+
+CRUD stands for create, read, update and delete.
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/sql/cap.jpeg)
 for more details see above
