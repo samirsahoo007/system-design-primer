@@ -1923,7 +1923,7 @@ HTTP is a method for encoding and transporting data between a client and a serve
 
 A basic HTTP request consists of a verb (method) and a resource (endpoint).  Below are common HTTP verbs:
 
-| Verb | | CRUD | Description | Idempotent | Safe | Cacheable |
+| Verb | CRUD | Description | Idempotent | Safe | Cacheable |
 |---|---|---|---|---|---|
 | GET | Read| 200(OK) | Yes | Yes | Yes |
 | POST | Create| 201Created | No | No | Yes if response contains freshness info |
