@@ -1923,15 +1923,15 @@ HTTP is a method for encoding and transporting data between a client and a serve
 
 A basic HTTP request consists of a verb (method) and a resource (endpoint).  Below are common HTTP verbs:
 
-| Verb | Description | Idempotent* | Safe | Cacheable |
-|---|---|---|---|---|
-| GET | Reads a resource | Yes | Yes | Yes |
-| POST | Creates a resource or trigger a process that handles data | No | No | Yes if response contains freshness info |
-| PUT | Creates or replace a resource | Yes | No | No |
-| PATCH | Partially updates a resource | No | No | Yes if response contains freshness info |
-| DELETE | Deletes a resource | Yes | No | No |
+| Verb | | CRUD | Description | Idempotent | Safe | Cacheable |
+|---|---|---|---|---|---|
+| GET | Read| 200(OK) | Yes | Yes | Yes |
+| POST | Create| 201Created | No | No | Yes if response contains freshness info |
+| PUT | Update/Replace| 405 (Method Not Allowed) | Yes | No | No |
+| PATCH | Update/Modify| 405 (Method Not Allowed) | No | No | Yes if response contains freshness info |
+| DELETE | Delete | 405 (Method Not Allowed) | Yes | No | No |
 
-*Can be called many times without different outcomes.
+Can be called many times without different outcomes.
 
 HTTP is an application layer protocol relying on lower-level protocols such as **TCP** and **UDP**.
 
