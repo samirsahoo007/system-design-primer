@@ -3779,6 +3779,18 @@ Memento pattern is implemented with two objects – Originator and Caretaker. Or
 
 Check out Memento Pattern for sample program and implementation details.
 
+# Email standards:
+
+<b>SMTP</b> (Simple Mail Transfer Protocol), used to send textual data, delivers the message to the specified destination and checks whether the messages are delivered successfully. 
+
+But it cannot send executable files, cannot send 8-bit code coz I support 7-bit ASCII, may reject messages over a certain size. It cannot be used for languages that do not support 7-bit ASCII format such as- French, German, Russian, Chinese and Japanese, etc. so it cannot be transmitted using SMTP. So, in order to make SMTP more broad we use <b>MIME</b> (Multipurpose Internet Mail Extension (MIME) Protocol).
+
+With MIME, I am able to send multiple attachments with a single message, Unlimited message length(not technically), Binary attachments (executables, images, audio or video files) which may be divided if needed, I provide support for varying content types and multipart messages.
+
+<b>Sendmail</b> and postfix are message transfer agents (MTAs)
+
+<b>Journaling</b> refers to recording email communications as part of the organization's email retention strategy. Archiving refers to removing email messages from their native location (for example, a user's mailbox), and storing them elsewhere.
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
