@@ -3850,6 +3850,36 @@ It's often attractive to spread infrastructure across multiple clouds to increas
 Realizing multi-cloud deployments can be very challenging as many existing tools for infrastructure management are cloud-specific. Terraform is cloud-agnostic and allows a single configuration to be used to manage multiple providers, and to even handle cross-cloud dependencies. This simplifies management and orchestration, helping operators build large-scale multi-cloud infrastructures.
 
 
+# Confused by AWS Storage Options? S3, EBS, EFS Explained
+
+## Amazon S3 
+provides simple object storage, useful for hosting website images and videos, data analytics, and both mobile and web applications. Object storage manages data as objects, meaning all data types are stored in their native formats. There is no hierarchy of relations between files with object storage — data objects can be distributed across several machines. You can access the S3 service from anywhere on the internet.
+
+## AWS EBS 
+provides persistent block-level data storage. Block storage stores files in multiple volumes called blocks, which act as separate hard drives; block storage devices are more flexible and offer higher performance than regular file storage. You need to mount EBS onto an Amazon EC2 instance. Use cases include business continuity, software testing, and database management.
+
+## AWS EFS 
+is a shared, elastic file storage system that grows and shrinks as you add and remove files. It offers a traditional file storage paradigm, with data organized into directories and subdirectories. EFS is useful for SaaS applications and content management systems. You can mount EFS onto several EC2 instances at the same time. 
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/block-object-storage.png)
+
+Which AWS Cloud Storage Service Is Best? 
+As always, it depends.
+
+Amazon S3 is cheapest for data storage alone. However, there are various other pricing parameters in S3, including cost per number of requests made, S3 Analytics, and data transfer out of S3 per gigabyte. EFS has the simplest cost structure. 
+
+Amazon S3 can be accessed from anywhere. AWS EBS is only available in a particular region, while you can share files between regions on multiple EFS instances.
+
+EBS and EFS are both faster than Amazon S3, with high IOPS and lower latency.
+
+EBS is scalable up or down with a single API call. Since EBS is cheaper than EFS, you can use it for database backups and other low-latency interactive applications that require consistent, predictable performance.
+
+EFS is best used for large quantities of data, such as large analytic workloads. Data at this scale cannot be stored on a single EC2 instance allowed in EBS—requiring users to break up data and distribute it between EBS instances. The EFS service allows concurrent access to thousands of EC2 instances, making it possible to process and analyze large amounts of data seamlessly.
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/netapp-dzone-cloud-services-table.png)
+
 # Email standards:
 
 <b>SMTP</b> (Simple Mail Transfer Protocol), used to send textual data, delivers the message to the specified destination and checks whether the messages are delivered successfully. 
