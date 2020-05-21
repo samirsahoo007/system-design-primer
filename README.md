@@ -1936,11 +1936,87 @@ Can be called many times without different outcomes.
 HTTP is an application layer protocol relying on lower-level protocols such as **TCP** and **UDP**.
 
 GET: The HTTP GET method is used to read (or retrieve) a representation of a resource. In the safe path, GET returns a representation in XML or JSON and an HTTP response code of 200 (OK). In an error case, it most often returns a 404 (NOT FOUND) or 400 (BAD REQUEST).
-POST: The POST verb is most-often utilized to create new resources. In particular, it’s used to create subordinate resources. That is, subordinate to some other (e.g. parent) resource. On successful creation, return HTTP status 201, returning a Location header with a link to the newly-created resource with the 201 HTTP status.
+
+What is the difference between POST and PUT?
+What is the difference between PUT and PATCH?
+
+POST: The POST verb is most-often utilized to create new resources. In particular, it’s used to create subordinate resources. That is, subordinate to some other (e.g. parent) resource.
 NOTE: POST is neither safe nor idempotent.
-PUT: It is used for updating the capabilities. However, PUT can also be used to create a resource in the case where the resource ID is chosen by the client instead of by the server. In other words, if the PUT is to a URI that contains the value of a non-existent resource ID. On successful update, return 200 (or 204 if not returning any content in the body) from a PUT. If using PUT for create, return HTTP status 201 on successful creation. PUT is not safe operation but it’s idempotent.
-PATCH: It is used for modify capabilities. The PATCH request only needs to contain the changes to the resource, not the complete resource. This resembles PUT, but the body contains a set of instructions describing how a resource currently residing on the server should be modified to produce a new version. This means that the PATCH body should not just be a modified part of the resource, but in some kind of patch language like JSON Patch or XML Patch. PATCH is neither safe nor idempotent.
+
+PUT: It is used for updating the capabilities. However, PUT can also be used to create a resource in the case where the resource ID is chosen by the client instead of by the server. In other words, if the PUT is to a URI that contains the value of a non-existent resource ID. On successful update, return 200 (or 204 if not returning any content in the body) from a PUT. 
+
+PATCH: It is used for modify capabilities. The PATCH request only needs to contain the changes to the resource, not the complete resource. This resembles PUT, but the body contains a set of instructions describing how a resource currently residing on the server should be modified to produce a new version. This means that the PATCH body should not just be a modified part of the resource, but in some kind of patch language like JSON Patch or XML Patch. 
+
+** In analogy POST is similar to SQL INSERT and PUT is similar to SQL UPDATE.
+
 DELETE: It is used to delete a resource identified by a URI. On successful deletion, return HTTP status 200 (OK) along with a response body.
+
+Note: 
+	POST is not idempotent
+
+	PUT is not safe operation but it’s idempotent.
+
+	PATCH is neither safe nor idempotent.
+	
+	GET and DELETE are idempotent
+
+WHY GET method is idempotent?
+
+An idempotent HTTP method is a HTTP method that can be called many times without different outcomes. It would not matter if the method is called only once, or ten times over. The result should be the same. ... The GET method should be used to send the information from the browser to the server in the URL.
+
+Methods PUT and DELETE are defined to be idempotent, meaning that multiple identical requests should have the same effect as a single request
+
+An HTTP method is "safe" if using it doesn’t modify anything on the server. So POST, PUT, PATCH and DELETE are unsafe.
+
+Que: When to Use Put and When Patch?
+
+Ans: When a client needs to replace an existing Resource entirely, they can use PUT. When they're doing a partial update, they can use HTTP PATCH.
+
+For instance, when updating a single field of the Resource, sending the complete Resource representation might be cumbersome and utilizes a lot of unnecessary bandwidth. In such cases, the semantics of PATCH make a lot more sense.
+
+Another important aspect to consider here is idempotence; PUT is idempotent; PATCH can be, but isn't required to. And, so – depending on the semantics of the operation we're implementing, we can also choose one or the other based on this characteristic.
+
+e.g.
+Put :
+if i want to change myfirst name of a person in a database then send put request for Update
+
+{ "first": "Nazmul", "last": "hasan" } 
+
+but here has one problem is put request that when i want to send put request i have to send all two parameters that is first and last so it is mandatory to send all value again
+
+Patch :
+patch request says . only send the data which one you want to update and it won't effecting or changing other data.
+so no need to send all value again . just i want to update my first name so i need to send only first name to update .
+
+Finally, let's write tests for both HTTP methods. First, we want to test the update of the full resource via PUT method:
+
+mockMvc.perform(put("/heavyresource/1")
+  .contentType(MediaType.APPLICATION_JSON_VALUE)
+  .content(objectMapper.writeValueAsString(
+    new HeavyResource(1, "Tom", "Jackson", 12, "heaven street")))
+  ).andExpect(status().isOk());
+
+Execution of a partial update is achieved by using the PATCH method:
+
+mockMvc.perform(patch("/heavyrecource/1")
+  .contentType(MediaType.APPLICATION_JSON_VALUE)
+  .content(objectMapper.writeValueAsString(
+    new HeavyResourceAddressOnly(1, "5th avenue")))
+  ).andExpect(status().isOk());
+
+The PATCH method is the correct choice here as you're updating an existing resource - the group ID. PUT should only be used if you're replacing a resource in its entirety.
+
+Why PATCH is neither safe nor idempotent?
+
+Since PUT request (so does PATCH for that matter) updates the resource, so it can't be cached and hence it's not SAFE. ... So multiple calls to PATCH request could end up in undesirable change in the resource state. Hence it is not IDEMPOTENT
+
+Why POST is not idempotent but PUT is?
+For example, if we make the PUT request from our test once, it updates the avatarNumber to 2. If we make it again, the avatarNumber will still be 2. If we make the PUT request 1 time or 10 times, the server always results in the same state.
+
+Now think about the POST request in our test, and imagine for a second that the nickname doesn’t have to be unique, because that detail clouds things here unnecessarily.
+
+If we make the request once, it would create a programmer. If we make it again, it would create another programmer. So making the request 12 times is not the same as making it just once. This is not idempotent.
+
 
 #### Source(s) and further reading: HTTP
 
