@@ -3970,6 +3970,103 @@ With MIME, I am able to send multiple attachments with a single message, Unlimit
 
 Also ref: https://github.com/samirsahoo007/python/tree/master/django-ldap-example
 
+## Docker
+
+- Docker is a platform/engine for developing, shipping and running applications using container technology
+
+- Docker is a containerization platform that packages your application and all its dependencies together in the form of a docker container to ensure that your application works seamlessly in any environment.
+
+## What is Container ? 
+
+– Docker Container is a standardized unit which can be created on the fly to deploy a particular application or environment. It could be an Ubuntu container, CentOs container, etc. to full-fill the requirement from an operating system point of view. Also, it could be an application oriented container like CakePHP container or a Tomcat-Ubuntu container etc.
+
+- Containers are lightweight
+
+- Typical laptop runs 10-100 containers easily
+
+- Typical server can run 100-1000 containers
+
+Let's understand it with an example:
+
+A company needs to develop a Java Application. In order to do so the developer will setup an environment with tomcat server installed in it. Once the application is developed, it needs to be tested by the tester. Now the tester will again set up tomcat environment from the scratch to test the application. Once the application testing is done, it will be deployed on the production server. Again the production needs an environment with tomcat installed on it, so that it can host the Java application. If you see the same tomcat environment setup is done thrice. There are some issues that I have listed below with this approach:
+
+1) There is a loss of time and effort.
+
+2) There could be a version mismatch in different setups i.e. the developer & tester may have installed tomcat 7, however the system admin installed tomcat 9 on the production server. 
+
+Now, I will show you how Docker container can be used to prevent this loss. 
+
+In this case, the developer will create a tomcat docker image ( A Docker Image is nothing but a blueprint to deploy multiple containers of the same configurations ) using a base image like Ubuntu, which is already existing in Docker Hub (Docker Hub has some base docker images available for free) . Now this image can be used by the developer, the tester and the system admin to deploy the tomcat environment. This is how docker container solves the problem
+
+## Docker Container Orchestration Using Kubernetes
+
+In a Docker cluster environment, there are lot of task need to manage like scheduling, communication, and scalability and these tasks can be taken care by any of the orchestration tools available in market but some of the industry recognized tools are Docker Swarm which is a Docker native orchestration tool and "Kubernetes".
+
+Kubernetes is an open-source container management (orchestration) tool. It’s container management responsibilities include container deployment, scaling, and descaling of containers and container load balancing. There are Cloud-based Kubernetes services called as KaaS (Kubenetes as a Service ) also available namely AWS ECS, EKS, Azure AKS, and GCP GKE.
+
+### Features of Kubernetes
+
+* Autoscaling
+
+* Automated Scheduling
+
+* Self-Healing Capabilities
+
+* Automated rollouts & rollback
+
+* Horizontal Scaling & Load Balancing
+
+* Offers environment consistency for development, testing, and production
+
+* Infrastructure is loosely coupled to each component can act as a separate unit
+
+* Provides a higher density of resource utilization
+
+* Offers enterprise-ready features
+
+* Application-centric management
+
+* You can create predictable infrastructure
+
+
+## Node
+	- a single machine in cluster
+	- it's a physical machine in a datacenter, or virtual machine hosted on a cloud provider like Google Cloud Platform
+
+## Persistent Volumes 
+	- Persistent Volumes provide a file system that can be mounted to the cluster, without being associated with any particular node
+
+	- Because programs running on your cluster aren’t guaranteed to run on a specific node, data can’t be saved to any arbitrary place in the file system. If a program tries to save data to a file for later, but is then relocated onto a new node, the file will no longer be where the program expects it to be. For this reason, the traditional local storage associated to each node is treated as a temporary cache to hold programs, but any data saved locally can not be expected to persist. To store data permanently, Kubernetes uses Persistent Volumes. While the CPU and RAM resources of all nodes are effectively pooled and managed by the cluster, persistent file storage is not. Instead, local or cloud drives can be attached to the cluster as a Persistent Volume. This can be thought of as plugging an external hard drive in to the cluster.
+
+## What is difference between POD and container?
+
+Kubernetes doesn't run containers directly; instead it wraps one or more containers into a higher-level structure called a pod. Any containers in the same pod will share the same resources and local network. Containers can easily communicate with other containers in the same pod as though they were on the same machine while maintaining a degree of isolation from others. Every container in a Pod shares the network namespace, including the IP address and network ports.
+
+## What is POD in Kubernetes?
+
+A group of containers that are deployed together on the same host.
+
+## How do you kill a pod in Kubectl?
+
+If you want to delete the pod, you need to delete the deployment with kubectl delete deploy DEPLOYMENT .
+
+## Deployments
+
+Although pods are the basic unit of computation in Kubernetes, they are not typically directly launched on a cluster. Instead, pods are usually managed by one more layer of abstraction: the deployment.
+
+A deployment’s primary purpose is to declare how many replicas of a pod should be running at a time. When a deployment is added to the cluster, it will automatically spin up the requested number of pods, and then monitor them. If a pod dies, the deployment will automatically re-create it.
+Using a deployment, you don’t have to deal with pods manually. You can just declare the desired state of the system, and it will be managed for you automatically.
+
+## Ingress
+
+Using the concepts described above, you can create a cluster of nodes, and launch deployments of pods onto the cluster. There is one last problem to solve, however: allowing external traffic to your application.
+By default, Kubernetes provides isolation between pods and the outside world. If you want to communicate with a service running in a pod, you have to open up a channel for communication. This is referred to as ingress.
+There are multiple ways to add ingress to your cluster. The most common ways are by adding either an Ingress controller, or a LoadBalancer. The exact tradeoffs between these two options are out of scope for this post, but you must be aware that ingress is something you need to handle before you can experiment with Kubernetes.
+
+## Docker queue / Job queue
+
+Docker Trusted Registry (DTR) uses a job queue to schedule batch jobs. Jobs are added to a cluster-wide job queue, and then consumed and executed by a job runner within DTR. All DTR replicas have access to the job queue, and have a job runner component that can get and execute work.
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
