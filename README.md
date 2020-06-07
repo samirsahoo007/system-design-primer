@@ -4067,6 +4067,141 @@ There are multiple ways to add ingress to your cluster. The most common ways are
 
 Docker Trusted Registry (DTR) uses a job queue to schedule batch jobs. Jobs are added to a cluster-wide job queue, and then consumed and executed by a job runner within DTR. All DTR replicas have access to the job queue, and have a job runner component that can get and execute work.
 
+# Create a simple microservice using Lambda and API Gateway
+# Create an API using Amazon API Gateway
+
+<b>To create an API</b>
+
+1. Sign in to the AWS Management Console and open the AWS Lambda console.
+
+2. Choose Create Lambda function.
+
+3. Choose Blueprint.
+
+4. Enter microservice in the search bar. Choose the microservice-http-endpoint blueprint and then choose Configure.
+
+5. Configure the following settings.
+
+* Name – lambda-microservice.
+
+* Role – Create a new role from one or more templates.
+
+* Role name – lambda-apigateway-role.
+
+* Policy templates – Simple microservice permissions.
+
+* API – Create a new API.
+
+* Security – Open.
+
+Choose Create function.
+
+When you complete the wizard and create your function, Lambda creates a proxy resource named lambda-microservice under the API name you selected.
+
+A proxy resource has an AWS_PROXY integration type and a catch-all method ANY. The AWS_PROXY integration type applies a default mapping template to pass through the entire request to the Lambda function and transforms the output from the Lambda function to HTTP responses. The ANY method defines the same integration setup for all the supported methods, including GET, POST, PATCH, DELETE and others.
+
+## Test sending an HTTPS request
+
+In this step, you will use the console to test the Lambda function. In addition, you can run a curl command to test the end-to-end experience. That is, send an HTTPS request to your API method and have Amazon API Gateway invoke your Lambda function. In order to complete the steps, make sure you have created a DynamoDB table and named it "MyTable". For more information, see Create a DynamoDB table with a stream enabled
+
+To test the API
+
+With your MyLambdaMicroService function still open in the console, choose the Actions tab and then choose Configure test event.
+Replace the existing text with the following:
+
+{
+	"httpMethod": "GET",
+	"queryStringParameters": {
+	"TableName": "MyTable"
+    }
+}
+After entering the text above choose Save and test.
+
+Ref: https://docs.aws.amazon.com/lambda/latest/dg/services-apigateway-blueprint.html
+
+# Deployment
+
+Deployment involves packaging up your web application and putting it in a production environment that can run the app.
+
+## Deployment tools
+
+- pants is a build system originally created at Twitter and now split out as its own sustainable open source project.
+
+- Other tools are Screwdriver, teletraan
+
+- Automated Continuous Deployment at Heroku explains Heroku's deployment system, the checks they use to ensure code quality and what they have learned from building the pipeline and process.
+
+
+# Heroku: Cloud Application Platform
+
+Heroku is a container-based cloud platform as a service (PaaS) that enables developers to build, run, and operate applications entirely in the cloud.
+
+# Deploying to Heroku
+
+$ heroku create
+
+$ git push heroku master
+
+$ heroku open
+
+
+# Discussing painpoints:
+
+Baby’s first python deployment: git & pip
+
+Python offers a rich ecosystem of modules. Whether you’re building a web server or a machine learning classifier, there’s probably a module to help you get started. Today’s standardized way of getting these modules is via pip, which downloads and installs from the Python Package Index (aka PyPI). This is just like apt, yum, rubygem, etc.
+
+Most people set up their development environment by first cloning the code using git, and then installing dependencies via pip. So it makes sense why this is also how most people first try to deploy their code. A deploy script might look something like this:
+
+git-pull-pip-install-deploy.sh
+git clone https://github.com/company/somerepo.git
+cd /opt/myproject pip install -r requirements.txt
+python start_server.py
+
+But when deploying large production services, this strategy breaks down for several reasons:
+
+pip does not offer a “revert deploy” strategy
+Running pip uninstall doesn’t always work properly, and there’s no way to “rollback” to a previous state. Virtualenv could help with this, but it’s really not built for managing a history of environments.
+
+Installing dependencies with pip can make deploys painfully slow
+Calling pip install for a module with C extensions will often build it from source, which can take on the order of minutes to complete for a new virtualenv. Deploys should be a fast lightweight process, taking on the order of seconds.
+
+Building your code separately on each host will cause consistency issues
+When you deploy with pip, the version of your app running is not guaranteed to be the same from server to server. Errors in the build process or existing dependencies result in inconsistencies that are difficult to debug.
+
+**Deploys will fail if the PyPI or your git server are down
+pip install and git pull oftentimes depend on external servers. You can choose to use third party systems (e.g. Github, PyPI) or setup your own servers. Regardless, it is important to make sure that your deploy process meets the same expectations of uptime and scale. Often external services are the first to fail when you scale your own infrastructure, especially with large deployments.
+
+If you’re running an app that people depend on, and running it across many servers, then the git+pip strategy will only cause headaches. What we need is a deploy strategy that’s fast, consistent and reliable. More specifically:
+
+Capability to build code into a single, versioned artifact
+Unit and system tests that can test the versioned artifact
+A simple mechanism to cleanly install/uninstall artifacts from remote hosts
+Having these three things would let us spend more time building features, and less time shipping our code in a consistent way.
+
+## “Just use Docker”
+
+At first glance, this might seem like a perfect job for Docker, the popular container management tool. Within a Dockerfile, one simply adds a reference to the code repository and installs the necessary libraries and dependencies. Then we build a Docker image, and ship it as the versioned artifact to remote hosts.
+
+However, we ran into a couple issues when we tried to implement this:
+
+Distributing Docker images within a private network also requires a separate service which we would need to configure, test, and maintain.
+Converting our ansible setup automation to a Dockerfile would be painful and require a lot of ugly hacks with our logging configuration, user permissions, secrets management, etc.
+PEX
+
+Even if we succeeded in fixing these issues, our engineering team would have to learn how to interface with Docker in order to debug production issues. We don’t think shipping code faster should involve reimplementing our entire infrastructure automation and orchestration layer. So we searched on.
+
+## PEX
+
+PEX is a clever tool being developed at Twitter that allows Python code to be shipped as executable zip files. It’s a pretty cool idea, and we recommend Brian Wickman’s Twitter University talk on the subject.
+
+Setting up PEX is simpler than Docker as it only involves running the resultant executable zip file, but building PEX files turned out to be a huge struggle. We ran into several issues building third party library requirements, especially when including static files. We were also confronted with confusing stack traces produced from within PEX’s source code, making it harder to debug builds. This was a dealbreaker, as our primary goal was to improve engineering productivity and make things easier to understand.
+
+Using Docker would have added complexity to our runtime. Using PEX would have added complexity to our builds. We needed a solution that would minimize overall complexity, while giving us reliable deploys, so our search continued.
+
+See:
+Deployment script examples here: https://github.com/samirsahoo007/deployments
+
 ## Contact info
 
 Feel free to contact me to discuss any issues, questions, or comments.
