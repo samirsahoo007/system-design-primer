@@ -3650,6 +3650,50 @@ Sleuth adds two types of IDs to the log file, one called a trace ID and the othe
 
 For installation and setup refer: https://medium.com/swlh/distributed-tracing-in-micoservices-using-spring-zipkin-sleuth-and-elk-stack-5665c5fbecf
 
+# Airflow:
+
+Apache Airflow is not a DevOps tool. It is a workflow orchestration tool primarily designed for managing “ETL” jobs in Hadoop environments. It basically will execute commands on the specified platform and also orchestrate data movement. It was never designed to do anything remotely similar to Jenkins or Gitlab.
+
+## What is Airflow?
+
+According to its documentation, Airflow is “a platform to programmatically author, schedule and monitor workflows”, where those workflows can be executed on some scheduled cadence like a cron job. It’s much better than a cron job, however, since we can express dependencies between jobs and automatically retry upon failure. Furthermore, jobs are efficiently scheduled for workers by Airflow’s scheduler process, ensuring good capacity utilization.
+
+Airflow organizes a workflow as a Directed Acyclic Graph (DAG) that is written in Python, describing how the workflow is organized. A DAG run is instantiated by the Airflow scheduler depending on the DAG schedule. The individual steps in the workflow are executed as tasks via Operators, which run independently. Airflow has a rich set of Operators, among which we heavily leverage the BashOperator and the PostgresOperator. The scheduling process will ensure that tasks are run in an order implied by the DAG. The handy user interface provided by the Airflow webserver also helps visualize all existing DAGs and their historical runs. Airflow’s excellent documentation has more details.
+Data pipelines: Example ELT workflow
+
+While ETLs — extract, transform, load — are a common data warehouse workflow pattern, another typical pattern for is an ELT workflow. The essential difference between the two is that in an ELT workflow, the “load” step happens before the “transform” step. Typically, our ELT workflow is as follows:
+
+    Fetch data from an external API
+    Load the data into staging tables
+    Apply some cleanup/transformations and then Upsert to the production tables
+    Run some data quality checks on recently updated production data
+    Notify success/failure job status once the job group gets completed
+
+As an example, this is our Salesforce ELT workflow:
+More: https://medium.com/engineers-optimizely/airflow-at-optimizely-38c6d17a25f5
+Also read https://en.paradigmadigital.com/dev/apache-airflow/
+
+In a nutshell Jenkins CI is the leading open-source continuous integration server. Built with Java, it provides over 300 plugins to support building and testing virtually any project.
+
+Use Airflow to author workflows as directed acyclic graphs (DAGs) of tasks. The Airflow scheduler executes your tasks on an array of workers while following the specified dependencies. Rich command lines utilities makes performing complex surgeries on DAGs a snap. The rich user interface makes it easy to visualize pipelines running in production, monitor progress and troubleshoot issues when needed.
+
+## Scenario:
+
+I’m explaining in terms why my previous company started to move from a proprietary Orchestration tool Tibco Business works to Apache Airflow.
+
+To reduce dependency on Tibco, most of the jobs were scheduled based on data availability from (S3, Server location) . In order for this we have to wait till a Tibco resource provides a jar to do the connectivity to S3 .
+
+Tibco tool framework was customized long back for the company, the original developers left the company. It became difficult to understand in case of a issue. New team members found it difficult to understand and make changes.
+
+Need a dedicated Tibco administrator to monitor the Tibco services running .
+
+In order to eliminate these dependencies, they wanted to move to tool where everyone can understand and maintain their own operations.
+
+They also had Oozie work flow scheduler.
+
+Before Airflow, the team used Jenkins as our “cron” for running data pipelines. We had low visibility on job metrics and had a hard time maintaining configuration as program code (this was before Jenkinsfiles became an option). We also considered other alternatives like Luigi and Pinball before finally deciding on Airflow.
+
+Airflow has given us the ability to maintain data pipeline workflows as Python code (convenient, as we use Python heavily elsewhere) and express dependencies between tasks while providing useful features like retry handling and task level metrics out of the box. With time, we realized it was a great fit for many workflows, like GDPR request processing and our Optimizely monetization team’s billing related pipelines.
 # What is SOLID?
 
 SOLID are five basic principles of OOD(Object oriented design) which help to create good software architecture. SOLID is an acronym where:-
