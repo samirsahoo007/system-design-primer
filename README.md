@@ -720,6 +720,7 @@ OR
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/cricinfo.jpg)
 
+[README](https://github.com/samirsahoo007/system-design-primer/tree/master/cricinfo)
 [Youtube](https://www.youtube.com/watch?v=exSwQtMxGd4&list=PLkQkbY7JNJuBoTemzQfjym0sqbOHt5fnV&index=2)
 
 ## Google Docs System design 

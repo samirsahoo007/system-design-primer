@@ -112,3 +112,5 @@ Membase
 
 Redis
 
+Ref: https://medium.com/@narengowda/cricinfo-cricbuzz-system-design-c596e8506669
+
