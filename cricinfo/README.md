@@ -1,5 +1,18 @@
 # CricInfo / CricBuzz System design
 
+## Summary
+
+*    The scores are stored in the memory storage called databases. Each and every entry will be unique. Each database will have further partitions called tables which each can contain like bowling details, batting details, strike rates, run rates etc.,
+ 
+*   This data is extracted using back end (server side) programming language. Generally these languages are Python, PHP etc., For example Quora uses Python as its back end language.
+
+*    Now the extracted data is displayed using a front end (client side) language on the user interface. Generally this is HTML along with CSS and Javascript.
+
+*    Now if a new score is entered into database, you have to refresh the web page to get new score details. But this refreshing can be avoided using some http attributes. These attributes are used to refresh the web page automatically for every particular time interval like 1s, 5s etc.,
+ 
+*   Now if you want to get some data from database without refreshing, we can use technologies like Ajax which uses Javascript along with XML or JSON which are used to represent data.
+
+
 *TRAFFIC:* Before designing a system design for CRICINFO we need to know the traffic. you can assume or go to
 
 https://www.similarweb.com/website/cricinfo.com/#overview or Alexa Website Traffic(https://www.alexa.com/siteinfo), Statistics and Analytics
