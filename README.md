@@ -706,6 +706,9 @@ OR
 
 [Solution](https://www.youtube.com/watch?v=umWABit-wbk)
 
+[Read it Here](https://github.com/samirsahoo007/system-design-primer/tree/master/cricinfo)
+
+
 ## NETFLIX System design | software architecture for netflix OR YOUTUBE or  HOTSTAR
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/netflix.jpeg)
