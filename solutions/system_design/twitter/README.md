@@ -73,7 +73,7 @@ Twitter handles thousands of tweets per second so you can’t have just one big 
 
 So far we have talked about all the core features and components of Twitter. There are some other in-depth components you can talk about. For example, you can talk about Trends / Trending topics (using Apache Storm and Heron framework), you can talk about notifications and how to incorporate advertisement.
 
-
+Ref: https://www.geeksforgeeks.org/design-twitter-a-system-design-interview-question/
 
 
 
