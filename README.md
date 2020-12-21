@@ -262,6 +262,16 @@ Check out the following links to get a better idea of what to expect:
 * [The system design interview](http://www.hiredintech.com/system-design)
 * [Intro to Architecture and Systems Design Interviews](https://www.youtube.com/watch?v=ZgdS0EUmn70)
 
+# Difference between Shared Nothing Architecture and Shared Disk Architecture :
+
+SHARED NOTHING ARCHITECTURE  | SHARED DISK ARCHITECTURE
+------------- | -------------
+nodes do not share memory or storage  | nodes share memory as well as the storage
+cheaper  | expensive
+data is strictly partitioned  | data is not partitioned
+fixed load balancing  | dynamic load balancing
+Its advantage is that it has high availability  | Its advantage is that it has unlimited scalability
+
 # N-Tier Architecture
 
 In N-tier, "N" refers to a number of tiers or layers are being used like – 2-tier, 3-tier or 4-tier, etc. It is also called "Multi-Tier Architecture".
