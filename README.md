@@ -729,7 +729,7 @@ OR
 
 ## BOOKMYSHOW System Design, FANDANGO System Design | Software architecture for online ticket booking
 
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/bookmyshow_myimage.png)
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/bookmyshow_myimage.png)
 
 OR
 
