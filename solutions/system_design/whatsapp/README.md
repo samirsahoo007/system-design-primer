@@ -1,4 +1,4 @@
-[alt text](https://miro.medium.com/max/1174/1*Ny0Ved3qrBZUTYMTUkUb9Q.png)
+![alt text](https://miro.medium.com/max/1174/1*Ny0Ved3qrBZUTYMTUkUb9Q.png)
 
 When two clients(A and B) want to communicate or send messages to each other, they first know the address of each other(It may be IP,MAC or any customized unique identity) and they exchange messages with each other over a network, in this case it is INTERNET.
 
@@ -26,12 +26,12 @@ So, let’s list some of the features needed to be incorporated in whatsapp:
 Based upon the user base we need multiple servers to handle this much traffic, so instead of one server we place multiple servers.
 But the question is that, to which server the client will connect as there are multiple servers and the client cannot connect randomly to any server. To overcome this issue we introduced a load balancer between the client and the server.
 
-[alt text](https://miro.medium.com/max/1056/1*JQ7Y60sUP1PAqEBZSUP2qQ.png)
+![alt text](https://miro.medium.com/max/1056/1*JQ7Y60sUP1PAqEBZSUP2qQ.png)
 
 After implementing multiple servers and load balancer, our system architecture is capable of handling a large user base. Now when a client want to connect to the server, the connection request first hits the load balancer and then the load balancer redirects the connection to a server based on various parameters like load on individual servers etc.
 
 
-[alt text](https://miro.medium.com/max/1110/1*is2GaFuYvO_d9SLLpNDJvg.png)
+![alt text](https://miro.medium.com/max/1110/1*is2GaFuYvO_d9SLLpNDJvg.png)
 
 
 But our application also needs some storage mechanism to save some arbitrary state or data, to fulfill this requirement we also added database which is accessible to all the servers.
@@ -47,7 +47,7 @@ In this case when the receiver is not connected to the server, the message is st
 
 In this case when sender is not connected to the server, the message sent by the sender is saved in the device local storage (it may be SQLite or anything else based on platform). And when the sender goes online or connects to the serve the message is fetched from the local storage and sent to the server.
 
-[alt text](https://miro.medium.com/max/1086/1*7JkjITVEEoUlUAC5USUgkA.png)
+![alt text](https://miro.medium.com/max/1086/1*7JkjITVEEoUlUAC5USUgkA.png)
 
 3 . When both clients are connected to the server:
 
@@ -61,7 +61,7 @@ To Incorporate all these status changes, every message has a unique ID to identi
 
 **What happens inside the Whatsapp server when a client connects to the server?**
 
-[alt text](https://miro.medium.com/max/770/1*KIo2e5Op_iUb4j-6z_SkKQ.png)
+![alt text](https://miro.medium.com/max/770/1*KIo2e5Op_iUb4j-6z_SkKQ.png)
 
 When a client connects to the WhatsApp server, a process (or thread) is created with respect to that client. This process is responsible for handling all the operations related to that client.
 With every process, a queue(Highlighted with light green colour) is associated which act as a buffer for that process. After process creation, a table is created in the database to maintain the record of PID(Process ID) and the associated Client.
@@ -69,7 +69,7 @@ With every process, a queue(Highlighted with light green colour) is associated w
 **How Last Seen Work?**
 Implementation of this feature is very simple and straightforward, It is just about maintaining a record with Client ID and Timestamp.
 
-[alt text](https://miro.medium.com/max/730/1*KWR0NAiGqnU-HzuFP-Zurg.png)
+![alt text](https://miro.medium.com/max/730/1*KWR0NAiGqnU-HzuFP-Zurg.png)
 
 When we open Whatsapp in our smartphone, our application sends a pulse to server every 5 seconds, and with every pulse last seen time is updated in the table. As the client disconnects the last seen time exists in the record that is updated by the last pulse sent before closing the app.
 
@@ -78,7 +78,7 @@ When we open Whatsapp in our smartphone, our application sends a pulse to server
 For sharing, we don’t use the connection which is used for sending text messages because it is a very lightweight connection and it cannot handle this much load.
 Instead, WhatsApp uses a different server(like HTTP) to share media.
 
-[alt text](https://miro.medium.com/max/770/1*pkKmT7Rtl1l9DKfZQAB_nA.png)
+![alt text](https://miro.medium.com/max/770/1*pkKmT7Rtl1l9DKfZQAB_nA.png)
 
 
 When we share a media, it gets uploaded to an HTTP Server over a different connection, after successful upload, the HTTP server returns a hash or unique ID associated to that media and that hash value is sent to the WhatsApp server. At the receiver end, the same thing works in a reverse way, the receiver receives the hash value then it downloads the media from HTTP server associated to that hash value.
