@@ -2,7 +2,7 @@
 
 When two clients(A and B) want to communicate or send messages to each other, they first know the address of each other(It may be IP,MAC or any customized unique identity) and they exchange messages with each other over a network, in this case it is INTERNET.
 
-# 1 Simple communication can be seen as below
+# 1. Simple communication can be seen as below
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/whatsapp_simple.png)
 
@@ -14,34 +14,34 @@ As soon as UserB is connected to the server, then the server will send that mess
 
 This is how a message will work end to end.
 
-# 2 Understanding feature like last seen, single tick and double tick will work?
+# 2. Understanding feature like last seen, single tick and double tick will work?
 
 These features can be accomplished by Acknowledgement service.
 
-## 2.1 Single Tick:
+## 2.1. Single Tick:
 
 Once the message from UserA reaches the server, the server will send an acknowledgement saying that the message has been received. Then UserA will display single tick.
 
-## 2.2 Double Tick:
+## 2.2. Double Tick:
 
 Once the message from server sends that message to UserB by appropriate connection, UserB will send an acknowledgement to the server saying that it has recieved the message.
 
 Then server will send another acknowledgement to UserA, hence it will display double tick.
 
-## 2.3 Blue Tick:
+## 2.3. Blue Tick:
 
 Once the UserB opens whatsapp and checks the message, UserB will send another acknowledgement to server saying that user has read the message. Then server will send another acknowledgement message ti UserA. Then UserA will display blue tick.
 
 To identify all the acknowledgements, there will be unique ID attached to all the message.
 
-# 3 Last Seen feature:
+# 3. Last Seen feature:
 
 For this, we need a heartbeat mechanism. This service will be sending a heartbeat for every 5 seconds when the user is online or using the application.
 When the server receives a heartbeat, it will store in another table with User_name and last seen time.
 
 Then retrieve this information, when UserB is online.
 
-# 4 Working of message server
+# 4. Working of message server
 
 Whenever a connection is made to the server, a separate thread along with a queue[to store messages] will be created. Then there will be a separate table that will be mapping threadID with DeviceID.
 
@@ -49,13 +49,13 @@ So when the message is received from UserA, Thread of UserA will check the table
 
 If the UserB is not connected to the service, then the entry of UserB not be there in the table. When UserA sends message to UserB, as the entry is not available, the message will stored in DB. Once UserB is online, then the message will get delivered.
 
-# 5 Understanding how media transfer works?
+# 5. Understanding how media transfer works?
 
 For sending media, we cannot use previously created thread. As threads are light weight, sending media in the same connection will not be efficient. For this you can use a HTTP connection to upload media to a http server. Then this server will return a HashID to UserA. Then we send the HashID along with media type to UserB.
 
 When the message is recieved to UserB, UserB will download from http server. This procedure will work for all the media types.
 
-# 6 For encryption, you can use
+# 6. For encryption, you can use
 
 1. One key that is shared between 2 clients.
 2. One user will have a private key and share public key to other user.
