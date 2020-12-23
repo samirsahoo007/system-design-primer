@@ -2,6 +2,64 @@
 
 When two clients(A and B) want to communicate or send messages to each other, they first know the address of each other(It may be IP,MAC or any customized unique identity) and they exchange messages with each other over a network, in this case it is INTERNET.
 
+# 1 Simple communication can be seen as below
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/whatsapp_simple.png)
+
+System Design Tutorial Example 7: System design for online messaging service like WhatsApp
+
+So when the user, suppose UserA sends a message to UserB, once mobile is connected to internet, that message will be sent to a load balancer, then to a Message Server.
+Then the message server will check if the other user i.e UserB is connected to the service. If UserB is connected, then the message will be sent to UserB. If UserB is not connected to the service, then the message will be stored in DB.
+As soon as UserB is connected to the server, then the server will send that message to UserB.
+
+This is how a message will work end to end.
+
+# 2 Understanding feature like last seen, single tick and double tick will work?
+
+These features can be accomplished by Acknowledgement service.
+
+## 2.1 Single Tick:
+
+Once the message from UserA reaches the server, the server will send an acknowledgement saying that the message has been received. Then UserA will display single tick.
+
+## 2.2 Double Tick:
+
+Once the message from server sends that message to UserB by appropriate connection, UserB will send an acknowledgement to the server saying that it has recieved the message.
+
+Then server will send another acknowledgement to UserA, hence it will display double tick.
+
+## 2.3 Blue Tick:
+
+Once the UserB opens whatsapp and checks the message, UserB will send another acknowledgement to server saying that user has read the message. Then server will send another acknowledgement message ti UserA. Then UserA will display blue tick.
+
+To identify all the acknowledgements, there will be unique ID attached to all the message.
+
+# 3 Last Seen feature:
+
+For this, we need a heartbeat mechanism. This service will be sending a heartbeat for every 5 seconds when the user is online or using the application.
+When the server receives a heartbeat, it will store in another table with User_name and last seen time.
+
+Then retrieve this information, when UserB is online.
+
+# 4 Working of message server
+
+Whenever a connection is made to the server, a separate thread along with a queue[to store messages] will be created. Then there will be a separate table that will be mapping threadID with DeviceID.
+
+So when the message is received from UserA, Thread of UserA will check the table, if UserB is connected. If UserB is connected, then the message is sent to queue of UserB. Then the thread of UserB will check if there are any messages in its queue. If there are any messages, then those messages will be sent to UserB.
+
+If the UserB is not connected to the service, then the entry of UserB not be there in the table. When UserA sends message to UserB, as the entry is not available, the message will stored in DB. Once UserB is online, then the message will get delivered.
+
+# 5 Understanding how media transfer works?
+
+For sending media, we cannot use previously created thread. As threads are light weight, sending media in the same connection will not be efficient. For this you can use a HTTP connection to upload media to a http server. Then this server will return a HashID to UserA. Then we send the HashID along with media type to UserB.
+
+When the message is recieved to UserB, UserB will download from http server. This procedure will work for all the media types.
+
+# 6 For encryption, you can use
+
+1. One key that is shared between 2 clients.
+2. One user will have a private key and share public key to other user.
+
 But, what if the network is very large and number of clients are in millions or billions?
 In a very large network it is very difficult to know the address of each and every client, In this case to make this system more robust and highly available we need a component between the clients called “SERVER”. The task of this server is to coordinate between all the clients connected to it.
 
@@ -25,8 +83,6 @@ So, let’s list some of the features needed to be incorporated in whatsapp:
 
 Based upon the user base we need multiple servers to handle this much traffic, so instead of one server we place multiple servers.
 But the question is that, to which server the client will connect as there are multiple servers and the client cannot connect randomly to any server. To overcome this issue we introduced a load balancer between the client and the server.
-
-![alt text](https://miro.medium.com/max/1056/1*JQ7Y60sUP1PAqEBZSUP2qQ.png)
 
 After implementing multiple servers and load balancer, our system architecture is capable of handling a large user base. Now when a client want to connect to the server, the connection request first hits the load balancer and then the load balancer redirects the connection to a server based on various parameters like load on individual servers etc.
 
@@ -97,4 +153,8 @@ In Actual, Whatsapp handles 10 million connection on a single server, which seem
 -> Database: AMNESIA is the database which is used for storing data, it is also a key-value pair based DB which couples really good with Erlang.
 -> Web Server: The Web Server used in all the messaging server is YAWS — Yet Another Web Server.
 
+# How WhatsApp is different from other messaging services?
+
+In WhatsApp, the text is end to end encrypted. Hence intermediate servers cannot read your messages.
+In WhatsApp, the messages are stored in server till the other party reads the message. Once other party reads the message, that message will be deleted from the server.
 
