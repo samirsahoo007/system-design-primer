@@ -246,3 +246,6 @@ All the components we have discussed so far are horizontally scalable. We can sp
 And that is all, we have discussed the messaging flow for personal and group chats on WhatsApp, asset sharing, some challenges and optimizations that we can perform. We discussed the complete architecture in detail, in case you have any doubts about why we used which services like Kafka, etc, have a look at our article about various storage solution, as we have explained in detail which solutions are most suitable for which scenarios and what are the other options you might look at. And do send in your thoughts on our youtube video!
 
 ![alt text](https://www.codekarle.com/images/WhatsApp.png)
+
+Ref: https://www.codekarle.com/system-design/Whatsapp-system-design.html
+
