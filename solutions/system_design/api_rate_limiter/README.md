@@ -40,10 +40,10 @@ Solution:
                         - [Warm up feature](#warm-up-feature)
         - [Ratelimiter within Resiliency4J](#ratelimiter-within-resiliency4j)
 - [Distributed rate limit](#distributed-rate-limit)
-        - [Sticky sessions](#sticky-sessions)
-        - [Nginx based rate limiting](#nginx-based-rate-limiting)
-        - [Redis based rate limiter](#redis-based-rate-limiter)
-                - [Implementation](#implementation-1)
+	- [Sticky sessions](#sticky-sessions)
+	- [Nginx based rate limiting](#nginx-based-rate-limiting)
+	- [Redis based rate limiter](#redis-based-rate-limiter)
+		- [Implementation](#implementation-1)
                         - [Sliding log implementation using ZSet](#sliding-log-implementation-using-zset)
                         - [Sliding window implementation](#sliding-window-implementation)
                         - [Token bucket implementation](#token-bucket-implementation)
@@ -53,8 +53,8 @@ Solution:
                         - [How to avoid multiple round trips for different buckets:](#how-to-avoid-multiple-round-trips-for-different-buckets)
                         - [Performance bottleneck and single point failure due to Redis](#performance-bottleneck-and-single-point-failure-due-to-redis)
                         - [Static rate limit threshold](#static-rate-limit-threshold)
-        - [Ratelimiter within CloudBouncer](#ratelimiter-within-cloudbouncer)
-        - [Redis cell rate limiter](#redis-cell-rate-limiter)
+	- [Ratelimiter within CloudBouncer](#ratelimiter-within-cloudbouncer)
+	- [Redis cell rate limiter](#redis-cell-rate-limiter)
 
 <!-- /MarkdownTOC -->
 
