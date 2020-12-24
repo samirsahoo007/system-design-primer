@@ -130,3 +130,5 @@ Then how Uber tackles the datacenter failure??
 It actually uses driver phones as a source of trip data to tackle the problem of data center failure.
 When The driver’s phone app communicates with the dispatch system or the API call is happening between them, the dispatch system sends the encrypted state digest (to keep track of the latest information/data) to the driver’s phone app. Every time this state digest will be received by the driver’s phone app. In case of a datacenter failure, backup data center (backup DISCO) doesn’t know anything about the trip so it will ask for the state digest from the driver’s phone app and it will update itself with the state digest information received by the driver’s phone app.
 
+Ref: https://www.geeksforgeeks.org/system-design-of-uber-app-uber-system-architecture/
+
