@@ -1,39 +1,4 @@
-# Rate limiter
 
-<!-- MarkdownTOC -->
-
-- [Goals](#goals)
-- [Algorithm](#algorithm)
-        - [Token bucket](#token-bucket)
-        - [Leaky bucket](#leaky-bucket)
-        - [Fixed window](#fixed-window)
-        - [Sliding log](#sliding-log)
-        - [Sliding window](#sliding-window)
-- [Single machine rate limit](#single-machine-rate-limit)
-        - [Guava rate limiter](#guava-rate-limiter)
-                - [Implementation](#implementation)
-                        - [Producer consumer pattern](#producer-consumer-pattern)
-                - [Record the next time a token is available](#record-the-next-time-a-token-is-available)
-                        - [Warm up feature](#warm-up-feature)
-        - [Ratelimiter within Resiliency4J](#ratelimiter-within-resiliency4j)
-- [Distributed rate limit](#distributed-rate-limit)
-        - [Sticky sessions](#sticky-sessions)
-        - [Nginx based rate limiting](#nginx-based-rate-limiting)
-        - [Redis based rate limiter](#redis-based-rate-limiter)
-                - [Implementation](#implementation-1)
-                        - [Sliding log implementation using ZSet](#sliding-log-implementation-using-zset)
-                        - [Sliding window implementation](#sliding-window-implementation)
-                        - [Token bucket implementation](#token-bucket-implementation)
-                - [Challenges](#challenges)
-                        - [How to handle race conditions](#how-to-handle-race-conditions)
-                        - [How to handle the additional latency introduce by performance](#how-to-handle-the-additional-latency-introduce-by-performance)
-                        - [How to avoid multiple round trips for different buckets:](#how-to-avoid-multiple-round-trips-for-different-buckets)
-                        - [Performance bottleneck and single point failure due to Redis](#performance-bottleneck-and-single-point-failure-due-to-redis)
-                        - [Static rate limit threshold](#static-rate-limit-threshold)
-        - [Ratelimiter within CloudBouncer](#ratelimiter-within-cloudbouncer)
-        - [Redis cell rate limiter](#redis-cell-rate-limiter)
-
-<!-- /MarkdownTOC -->
 # Design API rate limiter
 
 ## Problem statement:
@@ -55,6 +20,43 @@ Solution:
 - We'll have our logic like when API rate limiter receives a request if checks in the database for a record which is least recent in start time having empty end time for the current user. If it found then validates the number of requests and proceeds further if limit is not reached else throws exception.
 ![API Rate Limiter Flow Chart](api_rate_limiter_flow.png)
 
+
+# Rate limiter
+
+<!-- MarkdownTOC -->
+
+- [Goals](#goals)
+- [Algorithm](#algorithm)
+	- [Token bucket](#token-bucket)
+	- [Leaky bucket](#leaky-bucket)
+	- [Fixed window](#fixed-window)
+	- [Sliding log](#sliding-log)
+	- [Sliding window](#sliding-window)
+- [Single machine rate limit](#single-machine-rate-limit)
+	- [Guava rate limiter](#guava-rate-limiter)
+		- [Implementation](#implementation)
+		- [Producer consumer pattern](#producer-consumer-pattern)
+                - [Record the next time a token is available](#record-the-next-time-a-token-is-available)
+                        - [Warm up feature](#warm-up-feature)
+        - [Ratelimiter within Resiliency4J](#ratelimiter-within-resiliency4j)
+- [Distributed rate limit](#distributed-rate-limit)
+        - [Sticky sessions](#sticky-sessions)
+        - [Nginx based rate limiting](#nginx-based-rate-limiting)
+        - [Redis based rate limiter](#redis-based-rate-limiter)
+                - [Implementation](#implementation-1)
+                        - [Sliding log implementation using ZSet](#sliding-log-implementation-using-zset)
+                        - [Sliding window implementation](#sliding-window-implementation)
+                        - [Token bucket implementation](#token-bucket-implementation)
+                - [Challenges](#challenges)
+                        - [How to handle race conditions](#how-to-handle-race-conditions)
+                        - [How to handle the additional latency introduce by performance](#how-to-handle-the-additional-latency-introduce-by-performance)
+                        - [How to avoid multiple round trips for different buckets:](#how-to-avoid-multiple-round-trips-for-different-buckets)
+                        - [Performance bottleneck and single point failure due to Redis](#performance-bottleneck-and-single-point-failure-due-to-redis)
+                        - [Static rate limit threshold](#static-rate-limit-threshold)
+        - [Ratelimiter within CloudBouncer](#ratelimiter-within-cloudbouncer)
+        - [Redis cell rate limiter](#redis-cell-rate-limiter)
+
+<!-- /MarkdownTOC -->
 
 
 ## Goals
