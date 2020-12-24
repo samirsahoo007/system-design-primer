@@ -141,6 +141,7 @@ Check out the sister repo [**Interactive Coding Challenges**](https://github.com
         * [Write-through](#write-through)
         * [Write-behind (write-back)](#write-behind-write-back)
         * [Refresh-ahead](#refresh-ahead)
+* [Databases! How do you know it's the right one?](#how-to-select-the-right-db)
 * [Asynchronism](#asynchronism)
     * [Message queues](#message-queues)
     * [Task queues](#task-queues)
@@ -1918,7 +1919,7 @@ Refresh-ahead can result in reduced latency vs read-through if the cache can acc
 * [AWS ElastiCache strategies](http://docs.aws.amazon.com/AmazonElastiCache/latest/UserGuide/Strategies.html)
 * [Wikipedia](https://en.wikipedia.org/wiki/Cache_(computing))
 
-## Databases! How do you know it’s the right one?
+## Databases! How do you know it's the right one?
 Whether you are a software engineer designing a new product, a student working on a project, or a job seeker preparing for your next system design interview, choosing the right storagesolution always requires some consideration.
 
 In this article we will be discussing various storage solutions available in the market and which will be suitable in which scenarios.
