@@ -141,7 +141,7 @@ Check out the sister repo [**Interactive Coding Challenges**](https://github.com
         * [Write-through](#write-through)
         * [Write-behind (write-back)](#write-behind-write-back)
         * [Refresh-ahead](#refresh-ahead)
-* [Databases! How do you know it's the right one?](#how-to-select-the-right-db)
+* [Databases! How do you know it's the right one?](#databases-how-do-you-know-it-the-right-one)
 * [Asynchronism](#asynchronism)
     * [Message queues](#message-queues)
     * [Task queues](#task-queues)
