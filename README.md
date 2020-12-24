@@ -1920,6 +1920,7 @@ Refresh-ahead can result in reduced latency vs read-through if the cache can acc
 * [Wikipedia](https://en.wikipedia.org/wiki/Cache_(computing))
 
 ## Databases! How do you know it's the right one?
+
 Whether you are a software engineer designing a new product, a student working on a project, or a job seeker preparing for your next system design interview, choosing the right storagesolution always requires some consideration.
 
 In this article we will be discussing various storage solutions available in the market and which will be suitable in which scenarios.
