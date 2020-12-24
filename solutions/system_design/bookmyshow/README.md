@@ -150,3 +150,6 @@ There will be no relationship between these tables.
 * Logging: Log4J
 * Log Management: Logstash, ELK Stack
 * Load balancer: Nginx
+
+Ref: https://www.geeksforgeeks.org/design-bookmyshow-a-system-design-interview-question/
+
