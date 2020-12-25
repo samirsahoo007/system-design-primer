@@ -1,7 +1,11 @@
 
 # Design API rate limiter
 
-Rate limiting protects your APIs from overuse by limiting how often each user can call the API. This protects them from inadvertent or malicious overuse. Without rate limiting, each user may request as often as they like, which can lead to “spikes” of requests that starve other consumers. After rate limiting is enabled, they are limited to a fixed number of requests per second.
+A rate limiter is a tool that monitors the number of requests per a window time a service agrees to allow. If the request count exceeds the number agreed by the service owner and the user (in a decided window time), the rate limiter blocks all the excess calls(say by throwing exceptions). The user can be a human or any other service(ex: in a micro service based architecture)
+
+**Example:** A device with a specific ip address can only make 10 ticket bookings per minute to a show booking website. Or a service A can hit service B with a rate of at most 500 req/sec. All the excess requests get rejected.
+
+Also Rate limiting protects your APIs from overuse by limiting how often each user can call the API. This protects them from inadvertent or malicious overuse. Without rate limiting, each user may request as often as they like, which can lead to “spikes” of requests that starve other consumers. After rate limiting is enabled, they are limited to a fixed number of requests per second.
 
 ![API Rate Limiter](01-rate-limit-kong.png)
 
@@ -21,6 +25,16 @@ Note: This is not complete design and this design is theoritacal and not impleme
 
 Solution:
 ----------
+For these use cases, using persistent memory stores like mysql is a bad idea because the time taken for disk seeks is high enough to hamper the rate limiter granularity. For instance, let’s say that we’re using a single mysql instance to store the request counts and mysql takes 1ms to process 1 request, which means we can achieve a throughput of 1000 req/sec. But a rate limiter using in-memory cache takes around 100nanosec(a main-memory access) to process 1 request, which implies a granularity of around 10Mreq/sec can be achieved.
+
+**Various Levels:** There are different levels at which one can design rate limiters. Listing a few…
+* Rate limiter in a single machine, single threaded scenario
+* Rate limiter in a single machine, multi threaded scenario — Handling race conditions
+* Rate limiter in a distributed scenario —Distributed Cache Usage like redis
+* Rate limiter from client side —Prevent network calls from client to server for all the excess requests.
+
+There are different designs to implement rate limiters, some of which are described below…
+
 - The idea is to send all requests through API rate limit handler and processing further. This sounds like using interceptor design pattern.
 ![API Rate Limiter](api_rate_limiter2.png)
 - As shown in above image, all requests will pass through rate limit handler. So for every request we can verify how many requests this user has sent in last one second, minute or hour based on user plan.
@@ -105,42 +119,54 @@ In a fixed window algorithm, a window size of n seconds (typically using human-f
 
 * Steps
     1. A window of size N is used to track the requests.
-    2. Each request increments the counter for the window.
-    3. If the counter exceeds a threshold, the request is discarded.
+    2. There is one bucket for each of the unit time window.
+    3. Each bucket maintains the count of number of requests in that particular window; If the counter exceeds a threshold, the request is discarded.
+
+For example, a rate limiter for a service that allows only 10 requests per an hour will have the data model like below. Here, the buckets are the windows of one hour, with values storing the counts of the requests seen in that hour.
+
+```
+{
+ "1AM-2AM": 7,
+ "2AM-3AM": 8
+}
+```
+
+With the current model in the above example, if a new request is seen at 2:45AM, we get the count from the current bucket(2AM-3AM) which is 8 and verify that if processing one more request exceeds the permissible limit of 10, if that is the case, an exception is raised; if not(which is the case here), count of the bucket is incremented by unit(to 9) and the request is allowed to be processed. Only the counts of the current window are stored and older windows are deleted when a new window is created(i.e in the above case, if the hour changes, older bucket is deleted)
+
+Space Complexity: O(1) — Storing the current window count
+Time Complexity: O(1) — Get and simple atomic increment operation
+
 * Pros
     - It ensures recent requests get processed without being starved by old requests.
+    - Can use inbuilt concurrency with redis like technologies
 * Cons
     - Stamping elephant problem: A single burst of traffic that occurs near the boundary of a window can result in twice the rate of requests being processed, because it will allow requests for both the current and next windows within a short time.
     - If many consumers wait for a reset window, for example at the top of the hour, then they may stampede your API at the same time.
+    - This in incorrect. Explanation: In the above case, if all the 7 requests in the 1AM-2AM bucket occurs from 1:30AM-2AM, and all the 8 requests from 2AM-3AM bucket occur from 2AM-2:30AM, then effectively we have 15(7 + 8) requests in the time range of 1:30AM-2:30AM, which is violating the condition of 10req/hr
 
 
-### Sliding log
+### Sliding window logs
+Ref: https://medium.com/@saisandeepmopuri/system-design-rate-limiter-and-data-modelling-9304b0d18250
+
 Sliding Log rate limiting involves tracking a time stamped log for each consumer’s request. These logs are usually stored in a hash set or table that is sorted by time. Logs with timestamps beyond a threshold are discarded. When a new request comes in, we calculate the sum of logs to determine the request rate. If the request would exceed the threshold rate, then it is held.
 * Steps
-    1. Tracking a time stamped log for each consumer’s request.
-    2. These logs are usually stored in a hash set or table that is sorted by time. Logs with timestamps beyond a threshold are discarded.
-    3. When a new request comes in, we calculate the sum of logs to determine the request rate. If the request would exceed the threshold rate, then it is held.
+    1. For every user, a queue of timestamps representing the times at which all the historical calls have occurred within the timespan of recent most window is maintained.
+    2. When ever a new request occurs, a check is made for any timestamps older than the window time and these are deleted as they are no longer relevant(Instead of doing this at every request, this step can also be done periodically after every ‘n’ mins or when a certain length of the queue is reached)
+    3. The new timestamp is appended to the user’s queue
+    4. If the number of elements in the queue is not more than that of the allowed count, the request is let through, else an exception is raised.
+
+Space Complexity: O(Max requests seen in a window time) — Stores all the timestamps of the requests in a time window
+Time Complexity: O(Max requests seen in a window time)— Deleting a subset of timestamps
+
 * Pros
     - It does not suffer from the boundary conditions of fixed windows. The rate limit will be enforced precisely. - Since the sliding log is tracked for each consumer, you don’t have the stampede effect that challenges fixed windows
 * Cons
-    - It can be very expensive to store an unlimited number of logs for every request. It’s also expensive to compute because each request requires calculating a summation over the consumer’s prior requests, potentially across a cluster of servers.
+	- High memory footprint. All the request timestamps needs to be maintained for a window time, thus requires lots of memory to handle multiple users or large window times
+	- High time complexity for removing the older timestamps
 
-
-This is a hybrid approach that combines the low processing cost of the fixed window algorithm, and the improved boundary conditions of the sliding log. Like the fixed window algorithm, we track a counter for each fixed window. Next, we account for a weighted value of the previous window’s request rate based on the current timestamp to smooth out bursts of traffic. For example, if the current window is 25% through, then we weight the previous window’s count by 75%. The relatively small number of data points needed to track per key allows us to scale and distribute across large clusters.
-
-
-
-We recommend the sliding window approach because it gives the flexibility to scale rate limiting with good performance. The rate windows are an intuitive way she to present rate limit data to API consumers. It also avoids the starvation problem of leaky bucket, and the bursting problems of fixed window implementations.
-
-### Sliding window
-This is a hybrid approach that combines the low processing cost of the fixed window algorithm, and the improved boundary conditions of the sliding log. Like the fixed window algorithm, we track a counter for each fixed window. Next, we account for a weighted value of the previous window’s request rate based on the current timestamp to smooth out bursts of traffic. For example, if the current window is 25% through, then we weight the previous window’s count by 75%. The relatively small number of data points needed to track per key allows us to scale and distribute across large clusters.
-* Steps
-    1. Like the fixed window algorithm, we track a counter for each fixed window.
-    2. Next, we account for a weighted value of the previous window’s request rate based on the current timestamp to smooth out bursts of traffic.
-* Pros
-    - It avoids the starvation problem of leaky bucket.
-    - It also avoids the bursting problems of fixed window implementations.
-* Please see the section on https://hechao.li/2018/06/25/Rate-Limiter-Part1/ for detailed rate limiter implementations.
+#### Data Modelling
+**In memory Design (Single machine with multiple threads)**
+<script src="https://gist.github.com/saisandeep/0c9a0e6b153fdea0914aaedea8ea84c8#file-sliding-window-logs-in-memory-py"></script>
 
 ## Rate Limiting in Distributed Systems
 ### Synchronization Policies
