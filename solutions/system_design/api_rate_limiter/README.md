@@ -1,4 +1,5 @@
 
+<script src="https://gist.github.com/samirsahoo007/9601135f91bddadb023b858cfb27cf49.js"></script>
 # Design API rate limiter
 
 A rate limiter is a tool that monitors the number of requests per a window time a service agrees to allow. If the request count exceeds the number agreed by the service owner and the user (in a decided window time), the rate limiter blocks all the excess calls(say by throwing exceptions). The user can be a human or any other service(ex: in a micro service based architecture)
