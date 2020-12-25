@@ -166,7 +166,7 @@ Time Complexity: O(Max requests seen in a window time)— Deleting a subset of t
 
 #### Data Modelling
 **In memory Design (Single machine with multiple threads)**
-<script src="https://gist.github.com/saisandeep/0c9a0e6b153fdea0914aaedea8ea84c8#file-sliding-window-logs-in-memory-py"></script>
+<script src="https://gist.github.com/samirsahoo007/9601135f91bddadb023b858cfb27cf49.js"></script>
 
 ## Rate Limiting in Distributed Systems
 ### Synchronization Policies
