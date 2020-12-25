@@ -332,6 +332,228 @@ class SlidingWindowLogRatelimiter(object):
 		return True
 ```
 
+### Sliding window counters
+* This is a hybrid of Fixed Window Counters and Sliding Window logs
+* The entire window time is broken down into smaller buckets. The size of each bucket depends on how much elasticity is allowed for the rate limiter
+* Each bucket stores the request count corresponding to the bucket range.
+
+For example, in order to build a rate limiter of 100 req/hr, say a bucket size of 20 mins is chosen, then there are 3 buckets in the unit time
+
+For a window time of 2AM to 3AM, the buckets are
+
+{
+ "2AM-2:20AM": 10,
+ "2:20AM-2:40AM": 20,
+ "2:40AM-3:00AM": 30
+}
+
+If a request is received at 2:50AM, we find out the total requests in last 3 buckets including the current and add them, in this case they sum upto 60 (<100), so a new request is added to the bucket of 2:40AM–3:00AM giving...
+
+{
+ "2AM-2:20AM": 10,
+ "2:20AM-2:40AM": 20,
+ "2:40AM-3:00AM": 31
+}
+
+**Note:** This is not a completely correct, for example: At 2:50, a time interval from 1:50 to 2:50 should be considered, but in the above example the first 10 mins isn’t considered and it may happen that in this missed 10 mins, there might’ve been a traffic spike and the request count might be 100 and hence the request is to be rejected. But by tuning the bucket size, we can reach a fair approximation of the ideal rate limiter.
+
+Space Complexity: O(number of buckets)
+Time Complexity: O(1) — Fetch the recent bucket, increment and check against the total sum of buckets(can be stored in a totalCount variable).
+
+* Pros
+	- No large memory footprint as only the counts are stored
+
+* Cons
+	- Works only for not-so-strict look back window times, especially for smaller unit times
+
+#### Data Modelling
+**In memory Design (Single machine with multiple threads)**
+
+```
+# sliding-window-counters-in-memory.py
+import time
+import threading
+
+class RequestCounters(object):
+	# Every window time is broken down to 60 parts
+	# 100 req/min translates to requests = 100 and windowTimeInSec = 60
+	def __init__(self, requests, windowTimeInSec, bucketSize=10):
+		self.counts = {}
+		self.totalCounts = 0
+		self.requests = requests
+		self.windowTimeInSec = windowTimeInSec
+		self.bucketSize = bucketSize
+		self.lock = threading.Lock()
+
+	# Gets the bucket for the timestamp
+	def getBucket(self, timestamp):
+		factor = self.windowTimeInSec / self.bucketSize
+		return (timestamp // factor) * factor
+
+	# Gets the bucket list corresponding to the current time window
+	def _getOldestvalidBucket(self, currentTimestamp):
+		return self.getBucket(currentTimestamp - self.windowTimeInSec)
+
+	# Remove all the older buckets that are not relevant anymore
+	def evictOlderBuckets(self, currentTimestamp):
+		oldestValidBucket = self._getOldestvalidBucket(currentTimestamp)
+		bucketsToBeDeleted = filter(
+			lambda bucket: bucket < oldestValidBucket, self.counts.keys())
+		for bucket in bucketsToBeDeleted:
+			bucketCount = self.counts[bucket]
+			self.totalCounts -= bucketCount
+			del self.counts[bucket]
+
+class SlidingWindowCounterRateLimiter(object):
+	def __init__(self):
+		self.lock = threading.Lock()
+		self.ratelimiterMap = {}
+
+	# Default of 100 req/minute
+	# Add a new user with a request rate
+	# If a request from un-registered user comes, we throw an Exception
+	def addUser(self, userId, requests=100, windowTimeInSec=60):
+		with self.lock:
+			if userId in self.ratelimiterMap:
+				raise Exception("User already present")
+			self.ratelimiterMap[userId] = RequestCounters(requests, windowTimeInSec)
+
+	def removeUser(self, userId):
+		with self.lock:
+			if userId in self.ratelimiterMap:
+				del self.ratelimiterMap[userId]
+
+	@classmethod
+	def getCurrentTimestampInSec(cls):
+		return int(round(time.time()))
+
+	def shouldAllowServiceCall(self, userId):
+		with self.lock:
+			if userId not in self.ratelimiterMap:
+				raise Exception("User is not present")
+		userTimestamps = self.ratelimiterMap[userId]
+		with userTimestamps.lock:
+			currentTimestamp = self.getCurrentTimestampInSec()
+			# remove all the existing older timestamps
+			userTimestamps.evictOlderBuckets(currentTimestamp)
+			currentBucket = userTimestamps.getBucket(currentTimestamp)
+			userTimestamps.counts[currentBucket] = userTimestamps.counts.
+				get(currentBucket, 0) + 1
+			userTimestamps.totalCounts += 1
+			if userTimestamps.totalCounts > userTimestamps.requests:
+				return False
+			return True
+```
+**Sliding Window Counters — Redis Design**
+
+```
+# sliding-window-counters-redis.py 
+import time
+import redis
+
+# redis connection
+def get_connection(host="127.0.0.1", port="6379", db=0):
+	connection = redis.StrictRedis(host=host, port=port, db=db)
+	return connection
+
+class SlidingWindowCounterRateLimiter(object):
+
+	"""
+	representation of data stored in redis
+	metadata
+	--------
+	"userid_metadata": {
+            "requests": 2,
+	    "window_time": 30
+	}
+	
+	counts
+	-------
+	"userid_counts": {
+	    "bucket1": 2,
+	    "bucket2": 3
+	}
+	"""
+	REQUESTS = "requests" # key in the metadata representing the max number of requests
+	WINDOW_TIME = "window_time" # key in the metadata representing the window time
+	METADATA_SUFFIX = "_metadata" # metadata suffix
+	COUNTS = "_counts" # count buckets suffix
+	
+	def __init__(self, bucketSize=10):
+		# bucket size can be coarser than 10 sec based on the window size.
+		self.bucketSize = bucketSize # in seconds
+		self.con = get_connection()
+
+	# current timestamp in seconds.
+	@classmethod
+	def getCurrentTimestampInSec(cls):
+		return int(round(time.time()))	
+
+	def getBucket(self, timestamp, windowTimeInSec):
+		factor = windowTimeInSec / self.bucketSize
+		return (timestamp // factor) * factor
+
+	# Adds a new user's rate of requests to be allowed.
+	# using redis hashes to store the user metadata.
+	def addUser(self, userId, requests=100, windowTimeInSec=60):
+		# TODO: Make sure that the given windowTimeInSec is a multiple of bucketSize
+		self.con.hmset(userId + self.METADATA_SUFFIX, {
+			self.REQUESTS: requests,
+			self.WINDOW_TIME: windowTimeInSec
+		})
+
+	# Get the user metadata storing the number of requests per window time.
+	def getRateForUser(self, userId):
+		val = self.con.hgetall(userId + self.METADATA_SUFFIX)
+		if val is None:
+			raise Exception("Un-registered user: " + userId)
+		return int(val[self.REQUESTS]), int(val[self.WINDOW_TIME])
+	
+	# Removes a user's metadata and timestamps.
+	def removeUser(self, userId):
+		self.con.delete(userId + self.METADATA_SUFFIX, userId + self.COUNTS)
+
+	# Atomically increments hash key val by unit and returns. Uses optimistic locking
+	# over userId + self.COUNTS redis key.
+	def _incrementAHashKeyValByUnitAmotically(self, userId, bucket, redisPipeline):
+		# A two element array with first one representing success of updating the
+		# bucket value and other giving a list of all the values(counts) of the buckets.
+		count = redisPipeline.hmget(userId + self.COUNTS, bucket)[0]
+		if count is None:
+			count = 0
+		currentBucketCount = int(count)
+		redisPipeline.multi()
+		redisPipeline.hmset(userId + self.COUNTS, {bucket: currentBucketCount + 1})
+		redisPipeline.hvals(userId + self.COUNTS)	
+
+	# Deciding if the rate has been crossed.
+	# we're using redis hashes to store the counts.
+	def shouldAllowServiceCall(self, userId):
+		allowedRequests, windowTime = self.getRateForUser(userId)
+		# evict older entries
+		allBuckets = map(int, self.con.hkeys(userId + self.COUNTS))
+		currentTimestamp = self.getCurrentTimestampInSec()
+		oldestPossibleEntry = currentTimestamp - windowTime
+		bucketsToBeDeleted = filter(
+			lambda bucket: bucket < oldestPossibleEntry, allBuckets)
+		if len(bucketsToBeDeleted) != 0:
+			self.con.hdel(userId + self.COUNTS, *bucketsToBeDeleted)
+		currentBucket = self.getBucket(currentTimestamp, windowTime)
+		# transaction holds an optimistic lock over the redis entries
+		# userId + self.METADATA_SUFFIX, userId + self.COUNTS.
+		# The changes in _incrementAHashKeyValByUnitAmotically are committed only 
+		# if none of these entries get changed.
+		_, requests = self.con.transaction(
+		    lambda pipe: self.
+			_incrementAHashKeyValByUnitAmotically(userId, currentBucket, pipe),
+    		    userId + self.COUNTS, userId + self.METADATA_SUFFIX
+		)
+		if sum(map(int, requests)) > allowedRequests:
+			return False
+		return True
+```
+References: https://blog.figma.com/an-alternative-approach-to-rate-limiting-f8a06cf7c94c
+
 ## Rate Limiting in Distributed Systems
 ### Synchronization Policies
 
