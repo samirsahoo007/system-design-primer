@@ -1,6 +1,16 @@
 
 # Design API rate limiter
 
+Rate limiting protects your APIs from overuse by limiting how often each user can call the API. This protects them from inadvertent or malicious overuse. Without rate limiting, each user may request as often as they like, which can lead to “spikes” of requests that starve other consumers. After rate limiting is enabled, they are limited to a fixed number of requests per second.
+
+![API Rate Limiter](01-rate-limit-kong.png)
+
+In the example chart, you can see how rate limiting blocks requests over time. The API was initially receiving 4 requests per minute shown in green. When rate limiting was enabled at 12:02, additional requests shown in red are denied.
+
+Rate limiting is very important for public APIs where you want to maintain a good quality of service for every consumer, even when some users take more than their fair share. Computationally-intensive endpoints are particularly in need of rate limiting – especially when served by auto-scaling, or by pay-by-the-computation services like AWS Lambda and OpenWhisk. You also may want to rate limit APIs that serve sensitive data, because this could limit the data exposed if an attacker gains access in some unforeseen event.
+
+There are actually many different ways to enable rate limiting, and we will explore the pros and cons of different rate limiting algorithms. We will also explore the issues that come up when scaling across a cluster. Lastly, we’ll show you an example of how to quickly set up rate limiting using Kong, which is the most popular open-source API gateway.
+
 ## Problem statement:
 
 Design and write classes need to implement api rate limiter. List out the data structures and design patterns needed for this implementation.
@@ -78,9 +88,9 @@ Solution:
         - A burst of request could fill up the queue with old requests and starve the more recent requests from being processed. Does not guarantee that requests get processed within a fixed amount of time. Consider an antisocial script that can make enough concurrent requests that it can exhaust its rate limit in short order and which is regularly overlimit. Once an hour as the limit resets, the script bombards the server with a new series of requests until its rate is exhausted once again. In this scenario the server always needs enough extra capacity to handle these short intense bursts and which will likely go to waste during the rest of the hour.
 
 ### Leaky bucket
-* The leaky bucket limits the constant outflow rate, which is set to a fixed value. Imagine a bucket partially filled with water and which has some fixed capacity (τ). The bucket has a leak so that some amount of water is escaping at a constant rate (T)
+* Leaky bucket (closely related to token bucket) is an algorithm that provides a simple, intuitive approach to rate limiting via a queue which you can think of as a bucket holding the requests. When a request is registered, it is appended to the end of the queue. At a regular interval, the first item on the queue is processed. This is also known as a first in first out (FIFO) queue. If the queue is full, then additional requests are discarded (or leaked).
 * Steps
-        1. Initialize the counter to N at every tick of the clock
+    1. Initialize the counter to N at every tick of the clock
     2. If N is greater than the size of the packet in front of the queue send the packet to network and decrement the counter by the size of the packet.
     3. Reset the counter and go to Step - 1.
 * Pros:
@@ -91,8 +101,10 @@ Solution:
     - The leaky bucket is normally implemented using a background process that simulates a leak. It looks for any active buckets that need to be drained, and drains each one in turn. The naive leaky bucket’s greatest weakness is its “drip” process. If it goes offline or gets to a capacity limit where it can’t drip all the buckets that need to be dripped, then new incoming requests might be limited incorrectly. There are a number of strategies to help avoid this danger, but if we could build an algorithm without a drip, it would be fundamentally more stable.
 
 ### Fixed window 
+In a fixed window algorithm, a window size of n seconds (typically using human-friendly values, such as 60 or 3600 seconds) is used to track the rate. Each incoming request increments the counter for the window. If the counter exceeds a threshold, the request is discarded. The windows are typically defined by the floor of the current timestamp, so 12:00:03 with a 60 second window length, would be in the 12:00:00 window.
+
 * Steps
-        1. A window of size N is used to track the requests.
+    1. A window of size N is used to track the requests.
     2. Each request increments the counter for the window.
     3. If the counter exceeds a threshold, the request is discarded.
 * Pros
@@ -101,7 +113,9 @@ Solution:
     - Stamping elephant problem: A single burst of traffic that occurs near the boundary of a window can result in twice the rate of requests being processed, because it will allow requests for both the current and next windows within a short time.
     - If many consumers wait for a reset window, for example at the top of the hour, then they may stampede your API at the same time.
 
+
 ### Sliding log
+Sliding Log rate limiting involves tracking a time stamped log for each consumer’s request. These logs are usually stored in a hash set or table that is sorted by time. Logs with timestamps beyond a threshold are discarded. When a new request comes in, we calculate the sum of logs to determine the request rate. If the request would exceed the threshold rate, then it is held.
 * Steps
     1. Tracking a time stamped log for each consumer’s request.
     2. These logs are usually stored in a hash set or table that is sorted by time. Logs with timestamps beyond a threshold are discarded.
@@ -111,14 +125,55 @@ Solution:
 * Cons
     - It can be very expensive to store an unlimited number of logs for every request. It’s also expensive to compute because each request requires calculating a summation over the consumer’s prior requests, potentially across a cluster of servers.
 
+
+This is a hybrid approach that combines the low processing cost of the fixed window algorithm, and the improved boundary conditions of the sliding log. Like the fixed window algorithm, we track a counter for each fixed window. Next, we account for a weighted value of the previous window’s request rate based on the current timestamp to smooth out bursts of traffic. For example, if the current window is 25% through, then we weight the previous window’s count by 75%. The relatively small number of data points needed to track per key allows us to scale and distribute across large clusters.
+
+
+
+We recommend the sliding window approach because it gives the flexibility to scale rate limiting with good performance. The rate windows are an intuitive way she to present rate limit data to API consumers. It also avoids the starvation problem of leaky bucket, and the bursting problems of fixed window implementations.
+
 ### Sliding window
+This is a hybrid approach that combines the low processing cost of the fixed window algorithm, and the improved boundary conditions of the sliding log. Like the fixed window algorithm, we track a counter for each fixed window. Next, we account for a weighted value of the previous window’s request rate based on the current timestamp to smooth out bursts of traffic. For example, if the current window is 25% through, then we weight the previous window’s count by 75%. The relatively small number of data points needed to track per key allows us to scale and distribute across large clusters.
 * Steps
-        1. Like the fixed window algorithm, we track a counter for each fixed window.
+    1. Like the fixed window algorithm, we track a counter for each fixed window.
     2. Next, we account for a weighted value of the previous window’s request rate based on the current timestamp to smooth out bursts of traffic.
 * Pros
     - It avoids the starvation problem of leaky bucket.
     - It also avoids the bursting problems of fixed window implementations.
 * Please see the section on https://hechao.li/2018/06/25/Rate-Limiter-Part1/ for detailed rate limiter implementations.
+
+## Rate Limiting in Distributed Systems
+### Synchronization Policies
+
+If you want to enforce a global rate limit when you are using a cluster of multiple nodes, you must set up a policy to enhttps://konghq.com/blog/using-instaclustr-and-cassandra-with-kong/force it. If each node were to track its own rate limit, then a consumer could exceed a global rate limit when requests are sent to different nodes. In fact, the greater the number of nodes, the more likely the user will be able to exceed the global limit.
+
+The simplest way to enforce the limit is to set up sticky sessions in your load balancer so that each consumer gets sent to exactly one node. The disadvantages include a lack of fault tolerance and scaling problems when nodes get overloaded.
+
+A better solution that allows more flexible load-balancing rules is to use a centralized data store such as Redis or Cassandra. This will store the counts for each window and consumer. The two main problems with this approach are increased latency making requests to the data store, and race conditions, which we will discuss next.
+
+![API Rate Limiter](06-rate-limit-kong.png)
+
+
+### Race Conditions
+
+One of the largest problems with a centralized data store is the potential for race conditions in high concurrency request patterns. This happens when you use a naïve “get-then-set” approach, wherein you retrieve the current rate limit counter, increment it, and then push it back to the datastore. The problem with this model is that in the time it takes to perform a full cycle of read-increment-store, additional requests can come through, each attempting to store the increment counter with an invalid (lower) counter value. This allows a consumer sending a very high rate of requests to bypass rate limiting controls.
+
+One way to avoid this problem is to put a “lock” around the key in question, preventing any other processes from accessing or writing to the counter. This would quickly become a major performance bottleneck, and does not scale well, particularly when using remote servers like Redis as the backing datastore.
+
+A better approach is to use a “set-then-get” mindset, relying on atomic operators that implement locks in a very performant fashion, allowing you to quickly increment and check counter values without letting the atomic operations get in the way.
+
+![API Rate Limiter](06-2-rate-limit-kong.png)
+
+### Optimizing for Performance
+
+The other disadvantage of using a centralized data store is increased latency when checking on the rate limit counters. Unfortunately, even checking a fast data store like Redis would result in milliseconds of additional latency for every request.
+
+In order to make these rate limit determinations with minimal latency, it’s necessary to make checks locally in memory. This can be done by relaxing the rate check conditions and using an eventually consistent model. For example, each node can create a data sync cycle that will synchronize with the centralized data store. Each node periodically pushes a counter increment for each consumer and window it saw to the datastore, which will atomically update the values. The node can then retrieve the updated values to update it’s in-memory version. This cycle of converge → diverge → reconverge among nodes in the cluster is eventually consistent.
+
+![API Rate Limiter](07-rate-limit-kong.png)
+
+The periodic rate at which nodes converge should be configurable. Shorter sync intervals will result in less divergence of data points when traffic is spread across multiple nodes in the cluster (e.g., when sitting behind a round robin balancer), whereas longer sync intervals put less read/write pressure on the datastore, and less overhead on each node to fetch new synced values.
+
 
 ## Single machine rate limit
 
