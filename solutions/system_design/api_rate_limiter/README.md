@@ -165,7 +165,172 @@ Time Complexity: O(Max requests seen in a window time)— Deleting a subset of t
 #### Data Modelling
 **In memory Design (Single machine with multiple threads)**
 
-<script src="https://gist.github.com/samirsahoo007/9601135f91bddadb023b858cfb27cf49.js"></script>
+```
+#  sliding-window-logs-in-memory.py
+import time
+import threading
+from collections import deque
+
+class RequestTimestamps(object):
+
+	# lock is for concurrency in a multi threaded system
+	# 100 req/min translates to requests = 100 and windowTimeInSec = 60
+	def __init__(self, requests, windowTimeInSec):
+		self.timestamps = deque()
+		self.lock = threading.Lock()
+		self.requests = requests
+		self.windowTimeInSec = windowTimeInSec
+
+	# eviction of timestamps older than the window time
+	def evictOlderTimestamps(self, currentTimestamp):
+		while len(self.timestamps) != 0 and (currentTimestamp - 
+				self.timestamps[0] > self.windowTimeInSec):
+			self.timestamps.popleft()
+
+class SlidingWindowLogsRateLimiter(object):
+	
+	def __init__(self):
+		self.lock = threading.Lock()
+		self.ratelimiterMap = {}
+
+	# Default of 100 req/minute
+	# Add a new user with a request rate
+	def addUser(self, userId, requests=100, windowTimeInSec=60):
+		# hold lock to add in the user-metadata map
+		with self.lock:
+			if userId in self.ratelimiterMap:
+				raise Exception("User already present")
+			self.ratelimiterMap[userId] = RequestTimestamps(requests, windowTimeInSec)
+
+	# Remove a user from the ratelimiter
+	def removeUser(self, userId):
+		with self.lock:
+			if userId in self.ratelimiterMap:
+				del self.ratelimiterMap[userId]
+
+	# gives current time epoch in seconds
+	@classmethod
+	def getCurrentTimestampInSec(cls):
+		return int(round(time.time()))
+
+	# Checks if the service call should be allowed or not
+	def shouldAllowServiceCall(self, userId):
+		with self.lock:
+			if userId not in self.ratelimiterMap:
+				raise Exception("User is not present. Please white \
+					list and register the user for service")
+		userTimestamps = self.ratelimiterMap[userId]
+		with userTimestamps.lock:
+			currentTimestamp = self.getCurrentTimestampInSec()
+			# remove all the existing older timestamps
+			userTimestamps.evictOlderTimestamps(currentTimestamp)
+			userTimestamps.timestamps.append(currentTimestamp)
+			if len(userTimestamps.timestamps) > userTimestamps.requests:
+				return False
+			return True
+```
+
+The following solutions use redis based pipelines which provide ways to use optimistic locking in redis. One can go through redis transactions, to get a gist of concurrency in redis. The below data modelling is optional.
+
+#### Sliding Window Logs — Redis Design
+
+```
+# sliding-window-logs-redis.py
+import time
+import redis
+
+# redis connection
+def get_connection(host="127.0.0.1", port="6379", db=0):
+	connection = redis.StrictRedis(host=host, port=port, db=db)
+	return connection
+
+class SlidingWindowLogRatelimiter(object):
+
+	"""
+	representation of data stored in redis
+	metadata
+	--------
+	"userid_metadata": {
+            "requests": 2,
+	    "window_time": 30
+	}
+	
+	timestamps
+	----------
+	"userid_timestamps": sorted_set([
+	    "ts1": "ts1",
+	    "ts2": "ts2"
+	])
+	"""
+	REQUESTS = "requests"
+	WINDOW_TIME = "window_time"
+	METADATA_SUFFIX = "_metadata"
+	TIMESTAMPS = "_timestamps"
+	INF = 9999999999
+
+	def __init__(self):
+		self.con = get_connection()
+
+	# timestamp in seconds
+	@classmethod
+	def getCurrentTimestampInSec(cls):
+		return int(round(time.time()))
+
+	# Adds a new user's rate of requests to be allowed
+	def addUser(self, userId, requests=100, windowTimeInSec=60):
+		self.con.hmset(userId + self.METADATA_SUFFIX, {
+			self.REQUESTS: requests,
+			self.WINDOW_TIME: windowTimeInSec
+		})
+
+	# get the user metadata storing the number of requests per window time
+	def getRateForUser(self, userId):
+		val = self.con.hgetall(userId + self.METADATA_SUFFIX)
+		if val is None:
+			raise Exception("Un-registered user: " + userId)
+		return int(val[self.REQUESTS]), int(val[self.WINDOW_TIME])
+
+	# Removes a user's metadata and timestamps
+	def removeUser(self, userId):
+		self.con.delete(userId + self.METADATA_SUFFIX, userId + self.TIMESTAMPS)
+
+	# Atomically add an element to the timestamps and return the total number of requests
+	# in the current window time. 
+	def addTimeStampAtomicallyAndReturnSize(self, userId, timestamp):
+		# Transaction holds an optimistic lock over the redis entries userId + self.METADATA_SUFFIX 
+		# and userId + self.TIMESTAMPS. The changes in _addNewTimestampAndReturnTotalCount
+		# are committed only if none of these entries get changed through out
+		_, size = self.con.transaction(
+			lambda pipe: self._addNewTimestampAndReturnTotalCount(userId, timestamp, pipe),
+			userId + self.METADATA_SUFFIX, userId + self.TIMESTAMPS
+		)
+		return size
+	
+	def _addNewTimestampAndReturnTotalCount(self, userId, timestamp, redisPipeline):
+		# A two element array with first one representing success of adding an element into
+		# sorted set and other as the count of the sorted set is returned by this method
+		redisPipeline.multi()
+		redisPipeline.zadd(userId + self.TIMESTAMPS, timestamp, timestamp)
+		redisPipeline.zcount(userId + self.TIMESTAMPS, 0, self.INF)
+
+	# decide to allow a service call or not
+	# we use sorted sets datastructure in redis for storing our timestamps. 
+	# For more info, visit https://redis.io/topics/data-types
+	def shouldAllowServiceCall(self, userId):
+		maxRequests, unitTime = self.getRateForUser(userId)
+		currentTimestamp = self.getCurrentTimestampInSec()
+		# evict older entries 
+		oldestPossibleEntry = currentTimestamp - unitTime
+		# removes all the keys from start to oldest bucket
+		self.con.zremrangebyscore(userId + self.TIMESTAMPS, 0, oldestPossibleEntry)
+		currentRequestCount = self.addTimeStampAtomicallyAndReturnSize(
+			userId, currentTimestamp
+		)
+		print currentRequestCount, maxRequests
+		if currentRequestCount > maxRequests:
+			return False
+		return True
+```
 
 ## Rate Limiting in Distributed Systems
 ### Synchronization Policies
