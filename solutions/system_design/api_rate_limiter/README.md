@@ -715,6 +715,29 @@ vals, err := rdb.Eval(
 
 ...and we’re done!
 
+### Test it
+
+```
+$ while true; do curl --silent --output /dev/null --show-error --fail http://localhost/shopfront/; echo -e $(date);done
+(master *) kubernetes-ambassador-ratelimit $ while true; do curl --silent --output /dev/null --show-error --fail http://localhost/shopfront/; echo -e $(date);done
+Tue 24 Apr 2018 14:16:31 BST
+Tue 24 Apr 2018 14:16:31 BST
+Tue 24 Apr 2018 14:16:31 BST
+Tue 24 Apr 2018 14:16:31 BST
+...
+Tue 24 Apr 2018 14:16:35 BST
+curl: (22) The requested URL returned error: 429 Too Many Requests
+Tue 24 Apr 2018 14:16:35 BST
+curl: (22) The requested URL returned error: 429 Too Many Requests
+Tue 24 Apr 2018 14:16:35 BST
+Tue 24 Apr 2018 14:16:35 BST
+curl: (22) The requested URL returned error: 429 Too Many Requests
+Tue 24 Apr 2018 14:16:35 BST
+curl: (22) The requested URL returned error: 429 Too Many Requests
+Tue 24 Apr 2018 14:16:35 BST
+^C
+```
+
 #### Bonus section: Benchmarking
 So how do we know what rate our limiter is actually capable of? We tried to do some benchmarking.
 
