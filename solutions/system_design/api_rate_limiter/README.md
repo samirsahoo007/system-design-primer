@@ -554,6 +554,200 @@ class SlidingWindowCounterRateLimiter(object):
 ```
 References: https://blog.figma.com/an-alternative-approach-to-rate-limiting-f8a06cf7c94c
 
+## Another Example (Implementing a sliding log rate limiter with Redis and Golang)
+Ref: https://levelup.gitconnected.com/implementing-a-sliding-log-rate-limiter-with-redis-and-golang-79db8a297b9e
+
+I work on an application that communicates with multiple payment providers. Each provider has their own rate limit for us. We did not want to exhaust our rate limit with any of the payment providers, while also making the most of what limits we are allowed. We could afford to delay requests to the payment provider for a small amount of time, as bulk payments are processed offline as async jobs.
+During an average billing day, we run a large number of payments in a short span of time. Are we breaching our payment processors’ rate limits? Should we do something about that? I’ve heard about something called a rate limiter.
+What is a rate limiter? A rate limiter caps the number of requests a sender can issue in a specific time window. It then blocks requests once the limit is reached.
+Usually the rate limiter component is at the receiving system, but since we depend so heavily on third party processors, it also makes sense to accommodate the provider’s rate limit and control outbound requests so as to not get too many — or optimistically, even a single — 429.
+
+We started designing the rate limiter with these requirements in mind:
+
+* It should limit the number of requests in a given time period to a particular payment provider
+* Since our systems run on a cluster (as opposed to a single server), the rate limit should apply on the sum total of requests made, and not per application process.
+* Our late limiting logic should be atomic, and not fail even if multiple requests land on our systems concurrently
+
+### System architecture
+
+Before we dive deep into the rate limiter design, here is a bird’s eye view of our async payment processing system:
+
+![API Rate Limiter](rate_limiter_payment_system.png)
+
+Any message that lands on the payment consumer's queues gets processed by the payment consumers. A payment consumer fetches some data from the persistent database in order to make a request to the corresponding Payment Processor (hereafter referred to as as PG)
+
+There are several standard algorithms used in the industry for rate limiting, like the leaky bucket, fixed window and sliding log. Without getting into the details of the decision making, I chose the sliding log because it suits our needs and is simple to implement.
+
+#### The algorithm
+
+Let's say for a PG pg1, we're allowed to do 100 API calls each second. Every time we do an API call we add the timestamp (in Nanoseconds) of the API call to a list.
+
+```
+timestamps << Time.now
+```
+
+When we're about to do an API call in our consumer we need to check if we're allowed to do one:
+```
+calls_already_made = timestamps.count {|t| t > now - 1.second }
+```
+remaining API calls allowed:
+```
+allowed = max_calls_per_second - calls_already_made
+```
+Where max_calls_per_minute comes from payment gateway configuration.
+```
+if allowed > 0
+  // do magic
+else
+  // Oops! Rate limit breached, please try later!
+end
+```
+Simple, right?
+
+#### Storing the sliding log
+We need some kind of database to store a list of timestamps grouped per payment gateway. Let’s choose from something we already have. Could we use MySQL or MongoDB? Yes, we could but then we would need a system that periodically removes outdated timestamps since neither MySQL nor MongoDB allow us to set a TTL on a row. What about Redis? Redis is a key/value store that supports lists, sets, sorted sets and more. We can use a sorted set to hold our timestamps!
+Since one of our key requirements is that our window is populated atomically, we could use either redis transactions or write lua script and eval it.
+
+#### Deeper into redis
+Here is what a transaction would look like
+
+```
+// start the transaction
+MULTI
+//  remove all values to the left of the start of the window
+ZREMRANGEBYSCORE <pgName> 0 <windowStartTimestamp>
+// Count the values in the window
+ZCARD <pgName>
+// Add current timestamp
+ZADD <pgName> <currentTimestamp> <currentTimestamp>
+// expire the whole set after the window size
+EXPIRE <pgName> <windowSize>
+// execute the transaction
+EXEC
+```
+
+Note how we are performing the ZADD regardless of whether the limit is reached. This means that our sliding log will be flooded with failed requests and we will not be able to fulfil legitimate requests.
+
+Instead, we want to only add the current timestamp if and only if we are performing the request.
+
+Therefore, a transaction would not be a wise choice because we would need the output of 1 command (ZCARD) to determine whether or not to run a subsequent command (ZADD).
+
+Hence the need for 'eval'ing a lua script — it allows us to use the output of one command before executing the subsequent command, including allowing us to write an if condition.
+
+```
+// Set variables from arguments
+local pgname = KEYS[1]
+local now = tonumber(ARGV[1])
+local window = tonumber(ARGV[2])
+local limit = tonumber(ARGV[3])
+// Remove keys older than now - window
+local clearBefore = now - window
+redis.call('ZREMRANGEBYSCORE', pgname, 0, clearBefore)
+// Get already sent count
+local already_sent = redis.call('ZCARD', pgname)
+if already_sent < limit then // if allowed, then add to sorted set
+redis.call('ZADD', pgname, now, now)
+end
+// for cleanup, expire the whole set in <window> secs
+redis.call('EXPIRE', pgname, window)
+// return the remaining amount of requests. If >= 0 then request is // allowed
+return limit - already_sent
+```
+
+Since all our payment consumers are connected to the same redis cluster, the sliding log is shared. The return value of the lua script being > 0 means that that more API calls are allowed to be made.
+
+Here is how we can run this in redis-cli: (just eval all the commands, separated by semicolon)
+
+```
+eval "local pgname = KEYS[1]; local now = tonumber(ARGV[1]); local window = tonumber(ARGV[2]); local limit = tonumber(ARGV[3]); local clearBefore = now - window; redis.call('ZREMRANGEBYSCORE', pgname, 0, clearBefore); local amount = redis.call('ZCARD', pgname); if amount < limit then redis.call('ZADD', pgname, now, now) end; redis.call('EXPIRE', pgname, window); return limit - amount" 1 <pgname> <timestamp_secs> <window_size_secs> <rate>
+```
+
+This is how we embed it into our golang program:
+
+```
+rdb := redis.NewClient(...)
+now := time.Now().UnixNano()
+windowSize := int64(time.Second) // 1000000000 NanoSeconds
+rateLimit := 1000 // can get from config
+luaScript := `
+  local pgname = KEYS[1]
+  local now = tonumber(ARGV[1])
+  local window = tonumber(ARGV[2])
+  local limit = tonumber(ARGV[3])
+  local clearBefore = now - window
+  redis.call('ZREMRANGEBYSCORE', pgname, 0, clearBefore)
+  local amount = redis.call('ZCARD', pgname)
+  if amount < limit then
+  redis.call('ZADD', pgname, now, now)
+  end
+  redis.call('EXPIRE', pgname, window)
+  return limit - amount
+`
+vals, err := rdb.Eval(
+  luaScript,            // script
+  1,                    // number of keys
+  []string{pgName},     // KEYS
+  now,                  // ARGV[1]
+  windowSize,           // ARGV[2]
+  rateLimit,            // ARGV[3]
+).Result()
+```
+
+Ok, this works. But I don’t want to pollute my neat go file with inline lua script. Surely there is a way to maintain it as another .lua file and load it in from there
+
+```
+filename := "/some/path/ratelimiter.lua"
+content, err := ioutil.ReadFile(filename)
+if err != nil {
+  // handle error
+  log.Errorf(err, "Could not read file %s", filename)
+}
+luaScript := string(content)
+vals, err := rdb.Eval(
+  luaScript,            // script
+  1,                    // number of keys
+  []string{pgName},     // KEYS
+  now,                  // ARGV[1]
+  windowSize,           // ARGV[2]
+  rateLimit,            // ARGV[3]
+).Result()
+```
+
+...and we’re done!
+
+#### Bonus section: Benchmarking
+So how do we know what rate our limiter is actually capable of? We tried to do some benchmarking.
+
+The average operation of checking rate limit was taking 55.37 microseconds, after a total of 2,236,110 runs. 55.37 translates to over 18,000 Requests per second from my local system, using a local redis instance.
+
+I tried the same benchmarking from my local system to our test (remote) redis setup, and the results were alarming. Each operation was taking over 10 milliseconds.
+
+Therefore, it means that most of the time is being taken by the redis connection. We then benchmarked time to make simple redis commands — SET & GET, and that came to be 34.01 microseconds in my local setup, and again over 10 milliseconds in the local-remote setup.
+
+It is safe to say that compared to a simple redis SET operation, the rate limiter takes about ~21 microseconds longer. This is not going to be a bottleneck for our payment system in the near future. We just need to be sure that our server to redis connection is fast enough.
+
+#### Appendix
+**Alternate implementations**
+Pure go, memory based(https://github.com/RussellLuo/slidingwindow/blob/master/slidingwindow.go)
+Redis & lua, GCRA based(https://github.com/go-redis/redis_rate)
+
+**Resources**
+https://rafaeleyng.github.io/redis-pipelining-transactions-and-lua-scripts
+https://konghq.com/blog/how-to-design-a-scalable-rate-limiting-algorithm/
+https://rafaeleyng.github.io/redis-pipelining-transactions-and-lua-scripts
+https://redis.io/commands/zadd
+https://redis.io/commands/zcard
+https://redis.io/commands/zcount
+https://engagor.github.io/blog/2017/05/02/sliding-window-rate-limiter-redis/
+https://engagor.github.io/blog/2018/09/11/error-internal-rate-limit-reached/
+https://app.diagrams.net/#G1USTEf_sVbyi0ri0NjN_xUYmXraM7bLES
+https://medium.com/@saisandeepmopuri/system-design-rate-limiter-and-data-modelling-9304b0d18250
+https://www.figma.com/blog/an-alternative-approach-to-rate-limiting/
+https://gist.github.com/ptarjan/e38f45f2dfe601419ca3af937fff574d 
+https://stripe.com/blog/rate-limiters
+https://github.com/go-redis/redis
+https://github.com/abhirockzz/redis-geo.lua-golang/blob/master/redis-geo-lua-example.go
+
 ## Rate Limiting in Distributed Systems
 ### Synchronization Policies
 
@@ -736,122 +930,3 @@ void resync(long nowMicros) {
                                                                                                                                                                                                                246,1         Bot
 
 
-# Scaling your API with rate limiter
-
-Rate limiting is a common technique used to improve the security and durability of a web application.
-
-For example, a simple script can make thousands of web requests per second. Whether malicious, apathetic, or just a bug, your application and infrastructure may not be able to cope with the load. For more details, see Denial-of-service attack. Most cases can be mitigated by limiting the rate of requests from a single IP address.
-
-Most brute-force attacks are similarly mitigated by a rate limit.
-
-
-Availability and reliability are paramount for all web applications and APIs. If you’re providing an API, chances are you’ve already experienced sudden increases in traffic that affect the quality of your service, potentially even leading to a service outage for all your users.
-
-The first few times this happens, it’s reasonable to just add more capacity to your infrastructure to accommodate user growth. However, when you’re running a production API, not only do you have to make it robust with techniques like idempotency, you also need to build for scale and ensure that one bad actor can’t accidentally or deliberately affect its availability.
-
-Rate limiting can help make your API more reliable in the following scenarios:
-
-* One of your users is responsible for a spike in traffic, and you need to stay up for everyone else.
-* One of your users has a misbehaving script which is accidentally sending you a lot of requests. Or, even worse, one of your users is intentionally trying to overwhelm your servers.
-* A user is sending you a lot of lower-priority requests, and you want to make sure that it doesn’t affect your high-priority traffic. For example, users sending a high volume of requests for analytics data could affect critical transactions for other users.
-* Something in your system has gone wrong internally, and as a result you can’t serve all of your regular traffic and need to drop low-priority requests.
-
-At Stripe, we’ve found that carefully implementing a few rate limiting strategies helps keep the API available for everyone. In this post, we’ll explain in detail which rate limiting strategies we find the most useful, how we prioritize some API requests over others, and how we started using rate limiters safely without affecting our existing users’ workflows.
-
-## Rate limiters and load shedders
-
-A rate limiter is used to control the rate of traffic sent or received on the network. **When should you use a rate limiter?** If your users can afford to change the pace at which they hit your API endpoints without affecting the outcome of their requests, then a rate limiter is appropriate. If spacing out their requests is not an option (typically for real-time events), then you’ll need another strategy outside the scope of this post (most of the time you just need more infrastructure capacity).
-
-Our users can make a lot of requests: for example, batch processing payments causes sustained traffic on our API. We find that clients can always (barring some extremely rare cases) spread out their requests a bit more and not be affected by our rate limits.
-
-Rate limiters are amazing for day-to-day operations, but during incidents (for example, if a service is operating more slowly than usual), we sometimes need to drop low-priority requests to make sure that more critical requests get through. This is called load shedding. It happens infrequently, but it is an important part of keeping Stripe available.
-
-A load shedder makes its decisions based on the whole state of the system rather than the user who is making the request. Load shedders help you deal with emergencies, since they keep the core part of your business working while the rest is on fire.
-
-Using different kinds of rate limiters in concert
-
-Once you know rate limiters can improve the reliability of your API, you should decide which types are the most relevant.
-
-At Stripe, we operate 4 different types of limiters in production. The first one, the Request Rate Limiter, is by far the most important one. We recommend you start here if you want to improve the robustness of your API.
-
-## Request rate limiter
-
-This rate limiter restricts each user to N requests per second. Request rate limiters are the first tool most APIs can use to effectively manage a high volume of traffic.
-
-Our rate limits for requests is constantly triggered. It has rejected millions of requests this month alone, especially for test mode requests where a user inadvertently runs a script that’s gotten out of hand.
-
-Our API provides the same rate limiting behavior in both test and live modes. This makes for a good developer experience: scripts won't encounter side effects due to a particular rate limit when moving from development to production.
-
-After analyzing our traffic patterns, we added the ability to briefly burst above the cap for sudden spikes in usage during real-time events (e.g. a flash sale.)
-
-
-Request rate limiters restrict users to a maximum number of requests per second.
-
-Concurrent requests limiter
-
-Instead of “You can use our API 1000 times a second”, this rate limiter says “You can only have 20 API requests in progress at the same time”. Some endpoints are much more resource-intensive than others, and users often get frustrated waiting for the endpoint to return and then retry. These retries add more demand to the already overloaded resource, slowing things down even more. The concurrent rate limiter helps address this nicely.
-
-Our concurrent request limiter is triggered much less often (12,000 requests this month), and helps us keep control of our CPU-intensive API endpoints. Before we started using a concurrent requests limiter, we regularly dealt with resource contention on our most expensive endpoints caused by users making too many requests at one time. The concurrent request limiter totally solved this.
-
-It is completely reasonable to tune this limiter up so it rejects more often than the Request Rate Limiter. It asks your users to use a different programming model of “Fork off X jobs and have them process the queue” compared to “Hammer the API and back off when I get a HTTP 429”. Some APIs fit better into one of those two patterns so feel free to use which one is most suitable for the users of your API.
-
-
-Concurrent request limiters manage resource contention for CPU-intensive API endpoints.
-
-Fleet usage load shedder
-
-Using this type of load shedder ensures that a certain percentage of your fleet will always be available for your most important API requests.
-
-We divide up our traffic into two types: critical API methods (e.g. creating charges) and non-critical methods (e.g. listing charges.) We have a Redis cluster that counts how many requests we currently have of each type.
-
-We always reserve a fraction of our infrastructure for critical requests. If our reservation number is 20%, then any non-critical request over their 80% allocation would be rejected with status code 503.
-
-We triggered this load shedder for a very small fraction of requests this month. By itself, this isn’t a big deal—we definitely had the ability to handle those extra requests. But we’ve had other months where this has prevented outages.
-
-
-Fleet usage load shedders reserves fleet resources for critical requests.
-
-Worker utilization load shedder
-
-Most API services use a set of workers to independently respond to incoming requests in a parallel fashion. This load shedder is the final line of defense. If your workers start getting backed up with requests, then this will shed lower-priority traffic.
-
-This one gets triggered very rarely, only during major incidents.
-
-We divide our traffic into 4 categories:
-
-Critical methods
-POSTs
-GETs
-Test mode traffic
-We track the number of workers with available capacity at all times. If a box is too busy to handle its request volume, it will slowly start shedding less-critical requests, starting with test mode traffic. If shedding test mode traffic gets it back into a good state, great! We can start to slowly bring traffic back. Otherwise, it’ll escalate and start shedding even more traffic.
-
-It’s very important that shedding and bringing load happen slowly, or you can end up flapping (“I got rid of testmode traffic! Everything is fine! I brought it back! Everything is awful!”). We used a lot of trial and error to tune the rate at which we shed traffic, and settled on a rate where we shed a substantial amount of traffic within a few minutes.
-
-Only 100 requests were rejected this month from this rate limiter, but in the past it’s done a lot to help us recover more quickly when we have had load problems. This load shedder limits the impact of incidents that are already happening and provides damage control, while the first three are more preventative.
-
-
-Worker utilization load shedders reserve workers for critical requests.
-
-Building rate limiters in practice
-
-Now that we’ve outlined the four basic kinds of rate limiters we use and what they’re for, let’s talk about their implementation. What rate limiting algorithms are there? How do you actually implement them in practice?
-
-We use the token bucket algorithm to do rate limiting. This algorithm has a centralized bucket host where you take tokens on each request, and slowly drip more tokens into the bucket. If the bucket is empty, reject the request. In our case, every Stripe user has a bucket, and every time they make a request we remove a token from that bucket.
-
-We implement our rate limiters using Redis. You can either operate the Redis instance yourself, or, if you use Amazon Web Services, you can use a managed service like ElastiCache.
-
-Here are important things to consider when implementing rate limiters:
-
-Hook the rate limiters into your middleware stack safely. Make sure that if there were bugs in the rate limiting code (or if Redis were to go down), requests wouldn’t be affected. This means catching exceptions at all levels so that any coding or operational errors would fail open and the API would still stay functional.
-Show clear exceptions to your users. Figure out what kinds of exceptions to show your users. In practice, you should decide if you want HTTP 429 (Too Many Requests) or HTTP 503 (Service Unavailable) and what is the most accurate depending on the situation. The message you return should also be actionable.
-Build in safeguards so that you can turn off the limiters. Make sure you have kill switches to disable the rate limiters should they kick in erroneously. Having feature flags in place can really help should you need a human escape valve. Set up alerts and metrics to understand how often they are triggering.
-Dark launch each rate limiter to watch the traffic they would block. Evaluate if it is the correct decision to block that traffic and tune accordingly. You want to find the right thresholds that would keep your API up without affecting any of your users’ existing request patterns. This might involve working with some of them to change their code so that the new rate limit would work for them.
-Conclusion
-
-Rate limiting is one of the most powerful ways to prepare your API for scale. The different rate limiting strategies described in this post are not all necessary on day one, you can gradually introduce them once you realize the need for rate limiting.
-
-Our recommendation is to follow the following steps to introduce rate limiting to your infrastructure:
-
-Start by building a Request Rate Limiter. It is the most important one to prevent abuse, and it’s by far the one that we use the most frequently.
-Introduce the next three types of rate limiters over time to prevent different classes of problems. They can be built slowly as you scale.
-Follow good launch practices as you're adding new rate limiters to your infrastructure. Handle any errors safely, put them behind feature flags to turn them off easily at any time, and rely on very good observability and metrics to see how often they’re triggering.
