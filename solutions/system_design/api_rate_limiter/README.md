@@ -1,5 +1,4 @@
 
-<script src="https://gist.github.com/samirsahoo007/9601135f91bddadb023b858cfb27cf49.js"></script>
 # Design API rate limiter
 
 A rate limiter is a tool that monitors the number of requests per a window time a service agrees to allow. If the request count exceeds the number agreed by the service owner and the user (in a decided window time), the rate limiter blocks all the excess calls(say by throwing exceptions). The user can be a human or any other service(ex: in a micro service based architecture)
@@ -125,12 +124,10 @@ In a fixed window algorithm, a window size of n seconds (typically using human-f
 
 For example, a rate limiter for a service that allows only 10 requests per an hour will have the data model like below. Here, the buckets are the windows of one hour, with values storing the counts of the requests seen in that hour.
 
-```
 {
  "1AM-2AM": 7,
  "2AM-3AM": 8
 }
-```
 
 With the current model in the above example, if a new request is seen at 2:45AM, we get the count from the current bucket(2AM-3AM) which is 8 and verify that if processing one more request exceeds the permissible limit of 10, if that is the case, an exception is raised; if not(which is the case here), count of the bucket is incremented by unit(to 9) and the request is allowed to be processed. Only the counts of the current window are stored and older windows are deleted when a new window is created(i.e in the above case, if the hour changes, older bucket is deleted)
 
