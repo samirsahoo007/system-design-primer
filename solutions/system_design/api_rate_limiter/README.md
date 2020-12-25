@@ -143,7 +143,7 @@ Time Complexity: O(1) — Get and simple atomic increment operation
     - This in incorrect. Explanation: In the above case, if all the 7 requests in the 1AM-2AM bucket occurs from 1:30AM-2AM, and all the 8 requests from 2AM-3AM bucket occur from 2AM-2:30AM, then effectively we have 15(7 + 8) requests in the time range of 1:30AM-2:30AM, which is violating the condition of 10req/hr
 
 
-### Sliding window logs
+### Sliding log
 Ref: https://medium.com/@saisandeepmopuri/system-design-rate-limiter-and-data-modelling-9304b0d18250
 
 Sliding Log rate limiting involves tracking a time stamped log for each consumer’s request. These logs are usually stored in a hash set or table that is sorted by time. Logs with timestamps beyond a threshold are discarded. When a new request comes in, we calculate the sum of logs to determine the request rate. If the request would exceed the threshold rate, then it is held.
@@ -161,6 +161,8 @@ Time Complexity: O(Max requests seen in a window time)— Deleting a subset of t
 * Cons
 	- High memory footprint. All the request timestamps needs to be maintained for a window time, thus requires lots of memory to handle multiple users or large window times
 	- High time complexity for removing the older timestamps
+
+Sliding log algorithms don’t suffer from the stampeding issues of fixed windows. It can get quite expensive to store an unlimited amount of logs for each request. Calculating the number of requests across multiple servers can also be expensive. Sliding log algorithms aren’t the best for scalable APIs, preventing overload, or for preventing DoS attacks.
 
 #### Data Modelling
 **In memory Design (Single machine with multiple threads)**
@@ -770,6 +772,17 @@ https://gist.github.com/ptarjan/e38f45f2dfe601419ca3af937fff574d
 https://stripe.com/blog/rate-limiters
 https://github.com/go-redis/redis
 https://github.com/abhirockzz/redis-geo.lua-golang/blob/master/redis-geo-lua-example.go
+
+## Final Thoughts: The Effects of Rate Limiting
+Today, we’ve looked at some of the best ways to limit API requests, but what are the effects of rate limiting APIs?
+
+It’s never been more essential to make digital creations as efficient as possible. The research firm Dimensional Research conducted a study on mobile performance and user experience in 2015. They found that 80% of app users will only try and use an app that’s giving them problems three times before uninstalling it. 36% of app users report developing an unfavorable opinion towards a brand due to app performance issues.
+
+Unregulated API requests can also lead to slow page load times for websites. Not only could this leave an unfavorable opinion with your customers, but it can also tank your SEO rankings. With the prevalence of mobile Internet traffic, Google is factoring Page Speed more and more in their algorithm rankings.
+
+Ensuring digital content is as fast and efficient as possible is vital in today’s global economy. Mobile app speed and page load times can fluctuate wildly from country to country. You don’t want to alienate your international customers with bloated, slow-to-load apps and websites.
+
+As we’ve seen, rate limiting is an essential skill for developers of all traditions. If you’re using API requests in any regard, consider these rate limiting techniques to increase security, business impact, and efficiency across the board.
 
 ## Rate Limiting in Distributed Systems
 ### Synchronization Policies
