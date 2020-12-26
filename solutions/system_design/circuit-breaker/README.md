@@ -15,6 +15,10 @@ tags:
 Handle costly remote service calls in such a way that the failure of a single service/component 
 cannot bring the whole application down, and we can reconnect to the service as soon as possible.
 
+Netflix Hystrix or Circuit Breaker is a commonly used component in the Microservice architecture for handling the fault tolerance of a microservice. Following diagram quickly summarizes the circuit breaker pattern.
+
+![alt text](./etc/hystrix-circuit-broker.png)
+
 ## Explanation
 
 Real world example
