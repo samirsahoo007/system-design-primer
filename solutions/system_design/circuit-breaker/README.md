@@ -41,6 +41,246 @@ Wikipedia says
 > failures and encapsulates the logic of preventing a failure from constantly recurring, during 
 > maintenance, temporary external system failure or unexpected system difficulties.
 
+## Understand CircuitBreaker Design pattern with simple practical example
+
+### Problem Statement
+We have a serviceA which has two APIs
+* /data which depends on serviceB
+* /data2 does not depend on any external service
+
+![alt text](./etc/circuit_breaker1.png)
+
+### Without Circuit Breaker
+serviceB implementation below. The API is returning a 5 second delayed response to a request for the first 5 minutes. It’s running on port 8000.
+```
+server.route({
+  method: 'GET',
+  path: '/flakycall',
+  handler: async (request, h) => {
+    const currentTime = Date.now();
+    if ((currentTime - serverStartTime) < (1000 * 60 * 5)) {
+      const result = await new Promise((resolve) => {
+        setTimeout(() => {
+          resolve('This is a delayed repsonse');
+        }, 5000);
+      });
+      return h.response(result);
+    }
+    return h.response('This is immediate response');
+  },
+});
+```
+serviceB: Simulating delayed response
+
+
+serviceA implementation which will make http request to serviceB
+```
+server.route({
+  method: 'GET',
+  path: '/data2',
+  handler: (request, h) => {
+    try {
+      return h.response('data2');
+    } catch (err) {
+      throw Boom.clientTimeout(err);
+    }
+  },
+});
+
+server.route({
+  method: 'GET',
+  path: '/data',
+  handler: async (request, h) => {
+    try {
+      const response = await axios({
+        url: 'http://0.0.0.0:8000/flakycall',
+        timeout: 6000,
+        method: 'get',
+
+      });
+      return h.response(response.data);
+    } catch (err) {
+      throw Boom.clientTimeout(err);
+    }
+  },
+});
+```
+
+We will simulate the load using jMeter . Within few seconds, serviceA would be starved of resources. All the requests are waiting for http request to complete. First API would start throwing error and it will eventually crash as it would reach its max heap size.
+
+![alt text](./etc/jmeter.png)
+jMeter report for failing API
+
+
+```
+<--- Last few GCs --->
+[90303:0x102801600]    90966 ms: Mark-sweep 1411.7 (1463.4) -> 1411.3 (1447.4) MB, 1388.3 / 0.0 ms  (+ 0.0 ms in 0 steps since start of marking, biggest step 0.0 ms, walltime since start of marking 1388 ms) last resort GC in old space requested
+[90303:0x102801600]    92377 ms: Mark-sweep 1411.3 (1447.4) -> 1411.7 (1447.4) MB, 1410.9 / 0.0 ms  last resort GC in old space requested
+<--- JS stacktrace --->
+==== JS stack trace =========================================
+Security context: 0x2c271c925ee1 <JSObject>
+    1: clone [/Users/abhinavdhasmana/Documents/Personal/sourcecode/circuitBreaker/client/node_modules/hoek/lib/index.js:~20] [pc=0x10ea64e3ebcb](this=0x2c2775156bd9 <Object map = 0x2c276089fe19>,obj=0x2c277be1e761 <WritableState map = 0x2c27608b1329>,seen=0x2c2791b76f41 <Map map = 0x2c272c2848d9>)
+    2: clone [/Users/abhinavdhasmana//circuitBreaker/client/node_modul...
+```
+
+Now, instead of one, we have two services which are not working. This would escalate throughout the system and the whole infrastructure will come down.
+
+### Why we need a circuit breaker
+In case we have serviceB down, serviceA should still try to recover from this and try to do one of the followings:
+
+* **Custom fallback:** Try to get the same data from some other source. If not possible, use its own cache value.
+* **Fail fast:** If serviceA knows that serviceB is down, there is no point waiting for the timeout and consuming its own resources. It should return ASAP “knowing” that serviceB is down
+* **Don't crash:** As we saw in this case, serviceA should not have crashed.
+* **Heal automatic:** Periodically check if serviceB is working again.
+* **Other APIs should work:** All other APIs should continue to work.
+
+### What is circuit breaker design?
+The idea behind is simple:
+
+* Once serviceA “knows” that serviceB is down, there is no need to make request to serviceB. serviceA should return cached data or timeout error as soon as it can. This is the **OPEN** state of the circuit
+* Once serviceA “knows” that serviceB is up, we can **CLOSE** the circuit so that request can be made to serviceB again.
+* Periodically make fresh calls to serviceB to see if it is successfully returning the result. This state is **HALF-OPEN**.
+
+![alt text](./etc/circuit_breaker2.png)
+Circuit breaker in open position
+
+
+This is how our circuit state diagram would look like
+
+![alt text](./etc/StateDiagram.PNG "State Diagram")
+
+### Implementation with Circuit Breaker
+Let's implement a circuitBreaker which makes GET http calls. We need three parameters for our simple circuitBreaker
+
+* How many failures should happen before we OPEN the circuit.
+* What is the time period after which we should retry the failed service once the circuit is in OPEN state?
+* In our case, the timeout for the API request.
+
+With this information, we can create our circuitBreaker class.
+```
+class CircuitBreaker {
+  constructor(timeout, failureThreshold, retryTimePeriod) {
+    // We start in a closed state hoping that everything is fine
+    this.state = 'CLOSED';
+    // Number of failures we receive from the depended service before we change the state to 'OPEN'
+    this.failureThreshold = failureThreshold;
+    // Timeout for the API request.
+    this.timeout = timeout;
+    // Time period after which a fresh request be made to the dependent
+    // service to check if service is up.
+    this.retryTimePeriod = retryTimePeriod;
+    this.lastFailureTime = null;
+    this.failureCount = 0;
+  }
+}
+```
+
+Next, let's implement a function which would call the API to serviceB.
+```
+async call(urlToCall) {
+    // Determine the current state of the circuit.
+    this.setState();
+    switch (this.state) {
+      case 'OPEN':
+      // return  cached response if no the circuit is in OPEN state
+        return { data: 'this is stale response' };
+      // Make the API request if the circuit is not OPEN
+      case 'HALF-OPEN':
+      case 'CLOSED':
+        try {
+          const response = await axios({
+            url: urlToCall,
+            timeout: this.timeout,
+            method: 'get',
+          });
+          // Yay!! the API responded fine. Lets reset everything.
+          this.reset();
+          return response;
+        } catch (err) {
+          // Uh-oh!! the call still failed. Lets update that in our records.
+          this.recordFailure();
+          throw new Error(err);
+        }
+      default:
+        console.log('This state should never be reached');
+        return 'unexpected state in the state machine';
+    }
+  }
+```
+Let’s implement all the associated functions.
+```
+// reset all the parameters to the initial state when circuit is initialized
+  reset() {
+    this.failureCount = 0;
+    this.lastFailureTime = null;
+    this.state = 'CLOSED';
+  }
+
+  // Set the current state of our circuit breaker.
+  setState() {
+    if (this.failureCount > this.failureThreshold) {
+      if ((Date.now() - this.lastFailureTime) > this.retryTimePeriod) {
+        this.state = 'HALF-OPEN';
+      } else {
+        this.state = 'OPEN';
+      }
+    } else {
+      this.state = 'CLOSED';
+    }
+  }
+
+  recordFailure() {
+    this.failureCount += 1;
+    this.lastFailureTime = Date.now();
+  }
+```
+
+Next step is to modify our serviceA . We would wrap our call inside the circuitBreaker we just created.
+
+```
+let numberOfRequest = 0;
+
+server.route({
+  method: 'GET',
+  path: '/data2',
+  handler: (request, h) => {
+    try {
+      return h.response('data2');
+    } catch (err) {
+      throw Boom.clientTimeout(err);
+    }
+  },
+});
+
+const circuitBreaker = new CircuitBreaker(3000, 5, 2000);
+
+
+server.route({
+  method: 'GET',
+  path: '/data',
+  handler: async (request, h) => {
+    numberOfRequest += 1;
+    try {
+      console.log('numberOfRequest received on client:', numberOfRequest);
+      const response = await circuitBreaker.call('http://0.0.0.0:8000/flakycall');
+      // console.log('response is ', response.data);
+      return h.response(response.data);
+    } catch (err) {
+      throw Boom.clientTimeout(err);
+    }
+  },
+});
+```
+Important changes to note in this code with respect to the previous code:
+
+* We are initializing the circuitBreaker const circuitBreaker = new CircuitBreaker(3000, 5, 2000);
+* We are calling the API via our circuit breaker const response = await circuitBreaker.call(‘http://0.0.0.0:8000/flakycall');
+
+That’s it! Now let’s run our jMeter test again and we can see that our serviceA is not crashing and our error rate has gone down significantly.
+
+![alt text](./etc/jmeter2.png)
+
+
 ## Programmatic Example
 
 So, how does this all come together? With the above example in mind we will imitate the 
