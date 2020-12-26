@@ -141,13 +141,12 @@ The idea behind is simple:
 * Once serviceA “knows” that serviceB is up, we can **CLOSE** the circuit so that request can be made to serviceB again.
 * Periodically make fresh calls to serviceB to see if it is successfully returning the result. This state is **HALF-OPEN**.
 
-![alt text](./etc/circuit_breaker2.png, "Circuit breaker in open position")
+![alt text](./etc/circuit_breaker2.png "Circuit breaker in open position")
 
 
 This is how our circuit state diagram would look like
 
 ![alt text](./etc/StateDiagram.PNG "State Diagram")
-![alt text](./etc/ServiceDiagram.PNG "Service Diagram")
 
 ### Implementation with Circuit Breaker
 Let's implement a circuitBreaker which makes GET http calls. We need three parameters for our simple circuitBreaker
