@@ -280,7 +280,7 @@ That’s it! Now let’s run our jMeter test again and we can see that our servi
 ![alt text](./etc/jmeter2.png)
 
 
-## Programmatic Example
+############################################################################# Programmatic Example #############################################################################
 
 So, how does this all come together? With the above example in mind we will imitate the 
 functionality in a simple example. A monitoring service mimics the web app and makes both local and 
