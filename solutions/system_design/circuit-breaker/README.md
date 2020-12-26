@@ -279,6 +279,14 @@ That’s it! Now let’s run our jMeter test again and we can see that our servi
 
 ![alt text](./etc/jmeter2.png)
 
+### Netflix Hystrix
+Hystrix was an in-house product of Netflix API team that worked on resiliency engineering. It has following capabilities.
+
+* Service failure protection and handle it such that the failure will not propagate in the system.
+* Fail fast and rapid recovery.
+* Real-time monitoring and alerting.
+* Will tolerate the failures till a certain threshold after that the fallback methods will be invoked.
+
 
 ## Another Programmatic Example
 
