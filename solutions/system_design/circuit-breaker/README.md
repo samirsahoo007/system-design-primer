@@ -146,7 +146,7 @@ The idea behind is simple:
 
 This is how our circuit state diagram would look like
 
-![alt text](./etc/StateDiagram.PNG "State Diagram")
+![alt text](./etc/StateDiagram.jpg "State Diagram")
 
 ### Implementation with Circuit Breaker
 Let's implement a circuitBreaker which makes GET http calls. We need three parameters for our simple circuitBreaker
@@ -531,7 +531,7 @@ public class DefaultCircuitBreaker implements CircuitBreaker {
 How does the above pattern prevent failures? Let's understand via this finite state machine 
 implemented by it.
 
-![alt text](./etc/StateDiagram.PNG "State Diagram")
+![alt text](./etc/StateDiagram.jpg "State Diagram")
 
 - We initialize the Circuit Breaker object with certain parameters: `timeout`, `failureThreshold` and `retryTimePeriod` which help determine how resilient the API is.
 - Initially, we are in the `closed` state and nos remote calls to the API have occurred.
