@@ -147,6 +147,7 @@ The idea behind is simple:
 This is how our circuit state diagram would look like
 
 ![alt text](./etc/StateDiagram.PNG "State Diagram")
+![alt text](./etc/ServiceDiagram.PNG "Service Diagram")
 
 ### Implementation with Circuit Breaker
 Let's implement a circuitBreaker which makes GET http calls. We need three parameters for our simple circuitBreaker
