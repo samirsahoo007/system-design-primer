@@ -754,9 +754,13 @@ OR
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/google_docs.jpg)
 
-[Part 1| Operational transformation | differentail synchronisation](https://www.youtube.com/watch?v=2auwirNBvGg)
+[README](https://github.com/samirsahoo007/system-design-primer/tree/master/solutions/system_design/google_docs)
 
-[Part 2| System components explanation micro services arcitecture](https://www.youtube.com/watch?v=U2lVmSlDJhg)
+
+[Youtube | Part 1| Operational transformation | differentail synchronisation](https://www.youtube.com/watch?v=2auwirNBvGg)
+
+[Youtube | Part 2| System components explanation micro services arcitecture](https://www.youtube.com/watch?v=U2lVmSlDJhg)
+
 
 ## Object-oriented design interview questions with solutions
 
