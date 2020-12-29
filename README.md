@@ -109,6 +109,7 @@ Check out the sister repo [**Interactive Coding Challenges**](https://github.com
     * [Layer 4 load balancing](#layer-4-load-balancing)
     * [Layer 7 load balancing](#layer-7-load-balancing)
     * [Horizontal scaling](#horizontal-scaling)
+    * [Elastic Load Balancer](#elastic-load-balancer)
 * [Reverse proxy (web server)](#reverse-proxy-web-server)
     * [Load balancer vs reverse proxy](#load-balancer-vs-reverse-proxy)
 * [Application layer](#application-layer)
@@ -942,6 +943,41 @@ This topic is further discussed in the [Database](#database) section:
 
 * [Master-slave replication](#master-slave-replication)
 * [Master-master replication](#master-master-replication)
+
+### Elastic Load Balancer in AWS
+
+In Simplest terms, cloud computing means storing and accessing the data and programs on remote servers that are hosted on the internet instead of the computer’s hard drive or local server. It is also referred to as Internet-based computing.
+
+#### Features of cloud 
+
+* No up-front investment
+* Lowering operating cost
+* Highly scalable
+* Easy access
+* Reducing business risks and maintenance expenses
+* Amazon Web Services
+
+Amazon Web Services is a subsidiary of Amazon.com that provides on-demand cloud computing platforms to individuals, companies, and governments, on a paid subscription basis.
+
+**Elastic load balancer**
+Elastic load balancer is a service provided by Amazon in which the incoming traffic is efficiently distributed across a group of backend servers in a manner that increases speed and performance.
+
+Let’s suppose the GeeksforGeeks  website is deployed on an EC2 instance which gets limited traffic in common days and hence only limited servers are allocated to the application.
+
+While during contests this website may go down due to a large amount of incoming traffic. A solution is needed to handle both the conditions efficiently.
+
+The solution to this problem is Elastic Load Balancer !! It automatically scales up your resource and balances the load which is sufficient enough to handle the large incoming traffic.
+
+#### Types of load balancer
+
+**Classic Load Balancer**
+It is the traditional form of load balancer which was used initially. It distributes the traffic among the instances and is not intelligent enough to support host-based routing or path-based routing. It ends up reducing efficiency and performance in certain situations. It is operated on connection level as well as request level. 
+
+**Application Load Balancer**
+This type of Load Balancer is used when decisions are to be made related to  HTTP and HTTPS traffic routing. It supports path-based routing and host-based routing. This load balancer works at the Application layer of the OSI Model. 
+
+**Network Load Balancer**
+This type of load balancer works at the transport layer of the OSI model. It’s capable of handling millions of requests per second.  It is mainly used for load balancing TCP traffic.
 
 ## Domain name system
 
