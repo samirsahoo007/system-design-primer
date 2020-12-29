@@ -1160,6 +1160,40 @@ At the cost of flexibility, layer 4 load balancing requires less time and comput
 
 Load balancers can also help with horizontal scaling, improving performance and availability.  Scaling out using commodity machines is more cost efficient and results in higher availability than scaling up a single server on more expensive hardware, called **Vertical Scaling**.  It is also easier to hire for talent working on commodity hardware than it is for specialized enterprise systems.
 
+**Vertical Scaling** is defined as the process of increasing the capacity of a single machine by adding more resources such as memory, storage, etc. to increase the throughput of the system. No new resource is added, rather the capability of the existing resources is made more efficient. This is called Vertical scaling. Vertical Scaling is also called the *Scale-up* approach. 
+Example: MySQL
+
+**A Real-time Example of Vertical Scaling**
+When traffic increases, the server degrades in performance. The first possible solution that everyone has is to increase the power of their system. For instance, if earlier they used 8 GB RAM and 128 GB hard drive now with increasing traffic, the power of the system is affected. So a possible solution is to increase the existing RAM or hard drive storage, for e.g. the resources could be increased to 16 GB of RAM and 500 GB of a hard drive but this is not an ultimate solution as after a point of time, these capacities will reach a saturation point. 
+
+**Horizontal Scaling** is defined as the process of adding more instances of the same type to the existing pool of resources and not increasing the capacity of existing resources like in vertical scaling. This kind of scaling also helps in decreasing the load on the server. Horizontal Scaling is also called the *Scale-out* approach. 
+
+In this process, the number of servers is increased and not the individual capacity of the server. This is done with the help of a Load Balancer which basically routes the user requests to different servers according to the availability of the server. Thereby, increasing the overall performance of the system. In this way, the entire process is distributed among all servers rather than just depending on a single server. 
+Example: NoSQL, Cassandra, and MongoDB 
+
+**A Real-time Example of Horizontal Scaling**
+For example, if there exists a system of the capacity of 8 GB of RAM and in future, there is a requirement of 16 GB of RAM then, rather than the increasing capacity of 8 GB RAM to 16 GB of RAM, similar instances of 8 GB RAM could be used to meet the requirements.
+
+**Advantages of Vertical Scaling:**
+* It is easy to implement
+* Reduced software costs as no new resources are added
+* Fewer efforts required to maintain this single system
+
+**Advantages of Horizontal Scaling:**
+* Fault Tolerance means that there is no single point of failure in this kind of scale because there are 5 servers here instead of 1 powerful server. So if anyone of the servers fails then there will be other servers for backup. Whereas, in Vertical Scaling there is single point failure i.e: if a server fails then the whole service is stopped.
+* Low Latency: Latency refers to how late or delayed our request is being processed.
+* Built-in backup
+
+**Disadvantages of Vertical Scaling:**
+* Single-point failure
+* Since when the system (server) fails, the downtime is high because we only have a single server
+* High risk of hardware failures
+
+**Disadvantages of Horizontal Scaling:**
+* Not easy to implement as there are a number of components in this kind of scale
+* Cost is high
+* Networking components like, router, load balancer are required
+
 #### Disadvantage(s): horizontal scaling
 
 * Scaling horizontally introduces complexity and involves cloning servers
