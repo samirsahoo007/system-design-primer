@@ -103,7 +103,8 @@ Seems like WTF? Don’t worry, we would actually mostly need to decide what our 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/bloom_filter_hash10.png)
 
 Another important point I also need to mention here. As the sole purpose of using bloom filter is to search faster, we can’t use slow hash functions, right? Cryptographic hash functions such as Sha-1, MD5 won’t be good choice for bloom filters as they are a bit slow. So, the better choices from the faster hash function implementations would be murmur, the fnv series of hashes, Jenkins hashes and HashMix.
-Applications
+
+## Applications
 
 Bloom filter is all about testing Membership in a set. The classic example of using bloom filters is to reduce expensive disk (or network) lookups for non-existent keys. As we can see that bloom filters can search for a key in O(k) constant time, where k is the number of hash functions, it will be very fast to test non-existence of a key.
 
@@ -118,6 +119,131 @@ For some more concrete examples:
     You can also make a Spell-checker by using bloom filter to track the dictionary words.
     Want to know how Medium used bloom filter to decide if a user already read post? Read this mind-blowing, freaking awesome article about it.
 
+
+### Applications of Bloom filters 
+
+* Medium uses bloom filters for recommending post to users by filtering post which have been seen by user.
+
+* Quora implemented a shared bloom filter in the feed backend to filter out stories that people have seen before.
+    
+* The Google Chrome web browser used to use a Bloom filter to identify malicious URLs
+
+* Google BigTable, Apache HBase and Apache Cassandra, and Postgresql use Bloom filters to reduce the disk lookups for non-existent rows or columns
+
+## Basic Python Implementation
+```
+# 3rd party
+import mmh3
+
+class BloomFilter(set):
+
+    def __init__(self, size, hash_count):
+        super(BloomFilter, self).__init__()
+        self.bit_array = bitarray(size)
+        self.bit_array.setall(0)
+        self.size = size
+        self.hash_count = hash_count
+
+    def __len__(self):
+        return self.size
+
+    def __iter__(self):
+        return iter(self.bit_array)
+
+    def add(self, item):
+        for ii in range(self.hash_count):
+            index = mmh3.hash(item, ii) % self.size
+            self.bit_array[index] = 1
+
+        return self
+
+    def __contains__(self, item):
+        out = True
+        for ii in range(self.hash_count):
+            index = mmh3.hash(item, ii) % self.size
+            if self.bit_array[index] == 0:
+                out = False
+
+        return out
+
+def main():
+    bloom = BloomFilter(100, 10)
+    animals = ['dog', 'cat', 'giraffe', 'fly', 'mosquito', 'horse', 'eagle',
+               'bird', 'bison', 'boar', 'butterfly', 'ant', 'anaconda', 'bear',
+               'chicken', 'dolphin', 'donkey', 'crow', 'crocodile']
+    # First insertion of animals into the bloom filter
+    for animal in animals:
+        bloom.add(animal)
+
+
+    # Membership existence for already inserted animals
+    # There should not be any false negatives
+    for animal in animals:
+        if animal in bloom:
+            print('{} is in bloom filter as expected'.format(animal))
+        else:
+            print('Something is terribly went wrong for {}'.format(animal))
+            print('FALSE NEGATIVE!')
+
+    # Membership existence for not inserted animals
+    # There could be false positives
+    other_animals = ['badger', 'cow', 'pig', 'sheep', 'bee', 'wolf', 'fox',
+                     'whale', 'shark', 'fish', 'turkey', 'duck', 'dove',
+                     'deer', 'elephant', 'frog', 'falcon', 'goat', 'gorilla',
+                     'hawk' ]
+    for other_animal in other_animals:
+        if other_animal in bloom:
+            print('{} is not in the bloom, but a false positive'.format(other_animal))
+        else:
+            print('{} is not in the bloom filter as expected'.format(other_animal))
+
+if __name__ == '__main__':
+    main()
+```
+
+### Output is in the following:
+```
+dog is in bloom filter as expected
+cat is in bloom filter as expected
+giraffe is in bloom filter as expected
+fly is in bloom filter as expected
+mosquito is in bloom filter as expected
+horse is in bloom filter as expected
+eagle is in bloom filter as expected
+bird is in bloom filter as expected
+bison is in bloom filter as expected
+boar is in bloom filter as expected
+butterfly is in bloom filter as expected
+ant is in bloom filter as expected
+anaconda is in bloom filter as expected
+bear is in bloom filter as expected
+chicken is in bloom filter as expected
+dolphin is in bloom filter as expected
+donkey is in bloom filter as expected
+crow is in bloom filter as expected
+crocodile is in bloom filter as expected
+
+badger is not in the bloom filter as expected
+cow is not in the bloom filter as expected
+pig is not in the bloom filter as expected
+sheep is not in the bloom, but a false positive
+bee is not in the bloom filter as expected
+wolf is not in the bloom filter as expected
+fox is not in the bloom filter as expected
+whale is not in the bloom filter as expected
+shark is not in the bloom, but a false positive
+fish is not in the bloom, but a false positive
+turkey is not in the bloom filter as expected
+duck is not in the bloom filter as expected
+dove is not in the bloom filter as expected
+deer is not in the bloom filter as expected
+elephant is not in the bloom, but a false positive
+frog is not in the bloom filter as expected
+falcon is not in the bloom filter as expected
+goat is not in the bloom filter as expected
+gorilla is not in the bloom filter as expected
+hawk is not in the bloom filter as expected
+```
 
 Ref: https://hackernoon.com/probabilistic-data-structures-bloom-filter-5374112a7832
 
