@@ -1084,7 +1084,7 @@ Sites with heavy traffic work well with pull CDNs, as traffic is spread out more
 
 Typically a load balancer sits between the client and the server accepting incoming network and application traffic and distributing the traffic across multiple backend servers using various algorithms. By balancing application requests across multiple servers, a load balancer reduces individual server load and prevents any one application server from becoming a single point of failure, thus improving overall application availability and responsiveness.
 
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/lb.png)
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/lb2.png)
 
 
 <p align="center">
@@ -1095,9 +1095,12 @@ Typically a load balancer sits between the client and the server accepting incom
 
 To utilize full scalability and redundancy, we can try to balance the load at each layer of the system. We can add LBs at three places:
 
-* Between the user and the web server
+* Between the client application/user and the web server
+* Between the server and the application/job servers
 * Between web servers and an internal platform layer, like application servers or cache servers
 * Between internal platform layer and database.
+
+
 
 Load balancers distribute incoming client requests to computing resources such as application servers and databases.  In each case, the load balancer returns the response from the computing resource to the appropriate client.  Load balancers are effective at:
 * Preventing requests from going to unhealthy servers
