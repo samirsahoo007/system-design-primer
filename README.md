@@ -694,17 +694,21 @@ OR
 
 ## Dropbox system design | Google drive system design | System design file share and upload
 
-[View Solution](https://medium.com/@narengowda/system-design-dropbox-or-google-drive-8fd5da0ce55b)
-
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/dropbox_by_me.jpg)
 
 OR
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/dropbox.jpg)
 
+[README Here](https://github.com/samirsahoo007/system-design-primer/tree/master/solutions/system_design/dropbox)
+
 [Youtube](https://www.youtube.com/watch?v=U0xTu6E2CT8)
 
 [How We've Scaled Dropbox: from Dropbox guys](https://www.youtube.com/watch?v=PE4gwstWhmc)
+
+References: 
+https://medium.com/@narengowda/system-design-dropbox-or-google-drive-8fd5da0ce55b
+https://www.geeksforgeeks.org/design-dropbox-a-system-design-interview-question/
 
 ### Design a system that scales to millions of users on AWS
 
