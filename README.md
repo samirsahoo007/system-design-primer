@@ -979,6 +979,8 @@ This type of Load Balancer is used when decisions are to be made related to  HTT
 **Network Load Balancer**
 This type of load balancer works at the transport layer of the OSI model. It’s capable of handling millions of requests per second.  It is mainly used for load balancing TCP traffic.
 
+Steps to configure load balancer: https://www.geeksforgeeks.org/elastic-load-balancer-in-aws/?ref=rp
+
 ## Domain name system
 
 <p align="center">
