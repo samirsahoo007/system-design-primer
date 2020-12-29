@@ -1158,6 +1158,10 @@ At the cost of flexibility, layer 4 load balancing requires less time and comput
 
 ### Horizontal scaling
 
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/vertical_scaling.jpeg)
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/horizontal_scaling.jpeg)
+
 Load balancers can also help with horizontal scaling, improving performance and availability.  Scaling out using commodity machines is more cost efficient and results in higher availability than scaling up a single server on more expensive hardware, called **Vertical Scaling**.  It is also easier to hire for talent working on commodity hardware than it is for specialized enterprise systems.
 
 **Vertical Scaling** is defined as the process of increasing the capacity of a single machine by adding more resources such as memory, storage, etc. to increase the throughput of the system. No new resource is added, rather the capability of the existing resources is made more efficient. This is called Vertical scaling. Vertical Scaling is also called the *Scale-up* approach. 
