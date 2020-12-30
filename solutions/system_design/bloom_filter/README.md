@@ -294,4 +294,25 @@ Light nodes compute and transmit a Bloom filter of the list of transactions they
 
 Read more here: https://freecontent.manning.com/all-about-bloom-filters/
 Ref: https://hackernoon.com/probabilistic-data-structures-bloom-filter-5374112a7832
+https://www.kdnuggets.com/2016/08/gentle-introduction-bloom-filter.html
 
+```
+>>> import mmh3
+>>> mmh3.hash('foo') # 32 bit signed int
+-156908512
+>>> mmh3.hash('foo', 42) # uses 42 for its seed
+-1322301282
+>>> mmh3.hash('foo', signed=False) # 32 bit unsigned int (since Version 2.5)
+4138058784
+
+>>> mmh3.hash64('foo') # two 64 bit signed ints (by using the 128-bit algorithm as its backend)
+(-2129773440516405919, 9128664383759220103)
+>>> mmh3.hash64('foo',signed =False) #  two 64 bit unsigned ints
+(16316970633193145697, 9128664383759220103)
+>>> mmh3.hash128('foo', 42) # 128 bit unsigned int
+215966891540331383248189432718888555506
+>>> mmh3.hash128('foo', 42, signed = True) # 128 bit signed int
+-124315475380607080215185174712879655950
+>>> mmh3.hash_bytes('foo') # 128 bit value as bytes
+'aE\xf5\x01W\x86q\xe2\x87}\xba+\xe4\x87\xaf~'
+```
