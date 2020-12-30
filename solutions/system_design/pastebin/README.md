@@ -1,3 +1,183 @@
+# URL shortener System design(bit.ly or tinyurl.com)
+
+URL shortening service, a web service that provides short aliases for redirection of long URLs.
+```
+Example: Let the original URL be: 
+Long URL: https://nlogn.in/horizontal-scaling-and-vertical-scaling/
+Short URL is: https://tinyurl.com/tepyk8t
+
+Whenever you will click the second short URL, you will automatically be redirected to the page referred by the long URL. 
+```
+
+## Design Goals 
+The URL shortening service should have the following features:
+
+### Mandatory Features
+* Given a long URL it should be able to generate Unique Short URL.
+* Given a short URL it should redirect to the original URL.
+* The URL should expire after a timespan.
+
+### Optional Features
+* The service should be REST API accessible.
+* It should provide analytics features i.e, how many times the URL is visited.
+* A user should be able to pick a custom URL.
+
+## URL length :
+Shortened URL can be combinations of numbers(0–9) and characters(a-Z) of length 7.
+
+## Data capacity modeling :
+The important thing to note is that the number of reading requests will be 1000 times more than the number of write requests.
+
+Suppose, we are going to receive 1B(1 Billion) new URL's shorting requests per month, with a 100:1 read/write ratio. So, the total number of redirections: 100  * 1B = 100B redirections
+
+If we are going to store, each URL(long and corresponding short URL) for almost 10 years, then the numbers of URLs we are going to store are: 1B * 120 = 120B URLs
+
+Now if on average every URL is going to be of 200 bytes, then total storage required: 200B * 120byte = 24TB storages
+
+1. Considering average long URL size of 2KB ie for 2048 characters
+2. short URL size of about 17 Bytes for 17 character
+3. created_at — 10 bytes
+4. expiration_length_in_minutes — 10 bytes
+5. which gives a total of 2.037 K Bytes
+
+So have 30 M active users so total size = 30000000 * 2.031 = 60780000 KB = 60.78 GB per month
+In a Year 0.7284 TB and in 5 year 3.642 TB of data
+Think about the number of reads and writes happens to the system!!!
+
+## Algorithm REST Endpoints
+Let's starts by making two functions accessible through REST API:
+
+1. create_shortURL( long_url, api_key, custom_url, expiry_date)
+*	long_url: A long URL that needs to be shortened.
+*	api_key: A unique API key provided to each user, to protect from the spammers, access and resource control for user etc.
+*	custom_url(optional): The custom short link URL, user want to use.
+*	expiry_date(optional): The date after which the short URL becomes invalid.
+*	Return Value: The short Url generated, or error code in case of the inappropriate parameter.
+2. redirect_shortURL( short_url)
+*	short_url: The short URL generated from the above function.
+*	Return Value: The original long URL, or invalid URL error code.
+
+## Shortening logic :
+Given a long URL, how can we find hash function F that maps URL to a short alias
+
+## How to convert?
+Let's use base62encoder? Base62 encoder contains A-Z , a-z, 0–9 total( 26 + 26 + 10 = 62) basically converting a base10 number to hash, whenever we get a long URL -> get a random number and convert to base62 and use the hash as short URL id.
+or You can use the first few characters of MD5(long_url) hash output.
+
+## Database?
+We can use RDBMS which provides ACID properties but the problem is scaling (yes you can shard but that increases the complexity of design) 
+Since we anticipate storing billions of rows, and we don’t need to use relationships between objects – a NoSQL store like DynamoDB, Cassandra or Riak is a better choice. A NoSQL choice would also be easier to scale. 
+
+Let's try NoSQL
+
+NOSQL: As you know the data is eventually consistent, but it is easy to scale and it is a highly available database
+
+### Database Design & Choice
+Let's see the data we need to store:
+
+**Data Related to user**
+*User ID:* A unique user id or API key to make user globally distinguishable.
+*Name:* The name of the user.
+*Email:* The email id of the user
+*Password:* Password of the user to facilitate login feature.
+*Creation Date:* The date on which the user was registered.
+
+**Data Related to ShortLink**
+*Short Url:* 7 character long unique short URL.
+*Original Url:* The original long URL.
+*UserId:* The unique user id or API key of the user who created the short URL.
+*Expiration Date:* The date after which this short URL should become invalid.
+
+#### Data Storage Observation
+1. We will be storing Billions of links.
+2. The short link redirection should be fast.
+3. Our service is going to be read heavily.
+4.  The only relation that is going to exist is which user created which URL and that too is going to accessed very less.
+
+We have two different choices of databases: 1) Relational Databases(MySQL) 2) NoSQL Databases( Cassandra).
+
+In general, **Relational Databases are good if we have lots of complex queires involving joins, but they are slow. NoSQL databases are pathetic at handling the relationship queries but they are faster.**
+
+Now, we don't really need lots of relationship among data, but we do need the fast read and write speed. Hence we will choose NoSQL Database. The key for each row can be the shorturl, because it is going to be globally unique.
+
+##### Database Sharding
+To scale out our database, we need to partition it into several machines or nodes, so that it can store information about billions of URLs. Hence now we can store more data in memory because of more machines or nodes. For database sharding we will use hash based partition technique. 
+
+In this technique, we will find the hash of the shorturl we are going to store, and determine the machine/shard in which we are going to store this particular URL. The hash function will randomly distribute the URLs into different partation or shard. We can decide the number of shards we are going to make and then we can choose appropriate hash function that random number representing the partation/shard number.( Ex if we have chosen 512 shards, then hash function will generate a number between [1-512] or [0-511] ).
+
+### Speeding Up the Read Operation
+We know that our database is going to be read heavily. Till now we have find the way to speed up the writing process, but the reads are still slow. So we have to find some way to speed up the reading process.
+
+Caching is the solution. We can cache the URLs that are going to be accessed frequently. For example, a url that appears on the trending page of any social networking website. Hence many people are going to visit the url. We can use the caching servies like **memcached**.
+
+Things we need to consider after adding the caching layer:
+
+When the cache is full, we need to replace the URLs in cache with the treanding ones. For this we will use **LRU**(Least Recently Used) policy. The URL in the cace which have been refered the least number of times will be removed.
+Synchronizing the cache with the original URL. If the user updates or deletes the original link, the corresponding changes has to be reflected in the cache too.
+We can shared the cache too. This will help us store more data in memory because of the more machines. For deciding which thing go to which shard can be done using "Hashing" or "Consistant Hashing".
+
+Now this is now we have speed up our read and write request, but still our system is prone to network bandwidth bottleneck and single point of failure.
+
+
+### Techniques to store Tiny URL?
+**Technique 1**
+
+*	Checks whether generated TinyURL is present in DB (doing get(tiny) on DB).
+*	If tinyURL isn't present in DB then put longURL and tinyURL in DB (put(tinyURL, longURL)).
+*	Problem: This technique creates race condition because it’s possible that two threads may be simultaneously adding same data to DB and may end up corrupting data.
+*	If it was simply one server service then it might work, but we are talking about scale!!
+
+So what's the solution? Adding TinyURL and long URL in DB, if there is no key whose value is equal to TinyURL i.e.
+
+*	putIfAbsent(TinyURL, long URL) or INSERT-IF-NOT-EXIST and it Requires support from DB support
+*	In this case, we might can’t use NoSQL as putIfAbsent feature support might not be available as the data is eventual consistency, even DB cant perform this operation
+
+**Technique 2 (MD5 Approach)**
+
+* 	Calculate MD5 of long URL
+*	Take the first 7 chars and use that to generate TinyURL
+*	Now check the DB (using technique 2 discussed above) to verify that TinyURL is not used already
+*	Advantages of MD5 approach: For two users using same long URL,
+*	In a random generation, we generate two random TinyURL, so 2 rows in DBIn MD5 technique, MD5 of long URL will be same for both the users and hence same first 43 bits of URL will be same and hence deduping will save some space as we will only create one row, saving space
+
+Again we cant use NOSQL as there is no support for putIfAbsent
+
+**Technique 3 — Counters**
+
+*Single server approach*
+
+*	A single server is responsible for maintaining a counter e.g. database,
+*	When the worker host receives request they talk to counter, which returns a unique number and increments the counter.
+*	Every worker host gets a unique number which is used to generate TinyURL.
+
+Challenges are the Single point of failure and Single point of bottleneck
+
+Before learning about the next approach lets learn something about Zookeeper
+
+**ZooKeeper** is a distributed coordination service to manage a large set of hosts. Co-ordinating and managing a service in a distributed environment is a complicated process. ZooKeeper solves this issue with its simple architecture and API. ZooKeeper allows developers to focus on core application logic without worrying about the distributed nature of the application.
+
+A distributed application can run on multiple systems in a network at a given time (simultaneously) by coordinating among themselves to complete a particular task in a fast and efficient manner. more workers more work done faster.
+
+**The challenges of using a distributed system to get work done are**
+
+*	Race condition − Two or more machines trying to perform a particular task, and leads to race around condition
+*	Deadlock — two or more operations waiting for each other to complete indefinitely
+*	Inconsistency − Partial failure of data.
+
+Now let’s talk about how to maintain a counter(which we discussed earlier) when we have distributed hosts using Zookeeper.
+
+*	We take 1st billion combinations from 3.5 trillion combination
+*	We have divided the 1st billion into 1000 ranges of 1 million each which is maintained by Zookeeper
+*	1 -> 1,000,000 (range 1) 1,000,000 -> 2,000,000 (range 1) .... (range n)999,000,000 -> 1,000,000,000 ((range 1000))
+*	Worker thread will come to Zookeeper and ask for an unused range. suppose W1 is assigned range 1, W1 will keep incrementing the counter and generate the unique number and generate TinyURL based on that.
+*	When a worker thread exhausts their range they will come to Zookeeper and take a fresh range.
+*	Guaranteed No Collision of tiny URL
+*	Addition of new worker threads is easy
+*	Worse case is we will lose a million combinations (if a worker dies) but that’s not as severe as we have 3.5 trillion combinations.
+*	When 1st billion is exhausted, we will take 2nd billion and generate ranges to work with.
+
+Ref: https://www.educative.io/courses/grokking-the-system-design-interview/m2ygV4E81AR
+
 # Design Pastebin.com (or Bit.ly)
 
 *Note: This document links directly to relevant areas found in the [system design topics](https://github.com/donnemartin/system-design-primer#index-of-system-design-topics) to avoid duplication.  Refer to the linked content for general talking points, tradeoffs, and alternatives.*
