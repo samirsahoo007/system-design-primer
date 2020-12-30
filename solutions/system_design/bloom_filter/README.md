@@ -294,7 +294,10 @@ Light nodes compute and transmit a Bloom filter of the list of transactions they
 
 Read more here: https://freecontent.manning.com/all-about-bloom-filters/
 Ref: https://hackernoon.com/probabilistic-data-structures-bloom-filter-5374112a7832
-https://www.kdnuggets.com/2016/08/gentle-introduction-bloom-filter.html
+
+Sample code:
+1. https://www.kdnuggets.com/2016/08/gentle-introduction-bloom-filter.html
+2. https://www.geeksforgeeks.org/bloom-filters-introduction-and-python-implementation/
 
 ```
 >>> import mmh3
