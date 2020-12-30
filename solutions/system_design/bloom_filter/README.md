@@ -4,10 +4,16 @@ The large part of the reason behind Bloom filter popularity is that they have th
 
 One simple way to think about Bloom filters is that they support insert and lookup in the same way the hash tables do, but using very **little space**, i.e., one byte per item or less. **This is a significant saving when you have many items and each item takes up, say 8 bytes.**
 
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/bloom-filters_01.png)
+# Use case I:
 
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/bloom-filters_01.png)
+Figure 1: Bloom filters in distributed storage systems.(See explanation below) 
+
+
+# Use case II:
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/bloom-filters_02.png)
+Figure 2: Usage of Bloom filter in Squid web proxy. 
 
 
 # Bloom filter
@@ -258,5 +264,34 @@ gorilla is not in the bloom filter as expected
 hawk is not in the bloom filter as expected
 ```
 
+## Explaining *Use case I*:
+
+### Bloom Filter in Google's Webtable:
+
+For instance, this is how Bloom filters are used in Google’s **Webtable** and Apache **Cassandra** that are among the most widely used distributed storage systems designed to handle massive amounts of data. Namely, these systems organize their data into a number of tables called Sorted String Tables (SSTs) that reside on the disk and are structured as key-value maps. In Webtable, keys might be website names, and values might be website attributes or contents. In Cassandra, the type of data depends on what system is using it, so for example, for Twitter, a key might be a User ID, and the value could be user’s tweets.
+
+When users query for data, a problem arises because we do not know which table contains the desired result. To help locate the right table without checking explicitly on the disk, we maintain a dedicated Bloom filter in RAM for each of the tables, and use them to route the query to the correct table, in the way described in figure **Use case I** above.
+
+In this example, we have 50 sorted string tables (SSTs) on disk, and each table has a dedicated Bloom filter that can fit into RAM due to its much smaller size. When a user does a lookup, the lookup first checks the Bloom filters. In this example, the first Bloom filter that reports the item as Present is Bloom filter No.3. Then we go ahead and check in the SST3 on disk whether the item is present. In this case, it was a false alarm. We continue checking until another Bloom filter reports Present. Bloom filter No.50 reports present, we go to the disk and actually locate and return the requested item.
+
+## Explaining *Use case II*:
+
+### Bloom Filters in Networks: Squid
+
+Squid is a web proxy cache—a server that acts as a proxy between the client and other servers when the client requests a webpage, file, etc. Web proxies use caches to reduce web traffic, which means they maintain a local copy of recently-accessed links, in case they are requested again, and this usually enhances performance significantly. One of the protocols[6] designed suggests that a web proxy locally keeps a Bloom filter for each of its neighboring servers’ cache contents. This way when a proxy is looking for a webpage, it first checks its local cache. If a cache miss occurs locally, the proxy checks all its Bloom filters to see whether any of them contain the desired webpage, and if yes, it tries to fetch the webpage from the neighbor associated with that Bloom filter instead of directly fetching the page from the Web.
+
+Squid implements this functionality and it calls Bloom filters Cache Digests (see Figure Use case II) Because data is highly dynamic in the network scenario, and Bloom filters are only occasionally broadcasted between proxies, false negatives can arise.
+
+Web proxies keep the copies of recently-accessed web pages, but also keep the record of recently accessed web pages of their neighbors by having each proxy occasionally broadcast the Bloom filter of their own cache. In this example, a user requests a web page x, and a web proxy A cannot find it in its own cache, so it queries the Bloom filters of B, C and D. The Bloom filter of D reports Found/Present for x, so the request is forwarded to D. Note that, because Bloom filters are not always up-to-date, and the network environment is highly dynamic, by the time we get to the right proxy, the cache might have deleted the resource that we are looking for. Also, false negatives may arise due to the gap in the broadcasting times.
+
+## Use case III:
+
+### Bitcoin mobile app
+
+Peer-to-peer networks use Bloom filters to communicate data, and a well-known example of that is Bitcoin. An important feature of Bitcoin is ensuring transparency between clients, i.e., each node should be able to see everyone’s transactions. However, for nodes that are operating from a smartphone or a similar device of limited memory and bandwidth, keeping the copy of all transactions is highly impractical. This is why Bitcoin offers the option of simplified payment verification (SPV), where a node can choose to be a light node by advertising a list of transactions it is interested in. This is in contrast to full nodes that contain all the data
+
+Light nodes compute and transmit a Bloom filter of the list of transactions they are interested in to the full nodes. This way, before a full node sends information about a transaction to the light node, it first checks its Bloom filter to see whether a node is interested in it. If the false positive occurs, the light node can discard the information upon its arrival.
+
+Read more here: https://freecontent.manning.com/all-about-bloom-filters/
 Ref: https://hackernoon.com/probabilistic-data-structures-bloom-filter-5374112a7832
 
