@@ -1,6 +1,18 @@
 When main-stream data structures like Lists, Maps, Sets, Trees etc. are mostly used for achieving certain results about whether the data exist or not, maybe along with their number of occurrences and such, Probabilistic data structures will give you memory-efficient, faster result with a cost of providing a ‘probable’ result instead of a ‘certain’ one. It might not seems intuitive to use such data structures for now, but I’ll try to convince you in this post that these type of data structures have their specific use cases and you might find them useful in certain scenarios.
 
+The large part of the reason behind Bloom filter popularity is that they have that combination of being a fairly simple data structure to design and implement that is also very useful in many contexts. They were invented in 1970s by Burton Bloom[1],[2] but they only really “bloomed” in the last few decades with the onslaught of large amounts of data in various domains, and the need to tame and compress such huge datasets.
+
+One simple way to think about Bloom filters is that they support insert and lookup in the same way the hash tables do, but using very **little space**, i.e., one byte per item or less. **This is a significant saving when you have many items and each item takes up, say 8 bytes.**
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/bloom-filters_01.png)
+
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/bloom-filters_02.png)
+
+
 # Bloom filter
+
+Bloom filters do not store the items themselves and they use less space than the lower theoretical limit required to store the data correctly, and therefore, they exhibit an error rate. **They have false positives but they do not have false negatives**, i.e. and the one-sidedness of this error can be turned to our benefit. When the Bloom filter reports the item as Found/Present, **there is a small chance that it is not telling the truth, but when it reports the item as Not Found/Not Present, we know it’s telling the truth**. So, **in the context where the query answer is expected to be Not Present, Bloom filters offer great accuracy most of the time plus space-saving benefits**.
 
 Do you know how hash tables work? When you insert a new data in a simple array or list, the index, where this data would be inserted, is not determined from the value to be inserted. That means there is no direct relationship between the ‘key(index)’ and the ‘value(data)’. As a result, if you need to search for a value in the array you have to search in all of the indexes. Now, in hash tables, you determine the ‘key’ or ‘index’ by hashing the ‘value’. Then you put this value in that index in the list. That means the ‘key’ is determined from the ‘value’ and every time you need to check if the value exists in the list you just hash the value and search on that key. It’s pretty fast and will require O(1) searching time in Big-O notation. 
 
@@ -50,13 +62,11 @@ So, every time a user enters their password, we will feed it to our hash functio
 
 As you can see, most of the time we don’t even need to make a request to our server or read from disk to check the list, this will be a significant improvement in speed of the application. In case, if we don’t want to store the bit-vector at the client side, we can still load it in the server memory and that will at least saves some disk lookup time. Also consider that, if your bloom filters false positive rate is 1%(we will talk about the error rate in details later), that means among the costly round-trips to the server or the disk, only 1% of the query will be returned with false result, other 99% won’t go in vain. 
 
-
 Not bad, huh?
-
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/bloom_filter_hash5.png)
 
-Bloom filter operations
+## Bloom filter operations
 
 The basic bloom filter supports two operations: test and add.
 
@@ -80,11 +90,12 @@ Now we want to remove ‘geeks’ from it. So, if we remove 1, 4, 7 from the bit
 
 So, what’s the solution?
 
-The solution is we can’t support Remove operation in this simple bloom filters. But if we really need to have a Removal functionality we can use a variation of the bloom filter known as ‘Counting bloom filter’. The idea is simple. Instead of storing a single bit of values, we will store an integer value and our bit vector will then be an integer vector. This will increase the size and costs more space to gives us the Removal functionality. Instead of just marking a bit value to ‘1’ when inserting a value, we will increment the integer value by 1. To check if an element exists, check if the corresponding indexes after hashing the element is greater than 0. 
-If you are having a hard time to understand how a ‘Counting bloom filter’ can give us ‘deletion’ feature, I’ll suggest you take a pen and a paper and simulate our bloom filter as a counting filter and then try a deletion on it. Hopefully, you’ll get it easily. If you failed, try again. If you failed again then please leave a comment and I’ll try to describe it.
-Bloom filter size and number of Hash functions
+**The solution is we *can't support Remove* operation in this simple bloom filters**. But if we really need to have a Removal functionality we can use a variation of the bloom filter known as *Counting bloom filter*. The idea is simple. Instead of storing a single bit of values, we will store an integer value and our bit vector will then be an integer vector. This will increase the size and costs more space to gives us the Removal functionality. Instead of just marking a bit value to ‘1’ when inserting a value, we will increment the integer value by 1. To check if an element exists, check if the corresponding indexes after hashing the element is greater than 0. 
 
-You might already understand that if the size of the bloom filter is too small, soon enough all of the bit fields will turn into ‘1’ and then our bloom filter will return ‘false positive’ for every input. So, the size of the bloom filter is a very important decision to be made. A larger filter will have less false positives, and a smaller one more. So, we can tune our bloom filter to how much precise we need it to be based on the ‘false positive error rate’. 
+### Bloom filter size and number of Hash functions
+
+You might already understand that if the size of the bloom filter is too small, soon enough all of the bit fields will turn into ‘1’ and then our bloom filter will return ‘false positive’ for every input. So, the size of the bloom filter is a very important decision to be made. *A larger filter will have less false positives*, and a smaller one more. So, we can tune our bloom filter to how much precise we need it to be based on the ‘false positive error rate’. 
+
 Another important parameter is ‘how many hash functions we will use’. The more hash functions we use, the slower the bloom filter will be, and the quicker it fills up. If we have too few, however, we may suffer too many false positives.
 
 
@@ -102,23 +113,25 @@ Seems like WTF? Don’t worry, we would actually mostly need to decide what our 
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/bloom_filter_hash10.png)
 
-Another important point I also need to mention here. As the sole purpose of using bloom filter is to search faster, we can’t use slow hash functions, right? Cryptographic hash functions such as Sha-1, MD5 won’t be good choice for bloom filters as they are a bit slow. So, the better choices from the faster hash function implementations would be murmur, the fnv series of hashes, Jenkins hashes and HashMix.
+Another important point I also need to mention here. As the sole purpose of using bloom filter is to search faster, we can’t use slow hash functions, right? Cryptographic hash functions such as Sha-1, MD5 won’t be good choice for bloom filters as they are a bit slow. So, the better choices from the faster hash function implementations would be *murmur*, the *fnv* series of hashes, *Jenkins hashes* and *HashMix*.
 
 ## Applications
-
-Bloom filter is all about testing Membership in a set. The classic example of using bloom filters is to reduce expensive disk (or network) lookups for non-existent keys. As we can see that bloom filters can search for a key in O(k) constant time, where k is the number of hash functions, it will be very fast to test non-existence of a key.
 
 If the element is not in the bloom filter, then we know for sure we don’t need to perform the expensive lookup. On the other hand, if it is in the bloom filter, we perform the lookup, and we can expect it to fail some proportion of the time (the false positive rate).
 
 For some more concrete examples:
 
-    You’ve seen in our given example that we could’ve use it to warn the user for weak passwords.
-    You can use bloom filter to prevent your users from accessing malicious sites.
-    Instead of making a query to an SQL database to check if a user with a certain email exists, you could first use a bloom filter for an inexpensive lookup check. If the email doesn’t exist, great! If it does exist, you might have to make an extra query to the database. You can do the same to search for if a ‘Username is already taken’.
-    You can keep a bloom filter based on the IP address of the visitors to your website to check if a user to your website is a ‘returning user’ or a ‘new user’. Some false positive value for ‘returning user’ won’t hurt you, right?
-    You can also make a Spell-checker by using bloom filter to track the dictionary words.
-    Want to know how Medium used bloom filter to decide if a user already read post? Read this mind-blowing, freaking awesome article about it.
+*    You’ve seen in our given example that we could’ve use it to warn the user for weak passwords.
 
+*    You can use bloom filter to prevent your users from accessing malicious sites.
+
+*    Instead of making a query to an SQL database to check if a user with a certain email exists, you could first use a bloom filter for an inexpensive lookup check. If the email doesn’t exist, great! If it does exist, you might have to make an extra query to the database. You can do the same to search for if a ‘Username is already taken’.
+
+*    You can keep a bloom filter based on the IP address of the visitors to your website to check if a user to your website is a ‘returning user’ or a ‘new user’. Some false positive value for ‘returning user’ won’t hurt you, right?
+ 
+*   You can also make a Spell-checker by using bloom filter to track the dictionary words.
+
+*    Want to know how Medium used bloom filter to decide if a user already read post? Read this mind-blowing, freaking awesome article about it.
 
 ### Applications of Bloom filters 
 
