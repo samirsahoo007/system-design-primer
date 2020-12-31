@@ -620,12 +620,13 @@ Third, a sometimes underappreciated aspect of platform layers is that they make 
 
 | Question | |
 |---|---|
+| Design Pastebin.com (or Bit.ly) OR Design a URL Shortening Service (TinyURL) | [Solution](solutions/system_design/pastebin/README.md) |
+| Design YouTube/Netflix (a global video streaming service) | [Solution](solutions/system_design/netflix/README.md) |
 | Design the Twitter timeline and search (or Facebook feed and search) | [Solution](solutions/system_design/twitter/README.md) |
 | Design the data structures for a social network | [Solution](solutions/system_design/social_graph/README.md) |
 | Design a key-value store for a search engine | [Solution](solutions/system_design/query_cache/README.md) |
 | Design a web crawler | [Solution](solutions/system_design/web_crawler/README.md) |
 | Design Amazon's sales ranking by category feature | [Solution](solutions/system_design/sales_rank/README.md) |
-| Design Pastebin.com (or Bit.ly) | [Solution](solutions/system_design/pastebin/README.md) |
 | Design Mint.com | [Solution](solutions/system_design/mint/README.md) |
 | Design a system that scales to millions of users on AWS | [Solution](solutions/system_design/scaling_aws/README.md) |
 | Add a system design question | [Contribute](#contributing) |
@@ -729,7 +730,7 @@ https://www.geeksforgeeks.org/design-dropbox-a-system-design-interview-question/
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/designs/netflix.jpeg)
 
-[Solution](https://www.linkedin.com/pulse/system-design-netflix-narendra-l/?published=t)
+[README Here](solutions/system_design/netflix/README.md)
 
 [Youtube](https://www.youtube.com/watch?v=psQzyFfsUGU)
 
