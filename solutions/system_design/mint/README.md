@@ -1,6 +1,51 @@
 # Design Mint.com
 
+Mint.com is a free, web-based personal financial management service, that allows its users to integrate with financial accounts to automatically extract their data, and manage their personal budget.
+Design a system like Mint.
+
+
 *Note: This document links directly to relevant areas found in the [system design topics](https://github.com/donnemartin/system-design-primer#index-of-system-design-topics) to avoid duplication.  Refer to the linked content for general talking points, tradeoffs, and alternatives.*
+
+## Feature Scope
+* Connect Mint account with my financial accounts
+* Pull my financial data
+* when I log in
+* periodically
+* Give me financial suggestions
+
+## API Design
+
+syncUserData(userId, back?)
+
+userId: GUID of user
+
+bank?: If not provided, sync all my bank info; otherwise, just sync the info of this bank.
+
+getSuggestions(userId)
+
+Given userId, give a list of suggestions. Example
+
+```
+[
+    { bank: "Chase", suggestions: ["Pay loan on time"] },
+    { bank: "Bank of America", suggestions: ["Use less than 10% of credit card limit"] }
+]
+```
+
+## Database Design
+
+**Objects**
+
+* User: userId, authToken
+* UserBank: userId, bank, other user data specific to the bank
+
+I'd use SQL DB for User.
+
+Since the UserBank data might be different across different bank. One solution is that we use different tables for different banks. But even if we do that, a specific bank might change their schema as well. So since the data schema might not be stable, I'd prefer to use NoSQL DB.
+Relationships
+
+The relationship between User and UserBank table is connected using userId.
+
 
 ## Step 1: Outline use cases and constraints
 
