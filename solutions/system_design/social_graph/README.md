@@ -59,9 +59,9 @@ Handy conversion guide:
 ## Database design:
 We can refer Messenger Database Design
 
-![alt text](Messanger.png)
+![alt text](Messenger.png)
 
-Also refer [messanger.sql](messanger.sql)
+Also refer [messenger.sql](messanger.sql)
 
 ### Use case: User searches for someone and sees the shortest path to the searched person
 
