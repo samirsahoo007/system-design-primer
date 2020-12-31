@@ -56,6 +56,13 @@ Handy conversion guide:
 
 > Dive into details for each core component.
 
+## Database design:
+We can refer Messenger Database Design
+
+![alt text](Messanger.png)
+
+Also refer [messanger.sql](messanger.sql)
+
 ### Use case: User searches for someone and sees the shortest path to the searched person
 
 **Clarify with your interviewer how much code you are expected to write**.
