@@ -1,6 +1,259 @@
-# Design the data structures for a social network
+# Design the data structures for a social network like Facebook or LinkedIn
+
+How would you design the data structures for a very large social network like Facebook or Linkedln? Describe how you would design an algorithm to show the shortest path between two people (e.g., Me-> Bob-> Susan-> Jason-> You).
 
 *Note: This document links directly to relevant areas found in the [system design topics](https://github.com/donnemartin/system-design-primer#index-of-system-design-topics) to avoid duplication.  Refer to the linked content for general talking points, tradeoffs, and alternatives.*
+
+A good way to approach this problem is to remove some of the constraints and solve it for that situation first.
+
+## Case 1: Simplify the Problem (Not considering millions of people)
+We can construct a graph by treating each person as a node and letting an edge between two nodes indicate that the two users are friends. If we want to find the path between two people, we start with one person and do a simple breadth-first search. Alternatively, we can do bidirectional breadth first search. This means doing two breadth first searches, one from the source and one from the destination. When the searches collide, we know we’ve found a path.
+
+**Why not a depth-first search work well?** 
+First, the depth-first search would just find a path. It wouldn’t necessarily find the shortest path. Second, even if we just needed any path, it would be very inefficient. Two users might be only one degree of separation apart, but it could search millions of nodes in their”subtrees” before finding this relatively immediate connection.
+
+In the implementation, we’ll use two classes to help us. BFSData holds the data needed for a breadth-first search, such as the isVisited hash table and the toVisit queue. PathNode represents the path as we’re searching, storing each Person and the previousNode we visited in this path.
+
+```
+Linkedlist<Person> findPathBiBFS(HashMap<Integer, Person> people, 
+                                    int source, int destination) 
+{ 
+    BFSData sourceData = new BFSData(people.get(source)); 
+    BFSData destData = new BFSData(people.get(destination)); 
+  
+    while (!sourceData.isFinished() && !destData.isFinished()) 
+    { 
+  
+        /* Search out from source. */
+        Person collision = searchlevel(people, sourceData, destData); 
+        if (collision != null) 
+            return mergePaths(sourceData, destData, collision.getID()); 
+  
+        /* Search out from destination. */
+        collision = searchlevel(people, destData, sourceData); 
+        if (collision != null) 
+            return mergePaths(sourceData, destData, collision.getID()); 
+    } 
+  
+    return null; 
+} 
+  
+  
+/* Search one level and return collision, if any.*/
+Person searchLevel(HashMap<Integer, Person> people, 
+                BFSData primary, BFSData secondary) 
+{ 
+  
+    /* We only want to search one level at a time. Count 
+       how many nodes are currently 
+       in the primary's level and only do that many nodes. 
+       We continue to add nodes to the end. */
+  
+    int count = primary.toVisit.size(); 
+    for (int i= 0; i < count; i++) 
+    { 
+        /* Pull out first node. */
+        PathNode pathNode = primary.toVisit.poll(); 
+        int personld = pathNode.getPerson().getID(); 
+  
+        /* Check if it's already been visited. */
+        if (secondary.visited.containsKey(personid)) 
+            return pathNode.getPerson(); 
+  
+        /* Add friends to queue. */
+        Person person = pathNode. getPerson(); 
+        Arraylist<Integer> friends = person.getFriends(); 
+        for (int friendid : friends) 
+        { 
+            if (!primary.visited.containsKey(friendid)) 
+            { 
+                Person friend= people.get(friendld); 
+                PathNode next = new PathNode(friend, pathNode); 
+                primary.visited.put(friendld, next); 
+                primary.toVisit.add(next); 
+            } 
+        } 
+    } 
+    return null; 
+} 
+  
+  
+/* Merge paths where searches met at the connection. */
+Linkedlist<Person> mergePaths(BFSData bfsl, BFSData bfs2, 
+                                          int connection) 
+{ 
+    // endl -> source, end2 -> dest 
+    PathNode endl = bfsl.visited.get(connection); 
+    PathNode end2 = bfs2.visited.get(connection); 
+  
+    Linkedlist<Person> pathOne = endl.collapse(false); 
+    Linkedlist<Person> pathTwo = end2.collapse(true); 
+  
+    pathTwo.removeFirst(); // remove connection 
+    pathOne.addAll(pathTwo); // add second path 
+  
+    return pathOne; 
+} 
+  
+class PathNode 
+{ 
+    private Person person = null; 
+    private PathNode previousNode = null; 
+    public PathNode(Person p, PathNode previous) 
+    { 
+        person = p; 
+        previousNode = previous; 
+    } 
+  
+    public Person getPerson() 
+    { 
+        return person; 
+    } 
+  
+    public Linkedlist<Person> collapse(boolean startsWithRoot) 
+    { 
+        Linkedlist<Person> path= new Linkedlist<Person>(); 
+        PathNode node = this; 
+        while (node != null) 
+        { 
+            if (startsWithRoot) 
+                path.addlast(node.person); 
+            else
+                path.addFirst(node.person); 
+            node = node.previousNode; 
+        } 
+  
+        return path; 
+    } 
+} 
+  
+class BFSData 
+{ 
+    public Queue<PathNode> toVisit = new Linkedlist<PathNode>(); 
+    public HashMap<Integer, PathNode> visited = 
+                                 new HashMap<Integer, PathNode>(); 
+  
+    public BFSData(Person root) 
+    { 
+        PathNode sourcePath = new PathNode(root, null); 
+        toVisit.add(sourcePath); 
+        visited.put(root.getID(), sourcePath); 
+    } 
+    public boolean isFinished() 
+    { 
+        return toVisit.isEmpty(); 
+    } 
+}  
+```
+
+### How fast is above BFS based solution?
+Suppose every person has k friends, and Source S and Destination D have a friend C in common.
+
+1. Traditional breadth-first search from S to D: We go through roughly k + k * k nodes: each of S’s k friends, and then each of their k friends.
+
+2. Bidirectional breadth-first search: We go through 2k nodes: each of S’s k friends and each of D’s k friends. Of course, 2k is much less than k + k * k.
+
+3. Generalizing this to a path of length q, we have this:
+3.1 BFS: O(kq)
+3.2 Bidirectional BFS: 0( kq/2 + kq/2), which is just 0( kq/2)
+
+If we imagine a path like A->B->C->D->E where each person has 100 friends, this is a big difference. BFS will require looking at 100 million (1004) nodes. A bidirectional BFS will require looking at only 20,000 nodes (2 x 100^2).
+
+## Case 2: Handle Millions of Users
+For these many users, we cannot possibly keep all of our data on one machine. That means that our simple Person data structure from above doesn’t quite work-our friends may not live on the same machine as we do. Instead, we can replace our list of friends with a list of their IDs, and traverse as follows:
+
+1: For each friend ID: int machine index = getMachineIDForUser(person_ID);
+
+2: Go to machine #machine_index
+
+3: On that machine, do: Person friend = getPersonWithID( person_ID);
+
+The code below outlines this process. We’ve defined a class Server, which holds a list of all the machines, and a class Machine, which represents a single machine. Both classes have hash tables to efficiently lookup data.
+```
+// A server that holds list of all machines 
+class Server 
+{ 
+	HashMap<Integer, Machine> machines = 
+					new HashMap<Integer, Machine>(); 
+	HashMap<Integer, Integer> personToMachineMap = 
+						new HashMap<Integer, Integer>(); 
+
+	public Machine getMachineWithid(int machineID) 
+	{ 
+		return machines.get(machineID); 
+	} 
+
+	public int getMachineIDForUser(int personID) 
+	{ 
+		Integer machineID = personToMachineMap.get(personID); 
+		return machineID == null ? -1 : machineID; 
+	} 
+
+	public Person getPersonWithID(int personID) 
+	{ 
+		Integer machineID = personToMachineMap.get(personID); 
+		if (machineID == null) return null; 
+
+		Machine machine = getMachineWithid(machineID); 
+		if (machine == null) return null; 
+
+		return machine.getPersonWithID(personID); 
+	} 
+} 
+
+// A person on social network has id, friends and other info 
+class Person 
+{ 
+	private Arraylist<Integer> friends = 
+							new Arraylist<Integer>(); 
+	private int personID; 
+	private String info; 
+
+	public Person(int id) 
+	{ 
+		this.personID =id; 
+	} 
+	public String getinfo() 
+	{ 
+		return info; 
+	} 
+	public void setinfo(String info) 
+	{ 
+		this.info = info; 
+	} 
+	public Arraylist<Integer> getFriends() 
+	{ 
+		return friends; 
+	} 
+	public int getID() 
+	{ 
+		return personID; 
+	} 
+	public void addFriend(int id) 
+	{ 
+		friends.add(id); 
+	} 
+} 
+```
+**Following are some optimizations and follow-up questions**.
+
+**Optimization: Reduce machine jumps**
+Jumping from one machine to another is expensive. Instead of randomly jumping from machine to machine with each friend, try to batch this jumps-e.g., if five of my friends live on one machine, I should look them up all at once.
+
+**Optimization: Smart division of people and machines**
+People are much more likely to be friends with people who live in the same country as they do. Rather than randomly dividing people across machines, try to divide them by country, city, state, and so on. This will reduce the number of jumps.
+
+**Question: Breadth-first search usually requires “marking” a node as visited. How do you do that in this case**?
+Usually, in BFS, we mark a node as visited by setting a visited flag in its node class. Here, we don’t want to do that. There could be multiple searches going on at the same time, so it’s a bad idea to just edit our data.
+
+Instead, we could mimic the marking of nodes with a hash table to look up a node id and determine whether it’s been visited.
+
+**Other Follow-Up Questions**:
+1. In the real world, servers fail. How does this affect you?
+2. How could you take advantage of caching?
+3. Do you search until the end of the graph (infinite)? How do you decide when to give up?
+4. In real life, some people have more friends of friends than others and are therefore more likely to make a path between you and someone else. How could you use this data to pick where to start traversing?
+
 
 ## Step 1: Outline use cases and constraints
 
