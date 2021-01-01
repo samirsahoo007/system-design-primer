@@ -80,6 +80,7 @@ created		|timestamp
 
 ##### Comments
 | Column | Type  | References |
+| :------------ |:---------------:| -----:|
 |id		|integer|
 |user_id	|integer|user.id
 |post_id	|integer|post.id
