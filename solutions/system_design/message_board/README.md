@@ -42,13 +42,14 @@ Next, we'll dive into the details of each component of the system and talk about
 Let's model the data tables we'll need and the relationships among them. For each of these tables, you can list out the main columns we'll need, their type, and any foreign keys or relationship between them.
 
 ##### Users
-**Column	Type**
------------------------
-id		integer
-username	string
-email		string
-password_hash	string
-created		timestamp
+
+Column  | Type
+------------- | -------------
+id		|integer
+username	|string
+email		|string
+password_hash	|string
+created		|timestamp
 
 ##### Posts
 | Column | Type  | References |
@@ -62,28 +63,30 @@ created		timestamp
 |edited		|timestamp	|
 
 ##### Subreddits
-**Column	Type**
-id		integer
-subreddit_name	string
-description	string
-created		timestamp
+Column  | Type
+------------- | -------------
+id		|integer
+subreddit_name	|string
+description	|string
+created		|timestamp
 
 ##### Upvotes
-**Column	Type	References**
-id		integer
-user_id		integer	user.id
-post_id		integer	post.id
-created		timestamp
+| Column | Type  | References |
+| :------------ |:---------------:| -----:|
+|id		|integer		|
+|user_id		|integer	|user.id
+|post_id		|integer	|post.id
+|created		|timestamp	|
 
 ##### Comments
-**Column	Type	References**
-id		integer
-user_id		integer	user.id
-post_id		integer	post.id
-comment_id	integer	comment.id
-content		string
-created		timestamp
-edited		timestamp
+| Column | Type  | References |
+|id		|integer
+|user_id		|integer	|user.id
+|post_id		|integer	|post.id
+|comment_id	|integer	|comment.id
+|content		|string
+|created		|timestamp
+|edited		|timestamp
 
 ##### Indexing
 It's important to mention what fields we'll need to index in our database to support the types of queries we're making. We'll want to add indices on the user_id and subreddit_id columns to support fast lookup of posts. Similarly, we'll want to add indexes on other foreign keys and a unique index to fields such as username and subreddit_name.
