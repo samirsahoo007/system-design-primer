@@ -80,13 +80,13 @@ created		|timestamp
 
 ##### Comments
 | Column | Type  | References |
-|id		|integer
-|user_id		|integer	|user.id
-|post_id		|integer	|post.id
-|comment_id	|integer	|comment.id
-|content		|string
-|created		|timestamp
-|edited		|timestamp
+|id		|integer|
+|user_id	|integer|user.id
+|post_id	|integer|post.id
+|comment_id	|integer|comment.id
+|content	|string|
+|created	|timestamp|
+|edited		|timestamp|
 
 ##### Indexing
 It's important to mention what fields we'll need to index in our database to support the types of queries we're making. We'll want to add indices on the user_id and subreddit_id columns to support fast lookup of posts. Similarly, we'll want to add indexes on other foreign keys and a unique index to fields such as username and subreddit_name.
