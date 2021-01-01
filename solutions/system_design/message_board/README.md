@@ -51,14 +51,15 @@ password_hash	string
 created		timestamp
 
 ##### Posts
-**Column	Type	References**
-id		integer
-user_id		integer	user.id
-subreddit_id	integer	subreddit.id
-content		string
-image_url	string
-created		timestamp
-edited		timestamp
+| Column | Type  | References |
+| :------------ |:---------------:| -----:|
+|id		|integer	|	
+|user_id	|integer	|user.id
+|subreddit_id	|integer	|subreddit.id
+|content	|	string	|
+|image_url	|string		|
+|created	|	timestamp|
+|edited		|timestamp	|
 
 ##### Subreddits
 **Column	Type**
