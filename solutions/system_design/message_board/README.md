@@ -117,3 +117,5 @@ In order to support the scale and performance requirements of our project, we wi
 
 **Content delivery network**: To deliver static file content, such as user-uploaded images and frontend resources, we will need to make use a distributed content delivery network (CDN). This service will permit us to cache resources at nodes around the world, reducing the load on our backend servers while also decreasing latency for users. Newly uploaded resources can be pushed to the CDN or pulled by the CDN from object storage as needed. Some CDNs also offer additional benefits such as automatic image compression and optimization for different types of devices.
 
+Ref: https://www.tryexponent.com/courses/system-design/design-reddit
+
