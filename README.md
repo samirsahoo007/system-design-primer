@@ -264,6 +264,12 @@ Check out the following links to get a better idea of what to expect:
 * [The system design interview](http://www.hiredintech.com/system-design)
 * [Intro to Architecture and Systems Design Interviews](https://www.youtube.com/watch?v=ZgdS0EUmn70)
 
+# Single-Tenant vs Multi-Tenant Model(Singletenancy vs Multitenancy):
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/single_vs_multitenant.jpg)
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/single_vs_multitenant2.jpg)
+
 # Difference between Shared Nothing Architecture and Shared Disk Architecture :
 
 SHARED NOTHING ARCHITECTURE  | SHARED DISK ARCHITECTURE
@@ -623,7 +629,7 @@ Third, a sometimes underappreciated aspect of platform layers is that they make 
 | Design Pastebin.com (or Bit.ly) OR Design a URL Shortening Service (TinyURL) | [Solution](solutions/system_design/pastebin/README.md) |
 | Design YouTube/Netflix (a global video streaming service) | [Solution](solutions/system_design/netflix/README.md) |
 | Design the Twitter timeline and search (or Facebook feed and search) | [Solution](solutions/system_design/twitter/README.md) |
-| Design the data structures for a social network or Design a simple model of Facebook | [Solution](solutions/system_design/social_graph/README.md) |
+| Design the data structures for a social network(like Facebook or LinkedIn) or Design a simple model of Facebook | [Solution](solutions/system_design/social_graph/README.md) |
 | Design a key-value store for a search engine | [Solution](solutions/system_design/query_cache/README.md) |
 | Design a web crawler | [Solution](solutions/system_design/web_crawler/README.md) |
 | Design Amazon's sales ranking by category feature | [Solution](solutions/system_design/sales_rank/README.md) |
