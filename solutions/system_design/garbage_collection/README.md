@@ -1,3 +1,7 @@
+Read the following urls in free time:
+https://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.41.6129&rep=rep1&type=pdf
+file:///Users/samirsahoo/Downloads/Garbage.pdf
+
 # What do you know about garbage collection?
 As an interviewer, I’d like to start the discussion by asking “tell me about what you know about garbage collection”. This question can give me an idea of how familiar the candidate is with this topic.
 
