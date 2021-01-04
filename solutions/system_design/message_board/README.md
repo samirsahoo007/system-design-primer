@@ -1,3 +1,10 @@
+Modeling a Basic Data Structure to Manage Users, Threads, and Posts: https://vertabelo.com/blog/database-model-for-an-online-discussion-forum-part-1/
+
+Making a More Advanced Model With User, Thread, and Post Statuses: https://vertabelo.com/blog/database-model-for-an-online-discussion-forum-part-2/
+
+Adding More Advanced Features Like Managing Categories and Voting on Threads and Posts: https://vertabelo.com/blog/database-model-for-an-online-discussion-forum-part-3/
+
+
 Also refer
 Stack Overflow: The Architecture: https://nickcraver.com/blog/2016/02/17/stack-overflow-the-architecture-2016-edition/
 https://nickcraver.com/blog/archive/
