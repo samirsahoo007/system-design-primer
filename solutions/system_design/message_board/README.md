@@ -2,6 +2,24 @@ Also refer
 Stack Overflow: The Architecture: https://nickcraver.com/blog/2016/02/17/stack-overflow-the-architecture-2016-edition/
 https://nickcraver.com/blog/archive/
 
+**Database:**
+
+Posts
+Users
+Comments
+Badges
+Votes
+Tags
+CloseAsOffTopicReasonTypes
+PendingFlags
+PostFeedback
+PostHistory
+ReviewTasks
+SuggestedEdits
+
+for details refer:
+https://meta.stackexchange.com/questions/2677/database-schema-documentation-for-the-public-data-dump-and-sede/2678#2678
+
 # System design: Reddit or Quora or Hacker News
 
 Imagine you're the lead engineer responsible for building Reddit from the ground up. Walk me through how you would design the system to support the following functionality:
