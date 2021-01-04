@@ -254,6 +254,13 @@ Netflix knows this too. That’s why Netflix now personalizes all the images the
 Remember, Netflix records and counts everything you do on their site. They know which kind of movies you like best, which actors you like the most, and so on.
 
 ### How Netflix’s Recommendations System Works
+Read the urls below and delete once done...
+http://blog.gainlo.co/index.php/2016/05/24/design-a-recommendation-system/
+https://www.datacamp.com/community/tutorials/recommender-systems-python?utm_source=adwords_ppc&utm_campaignid=1455363063&utm_adgroupid=65083631748&utm_device=c&utm_keyword=&utm_matchtype=b&utm_network=g&utm_adpostion=&utm_creative=332602034361&utm_targetid=aud-299261629574:dsa-473406569915&utm_loc_interest_ms=&utm_loc_physical_ms=9040195&gclid=Cj0KCQiA88X_BRDUARIsACVMYD8yUYPPIGYoxY66_EJVKTspOgLUe59R3YoZpShpblKqHoj4OUBuTiQaAu2fEALw_wcB
+file:///Users/samirsahoo/Downloads/Design_of_a_recommendation_system_based_on_collabo.pdf
+https://realpython.com/build-recommendation-engine-collaborative-filtering/
+https://uxplanet.org/how-can-we-design-an-intelligent-recommendation-engine-b9bb1db4d050
+
 https://beta.vu.nl/nl/Images/werkstuk-fernandez_tcm235-874624.pdf
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/recommendation.png)
