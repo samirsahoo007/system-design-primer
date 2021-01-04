@@ -256,6 +256,8 @@ Remember, Netflix records and counts everything you do on their site. They know 
 ### How Netflix’s Recommendations System Works
 https://beta.vu.nl/nl/Images/werkstuk-fernandez_tcm235-874624.pdf
 
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/recommendation.png)
+
 Whenever you access the Netflix service, our recommendations system strives to help you find a show or movie to enjoy with minimal effort. We estimate the likelihood that you will watch a particular title in our catalog based on a number of factors including:
 
 * your interactions with our service (such as your viewing history and how you rated other titles),
