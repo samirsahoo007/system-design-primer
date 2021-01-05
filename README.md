@@ -628,6 +628,7 @@ Third, a sometimes underappreciated aspect of platform layers is that they make 
 |---|---|
 | Design Pastebin.com (or Bit.ly) OR Design a URL Shortening Service (TinyURL) | [Solution](solutions/system_design/pastebin/README.md) |
 | Design YouTube/Netflix (a global video streaming service) | [Solution](solutions/system_design/netflix/README.md) |
+| Design a recommendation system like Netflix | [Solution](solutions/system_design/netflix/README.md) |
 | Design the Twitter timeline and search (or Facebook feed and search) | [Solution](solutions/system_design/twitter/README.md) |
 | Design the data structures for a social network(like Facebook or LinkedIn) or Design a simple model of Facebook | [Solution](solutions/system_design/social_graph/README.md) |
 | Design a key-value store for a search engine | [Solution](solutions/system_design/query_cache/README.md) |
