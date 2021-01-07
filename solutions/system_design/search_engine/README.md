@@ -1,5 +1,12 @@
 Also read it
 https://www.google.com/search/howsearchworks/
+https://moz.com/beginners-guide-to-seo/how-search-engines-operate
+http://infolab.stanford.edu/~backrub/google.html
+https://research.google/pubs/pub62/ or https://research.google.com/archive/mapreduce-osdi04-slides/index.html	<= MapReduce: Simplified Data Processing on Large Clusters
+https://eileen-code4fun.medium.com/system-design-interview-mini-google-search-6fd319cd66ca
+https://towardsdatascience.com/how-to-build-a-search-engine-9f8ffa405eac
+file:///Users/samirsahoo/Downloads/Design_and_Implementation_of_a_Simple_Web_Search_E.pdf
+
 
 
 **Search Engine** refers to a huge database of internet resources such as web pages, newsgroups, programs, images etc. It helps to locate information on World Wide Web.
