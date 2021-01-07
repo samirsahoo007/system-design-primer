@@ -620,6 +620,18 @@ Third, a sometimes underappreciated aspect of platform layers is that they make 
 
 ## System design interview questions with solutions
 
+### How do I handle millions of requests in a server?
+
+Create a Load balancer with **Nginx** and enable **Nginx caching**. In back, you can keep 4–5 servers with 4-8GB RAM each, that is further connected with the 2 database servers with master-master or master-slave replication.
+
+If you decide to have master-slave replication, your master server will be bigger than your slave because it will handle all the write queries and your slave will be used for reading queries only.
+
+Also, You must have Caching system in place in order to make an application at this scale work smoothly. That’s why you can use Nginx caching that will serve the requests directly from the cache while you can keep the cache expiry tiny to decrease the load on your actual web servers.
+
+You can run your web servers on Nginx too as it can handle more requests than Apache (Personally tested, found out that Nginx can handle 3 times more traffic than apache) on the same configuration.
+So, this is the perfect configuration for your website. Also, this configuration is highly scalable and you can add as many replications as you need and as many web servers as you need.
+
+
 > Common system design interview questions with sample discussions, code, and diagrams.
 >
 > Solutions linked to content in the `solutions/` folder.

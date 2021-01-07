@@ -1,3 +1,7 @@
+Also read it
+https://www.google.com/search/howsearchworks/
+
+
 **Search Engine** refers to a huge database of internet resources such as web pages, newsgroups, programs, images etc. It helps to locate information on World Wide Web.
 User can search for any information by passing query in form of keywords or phrase. It then searches for relevant information in its database and return to the user.
 
@@ -194,4 +198,8 @@ The latest BERT update is about that, but is only a small step as acknowledged b
 The requirements for such a system supporting tens of thousands qps would be a very different animal and Google has barely started there. The race is on who will get there first.
 
 Another search engine example: https://www.gigablast.com/
+
+**What I came to know that**
+* Most query results are cached as static pages.
+* Google has more than 1 million servers.
 
