@@ -173,3 +173,25 @@ This naïve approach obviously does not scale!
 * denial of service protection / rate limiter / throttling
 
 
+Google has never had millions of searches at the same time, their queries -per-second are currently about 63000 queries/sec in 2019. That number can be a few times more at peak loads, but not millions.
+
+Google has been using **document-partitioned** system since about 2000 meaning a single machine is responsible for a portion of the entire Web and it returns best answers it has to another machine in charge of assembling answers at run time. That machine picks the best answers, chooses ads and other stuff and assembles all that to be returned as the result.
+
+The Web and its index are really not that big - for 100B pages, which include both the fast and the slow parts of the index it takes a few KB per page for a total of say 300–500TB. In 2019 that is not that special and has not been in years. Currently 64GB memory sticks are available so a typical 1U machine with, say 24 memory slots, can be stuffed with 1536GB of RAM. A few hundred of those would suffice per cluster, which is a single replica of the entire Web.
+
+It used to be the case that a single cluster/replica could serve about 100 queries/sec but that was way back with hard drives, everything in RAM changes that drastically and improves it to (many) thousand qps.
+
+Note also that the fast portion of the index is only a fraction, perhaps 10B or so. But I do not believe Google cares much about saving money on all that.
+
+Basically Google, as well as Facebook, Twitter and everybody else keeps everything in RAM. It is easy and cheap for them, and actually for others too as you can pick a 1TB of good older RAM (e.g. PC3–14900R of PC3–12800R) for as little as $600. You could stuff a solid fast index in less than 100TB for say < $100K together with the machines to put the memory.
+
+But the main story now is that keyword based is a legacy technology, more than 20 years old. It is quaint to think that relevant results should just give some blue links to pages where keywords appear. The result should be a list of authoritative direct answers to your question.
+
+Indeed Google tries to do that when it shows you a so-called info-box at the top of results but that works only for a small portion of the results and the actual results leave a lot to be desired.
+
+The latest BERT update is about that, but is only a small step as acknowledged by Google themselves. It also only a partial step as BERT works only on short snippets supplied by traditional keyword search. Obviously we would to do everything end-to-end by nearest-neighbor-search in vector spaces for both questions and answers.
+
+The requirements for such a system supporting tens of thousands qps would be a very different animal and Google has barely started there. The race is on who will get there first.
+
+Another search engine example: https://www.gigablast.com/
+
