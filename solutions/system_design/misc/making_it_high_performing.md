@@ -204,3 +204,36 @@ The ideal setup when using Railgun and a load balancer is to place the Railgun l
 
 Ref: https://support.cloudflare.com/hc/en-us/articles/212794707-General-best-practices-for-load-balancing-at-your-origin-with-Cloudflare
 
+# What is a CDN edge server?
+
+A CDN edge server is a computer that exists at the logical extreme or “edge” of a network. An edge server often serves as the connection between separate networks. A primary purpose of a CDN edge server is to store content as close as possible to a requesting client machine, thereby reducing latency and improving page load times.
+
+An edge server is a type of edge device that provides an entry point into a network. Other edges devices include routers and routing switches. Edge devices are often placed inside Internet exchange points (IxPs) to allow different networks to connect and share transit.
+
+## How does an edge server work?
+
+In any particular network layout, a number of different devices will connect to each other using one or more predefined network pattern. If a network wants to connect to another network or the larger Internet, it must have some form of bridge in order for traffic to flow from one location to another. Hardware devices that creates this bridge on the edge of a network are called edge devices.
+
+**Networks connect across the edge**
+
+In a typical home or office network with many devices connected, devices such as mobile phones or computers connect and disconnect to the network through a hub-and-spoke network model. All of the devices exist within the same local area network (LAN), and each device connects to a central router, through which they are able to connect with each other.
+
+In order to connect a second network to the first network, at some point the connection must be made between the networks. The device through which the networks are able to connect with each other is, by definition, an edge device.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/cdn-edge-network-device.png)
+CDN edge network device diagram
+
+Now, if a computer inside Network A needs to connect to a computer inside Network B, the connection must pass from network A, across the network edge, and into the second network. This same paradigm also works in more complex contexts, such when a connection is made across the Internet. The ability for networks to share transit is bottlenecked by the availability of edge devices between them.
+
+When a connection must traverse the Internet, even more intermediary steps must be taken between network A and network B. For the sake of simplicity, let's imagine that each network is a circle, and the place in which the circles touch is the edge of the network. In order for connection to move across the Internet, it will typically touch many networks and move across many network edge nodes. Generally speaking, the farther the connection must travel, the greater the number of networks that must be traversed. A connection may traverse different Internet service providers and Internet backbone infrastructure hardware before reaching its target.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/cdn-edge-server-placement.png)
+CDN edge server placement diagram
+
+A CDN provider will place servers in many locations, but some of the most important are the connection points at the edge between different networks. These edge servers will connect with multiple different networks and allow for traffic to pass quickly and efficiently between networks. Without a CDN, transit may take a slower and/or more convoluted route between source and destination. In worst case scenarios, traffic will “trombone” large distances; when connecting to another device across the street, a connection may move across the country and back again. By placing edge servers in key locations, a CDN is able to quickly deliver content to users inside different networks. To learn more about the improvements of using CDN, explore how CDN performance works.
+
+## What is the difference between an edge server and an origin server?
+
+An origin server is the web server that receives all Internet traffic when a web property is not using a CDN. Using an origin server without a CDN means that each Internet request must return to the physical location of that origin server, regardless of where in the world it resides. This creates an increase in load times which increases the further the server is from the requesting client machine.
+
+CDN edge servers store (cache) content in strategic locations in order to take the load off of one or more origin servers. By moving static assets like images, HTML and JavaScript files (and potentially other content) as close as possible to the requesting client machine, an edge server cache is able to reduce the amount of time it takes for a web resource to load. Origin servers still have an important function to play when using a CDN, as important server-side code such as a database of hashed client credentials used for authentication, typically is maintained at the origin. Learn about the Cloudflare CDN with edge servers all over the globe.
