@@ -37,7 +37,7 @@ So both Varnish and Redis are server level caching solutions, software that sits
 
 In addition to this **CloudFlare works behind the scenes to block known security threats.  Abusive bots and crawlers will be automatically limited from wasting your bandwidth and server resources**.
 When your site is protected by CloudFlare your web pages will be cached and optimized for speedy delivery so your visitors get some of the fastest page load times and best performance they have ever seen!
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/maxresdefault.png)
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/maxresdefault.jpg)
 
 By default, CloudFlare will only cache your static data - for instance your images, javascript and CSS - often what forms the bulk of your web site size. It can, with configuration, also cache your web site page content.
 
