@@ -55,6 +55,39 @@ What's more, Railgun speeds up re-caching of dynamic content by only transmittin
 
 Again, we're only touching the tip of the iceberg, and there are a myriad of other features and advantages in CloudFlare that can add speed and security benefits. With CloudFlare and Railgun in the mix, we're no longer just flying any old plane - we're on a rocket.
 
+### Understanding Railgun:
+When you host your site with DreamHost, we pick a server for you in one of our datacenters. Currently we have two datacenters in California and one in Virginia. This probably works just fine if you happen to be in the United States. However, your website is still limited to just one server. CloudFlare on the other hand has 23 data centers spread out across the world and is adding more all the time. These datacenters act like a CDN (Content Delivery Network) for sites using the service. In other words, CloudFlare will automatically make copies of your website across the world, and when someone visits your site they’ll automatically go to the closest one.
+
+When CloudFlare is enabled, your site visitors are automatically routed through CloudFlare. CloudFlare acts as a CDN, and provides other features such as automatically optimizing pages.
+
+That sounds great, but you may still be wondering how all that actually works. I don’t know all the intricate details of what CloudFlare does with their servers, but I can tell you what we do here at DreamHost. Under the hood there are three things we use:
+
+## DNS — 
+We modify the DNS records for your site to point to CloudFlare instead of the DreamHost servers. DNS stands for Domain Name System. In layman’s terms, DNS is how computers convert a domain name such as dreamhost.com to an IP address like 208.97.187.204 (every computer on the internet has an IP address). Most people never need to worry about DNS records, and as long as you’re using DreamHost for your DNS servers, we handle all the necessary changes for you when setting up CloudFlare.
+
+## CloudFlare’s Hosting Provider API — 
+We make use of CloudFlare’s Hosting Provider API to set up your account with them. If you’re a software developer, you’re probably familiar with the term API (Application Programming Interface). I won’t really go into the details about how the CloudFlare API works; this is just a system we use to communicate and synchronize settings with CloudFlare.
+
+## mod_cloudflare — 
+mod_cloudflare is an Apache module that allows your server to know the true IP address of your site visitors even when the connection (from DreamHost’s perspective) is coming from CloudFlare. Apache is the software we use for our web servers, and an “Apache module” is just a plugin for that software. There’s nothing all that magical about how this works. CloudFlare’s servers send a little bit of extra data using HTTP headers, and mod_cloudflare reads the headers and fixes up the reported IP address in Apache.
+And… that’s it. Everything else with regards to your website will be the same as it always has been. You still have the option of being on our Shared, VPS, or Dedicated Hosting. You don’t need to install any special plugins or make any changes to your site (the only special plugin is mod_cloudflare, and we’ve already installed that on all of our servers — even if you’re not using CloudFlare).
+
+Oh, I almost forgot… RAILGUN!!! Yes, that was supposed to be the subject of this post!
+
+People using CloudFlare up until now may have noticed that the connection between DreamHost and CloudFlare (aka the internet) is still a potential bottleneck. This can especially be a problem for sites with dynamic content because that dynamic content would need to be retrieved from the DreamHost web server each time. This is where Railgun makes a difference.
+
+Railgun compresses the data in the connection between DreamHost and CloudFlare in order to minimize the amount of data we need to transmit over the internet. Railgun does this by taking advantage of the fact that even pages with dynamic content often only have small parts that change. Rather than transmitting a new copy of the entire page over the internet every time, Railgun transmits only the parts that changed.
+
+Instead of connecting directly to CloudFlare, the web server’s connection is routed through a Railgun Server, which compresses the data before it goes over the internet. The load on the webserver remains the same, but the amount of data transmitted over the internet is greatly reduced.
+Less data going over the internet (between DreamHost and CloudFlare’s servers) means your site loads faster, and we can save bandwidth for things that are important...
+
+If you're currently a DreamHost customer, check out this wiki page for instructions on how to enable Railgun on your site. Even if you don’t use DreamHost, we still recommend taking advantage of the service CloudFlare provides. CloudFlare should work with any web host, although not all of them may support Railgun.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/cloudflare_no_railgun.png)
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/cloudflare_railgun.png)
+
+
 
 Ref: https://www.kualo.in/blog/fast-scalable-web-sites-with-redis-varnish-cloudflare-railgun
 
