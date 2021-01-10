@@ -237,3 +237,16 @@ A CDN provider will place servers in many locations, but some of the most import
 An origin server is the web server that receives all Internet traffic when a web property is not using a CDN. Using an origin server without a CDN means that each Internet request must return to the physical location of that origin server, regardless of where in the world it resides. This creates an increase in load times which increases the further the server is from the requesting client machine.
 
 CDN edge servers store (cache) content in strategic locations in order to take the load off of one or more origin servers. By moving static assets like images, HTML and JavaScript files (and potentially other content) as close as possible to the requesting client machine, an edge server cache is able to reduce the amount of time it takes for a web resource to load. Origin servers still have an important function to play when using a CDN, as important server-side code such as a database of hashed client credentials used for authentication, typically is maintained at the origin. Learn about the Cloudflare CDN with edge servers all over the globe.
+
+# What is a data center?
+
+A data center is a facility housing many networked computers that work together to process, store, and share data. Most major tech companies rely heavily upon data centers as a central component in delivering online services.
+
+## What is the difference between a data center and a point-of-presence (PoP)?
+
+The terms data center and point-of-presence (PoP) are sometimes used interchangeably, though distinctions can be made between them. Speaking generally, a PoP may refer to a company having a single server presence in a location while a data center may refer to a location that houses multiple servers. Instead of referring to multiple PoPs in one location, Cloudflare uses the term data center to indicate a location in which many of our servers are maintained.
+
+The concept of a point-of-presence rose to prominence during the court ordered breakup of the Bell telephone system. In the court decision, a point-of-presence referred to a location where long-distance carriers terminate services and shift connections onto a local network. Similarly, on the modern Internet a PoP typically refers to where CDNs have a physical presence in a location, often in the junctures between networks known as Internet exchange points (IxP).
+
+A data center refers to a physical location in which computers are networked together in order to improve usability and reduce costs related to storage, bandwidth, and other networking components. Data centers such as IxP co-location facilities allow different Internet service providers, CDN’s, and other infrastructure companies to connect with each other to share transit.
+
