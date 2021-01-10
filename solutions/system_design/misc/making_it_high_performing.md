@@ -35,6 +35,10 @@ Varnish is fast, really fast. It typically speeds up delivery by a factor or 300
 ## CloudFlare:
 So both Varnish and Redis are server level caching solutions, software that sits on your server, making things super snappy. By contrast, CloudFlare is a network level caching layer, and a big one at that. Let's say your VPS is in our UK datacentre, but you've got lots of visitors to your web site in the US. Normally when they load your web site, all of the components that make it up will travel across fiberoptic cables under the Atlantic. Now this happens incredibly quickly, but it would be much quicker if that data didn't have to travel all those thousands of miles. Enabling CloudFlare means that your data can be cached in a datacentre that's closer to each of your visitors. The CloudFlare network is vast, with over 100 datacentres spanning every continent on Earth.
 
+In addition to this **CloudFlare works behind the scenes to block known security threats.  Abusive bots and crawlers will be automatically limited from wasting your bandwidth and server resources**.
+When your site is protected by CloudFlare your web pages will be cached and optimized for speedy delivery so your visitors get some of the fastest page load times and best performance they have ever seen!
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/maxresdefault.png)
+
 By default, CloudFlare will only cache your static data - for instance your images, javascript and CSS - often what forms the bulk of your web site size. It can, with configuration, also cache your web site page content.
 
 There are two major benefits to this network level caching.
@@ -88,7 +92,7 @@ If you're currently a DreamHost customer, check out this wiki page for instructi
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/cloudflare_railgun.png)
 
 
-
+Ref: https://www.dreamhost.com/blog/cloudflare-railgun/
 Ref: https://www.kualo.in/blog/fast-scalable-web-sites-with-redis-varnish-cloudflare-railgun
 
 ### Can I use Cloudflare and Varnish together?
