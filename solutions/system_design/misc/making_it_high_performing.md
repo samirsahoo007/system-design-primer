@@ -66,13 +66,13 @@ When CloudFlare is enabled, your site visitors are automatically routed through 
 
 That sounds great, but you may still be wondering how all that actually works. I don’t know all the intricate details of what CloudFlare does with their servers, but I can tell you what we do here at DreamHost. Under the hood there are three things we use:
 
-## DNS — 
+#### DNS — 
 We modify the DNS records for your site to point to CloudFlare instead of the DreamHost servers. DNS stands for Domain Name System. In layman’s terms, DNS is how computers convert a domain name such as dreamhost.com to an IP address like 208.97.187.204 (every computer on the internet has an IP address). Most people never need to worry about DNS records, and as long as you’re using DreamHost for your DNS servers, we handle all the necessary changes for you when setting up CloudFlare.
 
-## CloudFlare’s Hosting Provider API — 
+#### CloudFlare’s Hosting Provider API — 
 We make use of CloudFlare’s Hosting Provider API to set up your account with them. If you’re a software developer, you’re probably familiar with the term API (Application Programming Interface). I won’t really go into the details about how the CloudFlare API works; this is just a system we use to communicate and synchronize settings with CloudFlare.
 
-## mod_cloudflare — 
+#### mod_cloudflare — 
 mod_cloudflare is an Apache module that allows your server to know the true IP address of your site visitors even when the connection (from DreamHost’s perspective) is coming from CloudFlare. Apache is the software we use for our web servers, and an “Apache module” is just a plugin for that software. There’s nothing all that magical about how this works. CloudFlare’s servers send a little bit of extra data using HTTP headers, and mod_cloudflare reads the headers and fixes up the reported IP address in Apache.
 And… that’s it. Everything else with regards to your website will be the same as it always has been. You still have the option of being on our Shared, VPS, or Dedicated Hosting. You don’t need to install any special plugins or make any changes to your site (the only special plugin is mod_cloudflare, and we’ve already installed that on all of our servers — even if you’re not using CloudFlare).
 
