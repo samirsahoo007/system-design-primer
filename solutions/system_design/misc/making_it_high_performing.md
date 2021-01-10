@@ -1,19 +1,30 @@
-What we cover in this post tries to explain in as simple terms as possible what it takes to optimise a web site so that it is lightning fast and scalable to handle very high numbers of visitors. The techniques we use are applicable to most applications our customers usually build their sites on, such as WordPress, Drupal, Joomla and Magento, amongst others.
-Let's see how we can make our site's landing page to load quickly...
 
 Redis => data caching
 Varnish => frontend caching
 CloudFlare => web static data(images, javascript, css) caching
 
+
+What we cover in this post tries to explain in as simple terms as possible what it takes to optimise a web site so that it is lightning fast and scalable to handle very high numbers of visitors. The techniques we use are applicable to most applications our customers usually build their sites on, such as WordPress, Drupal, Joomla and Magento, amongst others.
+The first impression of a good WordPress site is that its site’s landing page should load quickly. Then, the loading times of rest of interlinked pages should be fast. For a website to load fast it should have different layered approaches to caching.
+
+# How to improve page load times of website?
+* The first layer is the presence of content delivery network (CDN).
+* The second layer of creating the faster website is to install a free TLS/SSL certificate signed by CloudFlare on your origin server.
+* * It is completely free of cost.
+* Enable Varnish cache and enable Varnish cache settings for individual domains.
+* Most of times sites in the web browser wats for around 1.6 seconds for favicon to load. It is a good idea to add the favicon to reduce this waiting time of web browser in visitor’s computer.
+* Enable HTTP/2on CloudFlare to work with Varnish cache.
+* Use HTTPS protocol on your website.
+
 **Redis and Varnish do server level caching whereas CloudFlare do network level caching**
 
-# Redis:
+## Redis:
 For most use cases, we only need the tip - data caching. In simple terms, Redis can be used as a very fast way to cache data in memory. One of the pain points that make web sites slow is the time it takes to query a database, often where much of information necessary to display the page is stored. This is particularly true on busy sites that have lots of visitors, and make lots of queries to a database. Redis can be used to cache some or all of your database in memory, and querying data from memory takes a fraction of the time compared to querying from much slower hard disks.
 
 So it's also really useful at speeding up web sites that may rely on external APIs as well. For instance on our own web site, we query various external APIs such as TrustPilot reviews, recent blog posts and Twitter. These are cached directly into Redis so that the data is available instantly, without needing to do a live query to the external API or even build a MySQL table to store that data in.
 
 
-# Varnish:
+## Varnish:
 Varnish is a web application accelerator, which sits in front of the web server. To understand what Varnish does, it's first important to understand what happens normally, without Varnish. When a visitor accesses your web site, the web server will receive a request for a page, which will then spawn more requests to find all the components needed to display your page. Typically, all your images, CSS files, Javascript, PHP scripts will be requested, PHP code will execute, MySQL queries will be made and data returned, and eventually, the components and resulting HTML will be downloaded to your browser. That's an awful lot of work. When you've got lots of people accessing your web site, your web server is working overtime trying to deliver all of these requests, to all of these visitors. Often, it's doing all of this work to generate the exact same content for different visitors.
 
 With Varnish, all that hard work only needs to be done once, or at least only until the content or page itself changes. Once it's got all the necessary data to display the web page, Varnish caches that data in memory. Now, when the next visitor arrives, your web server can put its feet up and let Varnish simply return the ready made page and all the components in milliseconds, without a single request to disk, MySQL query or PHP execution. This means that your web server only needs to do the hard work when the requested data has changed, freeing it up to handle many times more requests than it would otherwise have been capable.
@@ -21,7 +32,7 @@ With Varnish, all that hard work only needs to be done once, or at least only un
 Varnish is fast, really fast. It typically speeds up delivery by a factor or 300 - 1000 x, and will allow your server to handle huge volumes of traffic. No need to buy a bigger boat, we're now flying a plane.
 
 
-# CloudFlare:
+## CloudFlare:
 So both Varnish and Redis are server level caching solutions, software that sits on your server, making things super snappy. By contrast, CloudFlare is a network level caching layer, and a big one at that. Let's say your VPS is in our UK datacentre, but you've got lots of visitors to your web site in the US. Normally when they load your web site, all of the components that make it up will travel across fiberoptic cables under the Atlantic. Now this happens incredibly quickly, but it would be much quicker if that data didn't have to travel all those thousands of miles. Enabling CloudFlare means that your data can be cached in a datacentre that's closer to each of your visitors. The CloudFlare network is vast, with over 100 datacentres spanning every continent on Earth.
 
 By default, CloudFlare will only cache your static data - for instance your images, javascript and CSS - often what forms the bulk of your web site size. It can, with configuration, also cache your web site page content.
@@ -36,7 +47,7 @@ In the example above, the orange portion represents all the requests for a web s
 
 The picture gets even better when you consider the bandwidth savings. Any data thats served from CloudFlare saves you bandwidth - you can expect your bandwidth reduction to go down by a similar percentage as your requests, if not even more.
 
-# Railgun
+## Railgun
 Railgun makes web sites even faster. 
 When CloudFlare requests data from your server, because that data has either changed or didn't already exist in that locations cache, it is transmitted to CloudFlare and onto the end user much faster than it would normally.
 
@@ -46,4 +57,113 @@ Again, we're only touching the tip of the iceberg, and there are a myriad of oth
 
 
 Ref: https://www.kualo.in/blog/fast-scalable-web-sites-with-redis-varnish-cloudflare-railgun
+
+### Can I use Cloudflare and Varnish together?
+You may also modify vcl\_recv to strip the \_\_cfduid cookies set by Cloudflare so Varnish can cache the response. The following VCL will strip all cookies starting with two underscores or including 'has\_js', such as Cloudflare and Google Analytics cookies:
+
+```
+    sub vcl_recv {
+      # Remove has_js and Cloudflare/Google Analytics __* cookies.
+      set req.http.Cookie = regsuball(req.http.Cookie, "(^|;\s *)(_[_a-z]+|has_js)=[^;]*", "");
+      # Remove a ";" prefix, if present.
+      set req.http.Cookie = regsub(req.http.Cookie, "^;\s*", "");
+    }
+```
+
+#### About Varnish
+Varnish Software’s powerful caching technology helps the world’s biggest content providers deliver lightning-fast web and streaming experiences for huge audiences, without downtime or loss of performance.
+
+Our solutions combine open-source flexibility with enterprise robustness to speed up media streaming services, accelerate websites and APIs, and enable global businesses to build custom CDNs, unlocking unbeatable content delivery performance and resilience.
+
+#### About CloudFlare
+Cloudflare is a successful combination of network security and performance solution that increases websites or networks speed and provides protection of websites, mobile applications, APIs, and SaaS services. It is one of the leading Content Delivery Network on the market.
+
+This CDN service speeds up and enhances the performance of networks, websites, apps, and APIs. It operates as a network of proxy servers and data centers (more than 100) that are located around the world, powering over 10 trillion requests per month. The service can manage 10Tbps in bandwidth for their users.
+
+When it comes to security, the key security elements include protection against SQL injection, which attacks the code of the website. It also protects from Distributed Denial of Service (DDoS) attacks, which is on the rise by exploitation of insecure Internet-of-Things devices. These downtimes can make the average hourly cost as high as $100,000 per hour.
+
+# How to enable Varnish cache on your origin server?
+* Log in to cPanel
+* Provide User Name and Password
+* Go to WEB ACCELERATOR in paper_lantern theme.
+* Click on MANAGE VARNISH
+* From MANAGE VARNISH SETTINGS scroll down to CACHE SETTINGS FOR INDIVIDUAL DOMAINS.
+* Enable it on your DOMAIN
+* It might take 30 minutes to enable Varnish cache on your website.
+
+# What is Varnish Cache?:
+* Varnish Cache speeds up website rendering time to three to five times.
+* It caches static and dynamic contents of WordPress website.
+* Dynamic contents of a website include images, CSS (Cascade style sheets), plain HTML.
+* Varnish Cache is a web application accelerator.
+* It works as caching HTTP reverse proxy.
+* It is installed on your origin server. (e.g. cPanel)
+* If your network speed of hosting server is fast then it works really fast.
+* It can deliver the high level of content through regular off-the-shelf hardware.
+
+# How to enable HTTP/2 on your website?
+* Set up Free CloudFlare CDN for your website
+* Install a free TLS certificate (SSL) signed by CloudFlare on your origin server.
+* Login to CloudFlare and then click on your website name in its dashboard.
+* Go to NETWORK and then HTTP/2 and enable it. Most of the times it is enabled by default if not enable it there.
+
+# What is HTTP/2?
+* It is the prominent revision of World Wide Web (WWW)
+* It improves the way HTTP requests and responses are sent through low-latency transport of web contents.
+* It increases page load times of website.
+* It creates per-domain multiplexing of retrieving resources.
+* HTTP header compression.
+* It provides server push by removing latency times on web browser.
+* It works nicely when Varnish cache is enabled on the origin server.
+
+# How to add the favicon to the website?
+* Log in to WordPress Admin
+* Put Username or Email Address and password.
+* From sidebar of WordPress Admin choose APPEARANCE
+* Then CUSTOMISE. I USE Twenty Twelve theme.
+* Then go to SITE IDENTITY
+* Then go to SITE ICON. It is favicon.
+* Here upload your favicon and save website.
+
+After enabling CloudFlare, SSL and HTTP/2 on my site, I saw the mobile speed of the website is 77 and desktop is 81. After implementation of Varnish cache, now the mobile score of website 79 and desktop score of the website is 91. This is from Google PageSpeed insight.
+I introduced CloudFlare CDN as one cache layer for the website and then Varnish Cache as another layer of caching of contents. This makes the website faster. In this way, original server or the host of the website is being kept secure and the handling of large data traffic rests with reverse proxy Varnish and content distribution network CloudFlare.
+
+Ref: https://mohanmekap.medium.com/how-to-use-varnish-and-cloudflare-for-maximum-caching-d3a7c42e54c3
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/MiddleHost-mhCache-Varnish-Cache-for-wordpress.png)
+
+mhCache => Middlehost cache(e.g. Varnish)
+
+# General best practices for load balancing at your origin with Cloudflare
+
+When integrating with Cloudflare, please consider the following for best practices when utilizing load balancers within your website's host environment:
+
+* Cloudflare's DNS Load Balancing 
+* HTTP keep-alive
+* Session cookies
+* Railgun 
+
+## DNS Load Balancing
+
+Cloudflare's Load Balancing feature supports DNS-based load balancing with active health checks against your origin servers. It expands on Cloudflare's existing Anycast DNS network to provide DDoS-resilient failover (steering around unhealthy origins) and geo-steering (directing users to specific pools of origins).
+
+## HTTP keep-alive (HTTP persistent connection)
+
+Cloudflare maintains keep-alive connections to improve performance and reduce cost of recurring TCP connects in the request transaction as Cloudflare proxies customer traffic from its edge network to the site's origin.
+
+Ensure HTTP Keep-Alive connections are enabled on your origin. Cloudflare reuses open TCP connections for up to 15 minutes (900 seconds) after the last HTTP request. Origins close TCP connections if too many are open. HTTP Keep-Alive helps avoid premature reset of connections for requests proxied by Cloudflare.
+
+## Session cookies
+
+If using HTTP cookies to track and bind user sessions to a specific application server at the load balancer, it is best is to configure the load balancer to parse HTTP requests by cookie headers and directing each request to the correct application server even if HTTP requests share the same TCP connection due to keep-alive.
+
+For example: F5 BIG-IP load balancers will set a session cookie (if none exists) at the beginning of a TCP connection and then ignore all cookies passed on subsequent HTTP requests made on the same TCP socket. This tends to break session affinity because Cloudflare will send multiple different HTTP sessions on the same TCP connection. (HTTP cookie-based session affinity).
+
+## Railgun (WAN Optimization)
+
+The ideal setup when using Railgun and a load balancer is to place the Railgun listener in front of the load balancer. Placing the listener in front is the ideal setup, as that allows the LB to handle the HTTP/S connections as normal, as it is difficult to load balance the long-lived TLS connection between the sender/listener.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/hc-import-railgun_diagram_lb_setup.png)
+
+Ref: https://support.cloudflare.com/hc/en-us/articles/212794707-General-best-practices-for-load-balancing-at-your-origin-with-Cloudflare
 
