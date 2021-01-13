@@ -550,3 +550,108 @@ Ref for config: https://engineering.pivotal.io/post/local-eureka-zuul-cloud_conf
 * The data is loaded from Document MicroService to Account MicroService and from the Account MicroService to the Customer microService.
 * The complete data is then sent as a responce back to the client.
 
+
+
+
+
+# One: What is Microservice?
+ 
+Microservice architecture mode is to organize the entire web application into a series of small Web services. These small Web services can be compiled and deployed independently and communicate with each other through their exposed API interfaces. They work together to provide functionality to the user as a whole, but can be extended independently.
+
+Features or usage scenarios required by the microservices architecture
+
+* 1: We split the entire system into several subsystems based on the business.
+
+* 2: Multiple applications can be deployed per subsystem, and load balancing is used between multiple applications.
+
+* 3: A service registry is required. All services are registered in the registry. Load balancing is also achieved by using certain policies through the services registered in the registry.
+
+* 4: All clients access the background service through the same gateway address. Through routing configuration, the gateway determines which service a URL request is processed by. Load balancing is also used when requests are forwarded to the service.
+
+* 5: Sometimes services need to be accessed from each other. For example, there is a user module, and other services need to obtain user data of the user service when processing some services.
+
+* 6: A circuit breaker is needed to deal with timeouts and errors in the service call in time to prevent the overall system from being paralyzed due to problems with one of the services.
+
+* 7: A monitoring function is also needed to monitor the time spent on each service call.
+
+At present, the mainstream micro-service framework: Dubbo, SpringCloud, thrift, Hessian, etc., most of the domestic SMEs use Dubbo, SpringCloud is estimated to be rare, and perhaps some development students have not heard of it.
+
+# Two: Introduction to the SpringCloud project
+
+springCloud is a set of frameworks for implementing microservices based on SpringBoot. He provides components such as configuration management, service discovery, circuit breakers, intelligent routing, micro-proxy, control bus, global locks, decision-making campaigns, distributed sessions, and cluster state management required for microservice development. the most important is,
+
+When used with the spring boot framework, it will make it very convenient for you to develop a cloud service for the microservice architecture.
+
+SpringBoot is designed to simplify the creation of product-level Spring applications and services, simplify configuration files, use embedded web servers, and includes many out-of-the-box microservices
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/spring_cloud.jpg) 
+
+The spring cloud subproject includes:
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/eureka.jpg)
+
+**Spring Cloud Config**: The Configuration Management Development Kit allows you to put your configuration on a remote server and currently supports local storage, Git, and Subversion.
+
+**Spring Cloud Bus**: An event, message bus that propagates state changes in a cluster (for example, configuration change events) and can be combined with Spring Cloud Config for hot deployment.
+
+Spring Cloud Netflix: A development kit for a variety of Netflix components, including Eureka, Hystrix, Zuul, Archaius, and more.
+
+Netflix Eureka: Cloud Load Balancing, a REST-based service for locating services for cloud-based load balancing and middle-tier server failover.
+
+Netflix Hystrix: A fault-tolerant management tool designed to provide greater fault tolerance for latency and failure by controlling the nodes of services and third-party libraries.
+
+Netflix Zuul: The Edge Services tool is an edge service that provides dynamic routing, monitoring, resiliency, security, and more.
+
+Netflix Archaius: A configuration management API that includes a set of configuration management APIs that provide dynamic typing properties, thread-safe configuration operations, polling frameworks, callback mechanisms, and more.
+
+Spring Cloud for Cloud Foundry: Binding services to CloudFoundry via Oauth2 protocol, CloudFoundry is an open source PaaS cloud platform from VMware.
+
+Spring Cloud Sleuth: A log collection toolkit that encapsulates Dapper, Zipkin and HTrace operations.
+
+Spring Cloud Data Flow: A big data manipulation tool that manipulates data streams from the command line.
+
+Spring Cloud Security: A security toolkit that adds security controls to your application, primarily OAuth2.
+
+Spring Cloud Consul: Encapsulates the Consul operation, a service discovery and configuration tool that seamlessly integrates with Docker containers.
+
+Spring Cloud Zookeeper: A toolkit for operating Zookeeper for service registration and discovery using the zookeeper method.
+
+Spring Cloud Stream: Data flow operation development package, which encapsulates sending and receiving messages with Redis, Rabbit, Kafka, etc.
+
+Spring Cloud CLI: Based on the Spring Boot CLI, you can quickly build cloud components from the command line.
+  
+
+SpringCloud features
+
+* 1: Convention is better than configuration
+
+* 2: Out of the box, quick start
+
+* 3: Suitable for various environments
+
+* 4: Lightweight components
+
+* 5: rich component support, full-featured
+
+
+# Three: SpringBoot understand
+ 
+
+Spring Boot makes our Spring applications lighter. For example: you can rely on a Java class to run a Spring reference. You can also package your app as a jar and run your Spring web app by using java -jar.
+
+Since SpringCloud relies on SpringBoot, you need to understand SpringBoot before learning the SpringCloud framework.
+
+The main advantages of SpringBoot:
+
+1: Get started faster for all Spring developers
+
+2: Out of the box, with various default configurations to simplify project configuration
+
+3: Embedded container simplifies web projects
+
+4: No requirements for redundant code generation and XML configuration
+
+Ref: https://www.programmersought.com/article/82911571660/
+ 
+
+
