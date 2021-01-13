@@ -79,6 +79,29 @@ The outbound filters run after a response has been returned and can be used for 
 
 It helps in Easy routing based on query params, URL, path. The main use case is for routing traffic to a specific test or staging cluster.
 
+#### What is the Netflix Zuul? Need for it?
+Zuul is a JVM based router and server side load balancer by Netflix. 
+It provides a single entry to our system, which allows a browser, mobile app, or other user interface to consume services from multiple hosts without managing cross-origin resource sharing (CORS) and authentication for each one. We can integrate Zuul with other Netflix projects like Hystrix for fault tolerance and Eureka for service discovery, or use it to manage routing rules, filters, and load balancing across your system.
+
+* Microservice call without Netflix Zuul
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/without_zuul.jpg)
+
+* Microservice call with Netflix Zuul
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/with_zuul.jpg)
+
+* Microservice call with Netflix Zuul + Netflix Eureka 
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/with_zuul_eureka.jpg)
+
+Refer https://www.javainuse.com/spring/spring-cloud-netflix-zuul-tutorial for more details...
+
+**Zuul and NGINX are very similar the key differences are**
+
+Unlike for NGINX Zuul can’t be downloaded as a binary distribution, instead it is running inside a Spring Boot application using the Spring Cloud integration
+Zuul is written in Java, therefore integration with the Java, Spring Boot, Spring Cloud and Netflix OSS ecosystem is quite easy
+
 #### Advantages: ??
 * Services needing to shard their traffic create routing rules that map certain paths or prefixes to separate origins
 * Developers onboard new services by creating a route that maps a new hostname to their new origin
@@ -426,3 +449,17 @@ public class User {
 Ref:
 https://medium.com/@narengowda/netflix-system-design-dbec30fede8d
 https://www.geeksforgeeks.org/design-video-sharing-system-like-youtube/
+
+
+# Spring Cloud for Microservices Compared to Kubernetes
+
+Spring Cloud and Kubernetes both claim to be the best environment for developing and running Microservices, but they are both very different in nature and address different concerns. 
+The two platforms, Spring Cloud and Kubernetes, are very different and there is no direct feature parity between them. If we map each MSA concern to the technology/project used to address it in both platforms, we come up with the following table.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/spring_cloud_vs_kubernetes.png)
+
+The main takeaways from the above table are:
+* Spring Cloud has a rich set of well integrated Java libraries to address all runtime concerns as part of the application stack. As a result, the Microservices themselves have libraries and runtime agents to do client side service discovery, load balancing, configuration update, metrics tracking, etc. Patterns such as singleton clustered services and batch jobs are managed in the JVM too.
+* Kubernetes is polyglot, doesn't target only the Java platform, and addresses the distributed computing challenges in a generic way for all languages. It provides services for configuration management, service discovery, load balancing, tracing, metrics, singletons, scheduled jobs on the platform level and outside of the application stack. The application doesn't need any library or agents for client side logic and it can be written in any language.
+* In some areas both platforms rely on similar third party tools. For example the ELK and EFK stacks, tracing libraries, etc. Some libraries such as Hystrix, Spring Boot are useful equally well on both environments. There are areas where both platforms are complementary and can be combined together to create a more powerful solution (KubeFlix and Spring Cloud Kubernetes are such examples).
+
