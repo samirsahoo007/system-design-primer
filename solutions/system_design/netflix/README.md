@@ -463,3 +463,90 @@ The main takeaways from the above table are:
 * Kubernetes is polyglot, doesn't target only the Java platform, and addresses the distributed computing challenges in a generic way for all languages. It provides services for configuration management, service discovery, load balancing, tracing, metrics, singletons, scheduled jobs on the platform level and outside of the application stack. The application doesn't need any library or agents for client side logic and it can be written in any language.
 * In some areas both platforms rely on similar third party tools. For example the ELK and EFK stacks, tracing libraries, etc. Some libraries such as Hystrix, Spring Boot are useful equally well on both environments. There are areas where both platforms are complementary and can be combined together to create a more powerful solution (KubeFlix and Spring Cloud Kubernetes are such examples).
 
+Ref: http://www.ofbizian.com/2016/12/spring-cloud-compared-kubernetes.html
+
+Read the article and setup here ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/Infrastructure_services.png)
+
+
+If you use Ribbon and Eureka in your Spring Boot application, you’ll notice that the default configuration is not optimal. Eureka takes a long time to figure out that the service went down unexpectedly and, in the meantime, your load balancer Ribbon will try to connect to the dead one. In other words, the eviction policy does not perform well by default.
+
+On the other hand, the official Eureka documentation discourages changing the leaseRenewalIntervalInSeconds parameter so, what can we do here?
+
+## Netflix Eureka does not deregister instances
+
+Eureka is a great tool for Service Discovery and integrates very well with Spring Boot. We can create a Service Registry just by adding some dependencies and an annotation, and we can connect our clients to register on the server with minimal configuration too. It comes with Ribbon as Load Balancer, so we can get everything working in few minutes. Our services will ask the registry for the instances of a given service and will decide by themselves, using Ribbon, to which one they’re connecting.
+
+The problem arises when one of our multiple instances of a service goes down unexpectedly or loses connectivity, not having time to notify the Eureka server. The service registry is based on leases, and every client should renew itself every N seconds. When the lease expires, Eureka takes also some time to decide that the instance is no longer valid. It’s not a very straightforward mechanism, as you’ll see explained on different Internet threads. With the default configuration, my experience is that it can take up to four or five minutes to deregister a dead instance.
+
+On the other hand, the official documentation tells us that we shouldn’t change this configuration. My guess is that, since the mechanism to deregister is not easy to understand, you can mess the entire configuration up if you make mistakes.
+
+## How to solve it
+
+The approach to solving this problem is based on Ribbon and not Eureka. We can leave the Service Registry alone and let it work as usual, with the optimal configuration, but we can make our clients smarter and let them find out which services are really healthy.
+
+Spring Boot configures Ribbon by default with a Round-Robin strategy for load balancing. It also sets the status-check mechanism to none (NoOpPing), which means that the load balancer will not verify if the services are still alive. It makes sense since it should be our Service Registry, Eureka, the one that registers and deregisters instances. But we just concluded that the time it will take it’s not good for us.
+
+## Adding Ribbon Configuration
+
+We can use the Ribbon functionality to ping services from the Service Registry and apply load balancing depending on the result. To get that working, we need to configure two Spring beans: an IPing to establish the check-status mechanism and an IRule to change the default load balancing strategy.
+
+* The PingUrl implementation checks if services are alive. We want to change the default URL and point it to /health since we want to avoid requests to unmapped root contexts. The false flag is just to indicate that the endpoint is not secured.
+* The AvailabilityFilteringRule is an alternative to the default RoundRobinRule that takes into account the availability being checked by our new pings.
+* One thing that's very important to note (since it's tricky) is that this class is not annotated with @Configuration. It's injected in a different way: we need to reference it from a new annotation added to the main application class: @RibbonClients.
+
+If we test now again the scenario where multiple instances are registered, and then one of them goes down, we’ll notice that the reaction time to find out an unavailable service is much less.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/logical_view_v8-1024x977.png)
+
+Ref: https://thepracticaldeveloper.com/how-to-fix-eureka-taking-too-long-to-deregister-instances/
+
+
+
+* **Eureka** is a REST (Representational State Transfer) based service that is primarily used in the AWS cloud for locating services for the purpose of load balancing and failover of middle-tier servers. We call this service, the Eureka Server. Eureka also comes with a Java-based client component, the Eureka Client, which makes interactions with the service much easier. The client also has a built-in load balancer that does basic round-robin load balancing. At Netflix, a much more sophisticated load balancer wraps Eureka to provide weighted load balancing based on several factors like traffic, resource usage, error conditions etc to provide superior resiliency.
+
+* **Spring Cloud Config** provides server-side and client-side support for externalized configuration in a distributed system. With the Config Server, you have a central place to manage external properties for applications across all environments.
+
+* **Zuul** is an edge service that provides dynamic routing, monitoring, resiliency, security, and more.
+
+Ref for config: https://engineering.pivotal.io/post/local-eureka-zuul-cloud_config-with-spring/
+
+# Architecture that common microservices use
+
+* Client sends in a request which is sent to the api gateway.
+* The Gateway may utilize a service discovery service to tell the port number of the named service to which the request points to.
+* The request is then forwarded to the specified service and the responce is generated from the service.
+
+
+1. **API Gateway**-
+
+* Netflix Zuul acts as an API gateway
+* When we have multiple instances of microservices registered on service discovery server, and we need to hide our system complexity to the outside world, we deploy a API gateway such as Netflix Zuul.
+* There should be only one IP address exposed on one port available for inbound clients. That’s why we need API gateway — Zuul.
+* Zuul will forward our request to the specific microservice based on its proxy configuration.
+* Zuul is an edge service that provides dynamic routing, monitoring, resiliency, security, and more. Please view the wiki for usage, information, HOWTO, etc https://github.com/Netflix/zuul/wiki
+
+2. **Discovery Service**-
+
+* In order for a client to make a request to a service it must use a service-discovery mechanism. A key part of service discovery is the service registry. The service registry is a database of available service instances.
+* This project uses Netflix Eureka for service discovery: Eureka is a REST (Representational State Transfer) based service that is primarily used in the AWS cloud for locating services for the purpose of load balancing and failover of middle-tier servers. For more info on Eureka read on : https://github.com/Netflix/eureka/wiki/Eureka-at-a-glance
+
+3. **Ribbon Client**-
+
+* Ribbon Load Balancer is integrated with Netflix OSS and is used for load balancing in the microservice architecture. Ribbon is a client side IPC(Inter-Process-Communication) library that is battle-tested in cloud.
+
+4. **FEIGN Client**-
+
+* Feign makes writing java http clients easy and simple. It is utilized for inter-process communication in the project. To read more on Feign go to: https://github.com/OpenFeign/feign
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/microservices_zuul_eureka.png)
+
+## Request Flow
+
+* When we hit the url : http://localhost:8765/api/customer/customers (after starting the required services) (discovery-service; gateway-service; customer-service; account-service; document-service; zipkin)
+* The Client request is recieved at the Gateway API.
+* The Gateway API(Zuul) resolves the port number from the service name using the Discovery Service (Eureka)
+* The request is sent to the customer microservice’s (findall()) method which internally uses the feign Client to take data from the Account MicroService.
+* The Account Microservice inturn hits the Document MicroService’s (findall()) method using the feign Client
+* The data is loaded from Document MicroService to Account MicroService and from the Account MicroService to the Customer microService.
+* The complete data is then sent as a responce back to the client.
+
