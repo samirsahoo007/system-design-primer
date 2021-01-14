@@ -65,6 +65,29 @@ Netflix uses Amazons Elastic Load Balancer (ELB) service to route traffic to our
 * The second tier of the ELB service is an array of load balancer instances (provisioned directly by AWS), which does round-robin load balancing over our own instances that are behind it in the same zone.
 
 ### **ZUUL:**
+Zuul is the front door for all requests from devices and websites to the backend of the Netflix streaming application. As an edge service application, Zuul is built to enable dynamic routing, monitoring, resiliency, and security. 
+
+Routing is an integral part of a microservice architecture. For example, /api/users is mapped to the user service and /api/shop is mapped to the shop service. Zuul is a JVM-based router and server side load balancer by Netflix.
+
+The volume and diversity of Netflix API traffic sometimes results in production issues arising quickly and without warning. We need a system that allows us to rapidly change behavior in order to react to these situations.
+
+Zuul uses a range of different types of filters that enables us to quickly and nimbly apply functionality to our edge service. These filters help us perform the following functions: 
+
+*    Authentication and Security: identifying authentication requirements for each resource.
+*    Insights and Monitoring: tracking meaningful data and statistics.
+*    Dynamic Routing: dynamically routing requests to different backend..
+*    Stress Testing: gradually increasing the traffic.
+*    Load Shedding: allocating capacity for each type of request and dropping requests.
+*    Static Response handling: building some responses directly.
+*    Multiregion Resiliency: routing requests across AWS regions.
+
+Zuul contains multiple components:
+
+*    zuul-core: library that contains the core functionality of compiling and executing Filters.
+*    zuul-simple-webapp: webapp that shows a simple example of how to build an application with zuul-core.
+*    zuul-netflix: library that adds other NetflixOSS components to Zuul — using Ribbon for routing requests, for example.
+*    zuul-netflix-webapp: webapp which packages zuul-core and zuul-netflix together into an easy to use package.
+
 The Netty handlers on the front and back of the filters are mainly responsible for handling the network protocol, web server, connection management and proxying work. With those inner workings abstracted away, the filters do all of the heavy lifting.
 
 The inbound filters run before proxying the request and can be used for authentication, routing, or decorating the request.
@@ -653,5 +676,14 @@ The main advantages of SpringBoot:
 
 Ref: https://www.programmersought.com/article/82911571660/
  
+# Anomaly Detection and Contextual Alerting
 
+As we grew from just a handful of origins to a new world where anyone can quickly spin up a container cluster and put it behind Zuul, we found there was a need to automatically detect and pinpoint origin failures.
 
+With the help of Mantis real time event streaming, we built an anomaly detector that aggregates error rates per service and notifies us in real time when services are in trouble. It takes all of the anomalies in a given time window and creates a timeline of all the origins in trouble. We then create a contextual alert email with the timeline of events and services affected. This allows an operator to quickly correlate these events and orient themselves to debug a specific app or feature, and ultimately find the root cause.
+
+**Notes**:
+
+Netflix uses Zuul2 and has opensourced it.
+
+ The Cloud Gateway team at Netflix runs and operates more than 80 clusters of Zuul 2, sending traffic to about 100 (and growing) backend service clusters which amounts to more than 1 million requests per second. 
