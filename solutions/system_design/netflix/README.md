@@ -527,6 +527,8 @@ Ref: https://thepracticaldeveloper.com/how-to-fix-eureka-taking-too-long-to-dere
 
 * **Eureka** is a REST (Representational State Transfer) based service that is primarily used in the AWS cloud for locating services for the purpose of load balancing and failover of middle-tier servers. We call this service, the Eureka Server. Eureka also comes with a Java-based client component, the Eureka Client, which makes interactions with the service much easier. The client also has a built-in load balancer that does basic round-robin load balancing. At Netflix, a much more sophisticated load balancer wraps Eureka to provide weighted load balancing based on several factors like traffic, resource usage, error conditions etc to provide superior resiliency.
 
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/microservice_registration.jpg)
+
 * **Spring Cloud Config** provides server-side and client-side support for externalized configuration in a distributed system. With the Config Server, you have a central place to manage external properties for applications across all environments.
 
 * **Zuul** is an edge service that provides dynamic routing, monitoring, resiliency, security, and more.
@@ -642,6 +644,10 @@ Spring Cloud Zookeeper: A toolkit for operating Zookeeper for service registrati
 Spring Cloud Stream: Data flow operation development package, which encapsulates sending and receiving messages with Redis, Rabbit, Kafka, etc.
 
 Spring Cloud CLI: Based on the Spring Boot CLI, you can quickly build cloud components from the command line.
+
+Turbine — Has the ability to get the metrics from different services and provide a stream combining them.
+
+Feign — provides a way to wrap rest call from one service to another service in a nice spring-ish manner.
   
 
 SpringCloud features
@@ -687,3 +693,159 @@ With the help of Mantis real time event streaming, we built an anomaly detector 
 Netflix uses Zuul2 and has opensourced it.
 
  The Cloud Gateway team at Netflix runs and operates more than 80 clusters of Zuul 2, sending traffic to about 100 (and growing) backend service clusters which amounts to more than 1 million requests per second. 
+
+
+# Build a sample project with spring cloud using cloud config, eureka, zuul, feign, hystrix and turbine
+
+Sample ready to use project with all basic configuration for -
+```
+1.    Spring cloud config (taking out and putting all the properties file at the same location)
+2.    Eureka discovery enabled to maintain scaled up instances
+3.    API gateways with zuul to support routing to different microservice
+4.    Use of feign client to call different micro service wherever necessary
+5.    fallback support for feign
+6.    hystrix dashboard with turbine to get metrics
+```
+https://github.com/samirsahoo007/microservices/tree/master/cloud-pet-project
+
+## The use case story
+
+We need to have a system where we can get the pet info, for starter we would need info about two types of pet cats and dogs
+
+* The ability to have different service for cats and dogs info, which would help me in scaling the service separately.
+* However the pet food preference info should be a separate service, which provides the info for all kinds of pets.
+* We need a fallback as if the info from food service isn’t available then we show custom message.
+* There should be a single point of contact, which means I should be able to call a single interface for cats and dogs both however the interface communicate with respective services.
+* Should have the ability to visualize the load and interactions on different services on a common platform.
+
+Look at the **Two: Introduction to the SpringCloud project** above for all the Tools.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/cloud_pet_project.png)
+
+## Understanding the components
+
+### Config server
+To start the project, first start config server application
+```
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-config-server</artifactId>
+</dependency>
+```
+
+After that we need to annotate the application to be run as a cenralized config server with @EnableConfigServer
+If it is set up to be used in native mode, it will search for the properties file specifically in local folder otherwise through a git repo.
+local folder option is good for local testing however any other environment requires a separate git repo of all your properties file
+```
+Local option : -
+spring.cloud.config.server.native.search-locations: file:\\\${HOME}\Desktop\pet_profiles_config
+Git option :-
+spring.cloud.config.server.git.uri=https://my.git.profile.location.git
+spring.cloud.config.server.git.username=<username>
+spring.cloud.config.server.git.password=<password>
+spring.cloud.config.server.git.label=master # optionally the branch name
+```
+
+### Eureka server
+Eureka server provides a common platform for all the microservices to communicate with each other or to be more correct get info about each other
+```
+<dependency>
+ <groupId>org.springframework.cloud</groupId>
+ <artifactId>spring-cloud-starter-netflix-eureka-server</artifactId></dependency>
+```
+
+After that we need to annotate the application to be run as a eureka server with @EnableEurekaServer
+the bootstrap.properties to fetch the config from pet-config should be as below
+
+Once the service is running you should see the registered server on http://localhost:8761
+
+#### Cat service
+Cat service is the service which holds the info for the cats through APIs, it needs to be discovered by eureka server, should get properties from config server, should make a call to food service when required, should also provide fallback through circuit breaker
+```
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+ <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-netflix-hystrix</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-openfeign</artifactId>
+</dependency>
+```
+It needs few self explanatory annotations too as
+
+To use feign client as bean, we need an interface which works like a template
+
+The value in @FeignClient is basically the name of food service provided as spring.application.name
+We have also defined a fallback as below
+
+#### Dog service
+Everything same as cat service just with different APIs
+
+#####Pet food
+It’s more simplistic service and it just needs @EnableDiscoveryClient and target jar spring-cloud-starter-netflix-eureka-client
+
+#####Pet api
+Here We would need zuul to route our call to target service
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+ <artifactId>spring-cloud-starter-netflix-eureka-client</artifactId></dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-netflix-zuul</artifactId>
+</dependency>
+
+so what the properties for zuul routing looks like?
+
+strip-prefix is by default true, what it does is while routing it removes the url prefix of /cat or /dog , in this case we want to keep it so we are setting it to false.
+#####Pet Dashboard
+Here we need to enable dashboard as well as turbine stream
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-netflix-hystrix-dashboard</artifactId>
+</dependency>
+<dependency>
+  <groupId>org.springframework.cloud</groupId>
+  <artifactId>spring-cloud-starter-netflix-turbine</artifactId>
+</dependency>
+Here also we would need to enable the annotations as below
+
+##### Flow
+UI/web --> pet-api --zuul--> cat and dog --feign--> pet-food
+		|_____________|_______|________________|
+				   |
+				pet-eureka
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/flow.png)
+
+##### Zuul
+API gateway is the interface for web servers or browser. API gateway is running on 8080 and through API gateway all other services can be called.
+API gateway uses zuul (@EnableZuulProxy) to route the calls to designated microserver
+for example : GET http://localhost:8080/app/cat/sound gets routed to GET http://localhost:8070/cat/sound
+hitting the API GET http://localhost:8080/app/cat/sound will give us "meooow!" response
+  
+ similarly hitting API GET http://localhost:8080/app/dog/sound will be routed to dog service and will return "woof!"
+##### Feign
+Another caveat is when one micro service need to call to other micro service, it will use feign client (@EnableFeignClients). It can be demonstrated as when we call the api gateway to get cat food it routes the call to cat service which in turns makes a call to pet-food service to get cat food information.
+GET http://localhost:8080/app/cat/food gets routed to GET http://localhost:8070/cat/food which makes a call to pet-food API http://localhost:8011/food/cat to get the information
+##### Circuit breaker and fallback
+If for some reason pet-food APIs are unavailable or it cannot be reached, we can configure a fallback implementation by providing @EnableCircuitBreaker and feign.hystrix.enabled=true
+To test it, we can take down the pet-food service and try to make the call to http://localhost:8080/app/cat/food, it should show me the below message
+food details is not available for cats at the moment! try again later.
+##### Hystrix dashboard with turbine
+We can keep a track of calls made by routing and circuit breaks by the means of hystrix dashboard, for that reason we would enable turbine (@EnableTurbine) in pet-dashboard running in localhost://8087 and @EnableHystrix in target services
+To get the dashboard (@EanbleHystrixDashboard) make a call to http://localhost:8087/hystrix/
+You should see the dashboard, in the stream put the value http://localhost:8087/turbine.stream and submit that, it should start monitoring and you should watch different services wuth chart and it should show the real time data when you try to make api calls of cat and dog.
+A particular service metrics can be fetched by the call to the service for ex. — http://localhost:8080/actuator/hystrix.stream
+##### APIs
+ GET  /app/cat/sound
+ GET  /app/cat/food
+ GET  /app/dog/sound
+ GET  /app/dog/food
+
+
+Ref https://medium.com/@27.rahul.k/build-a-sample-project-with-spring-cloud-using-cloud-config-eureka-zuul-feign-hystrix-and-378b16bcb7c3 for details
+
