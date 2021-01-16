@@ -497,6 +497,11 @@ Ref: http://www.ofbizian.com/2016/12/spring-cloud-compared-kubernetes.html
 
 Read the article and setup here ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/Infrastructure_services.png)
 
+A better design...
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/system-landscape.png)
+Refer: https://callistaenterprise.se/blogg/teknik/2015/04/15/building-microservices-with-spring-cloud-and-netflix-oss-part-2/
+
 
 If you use Ribbon and Eureka in your Spring Boot application, you’ll notice that the default configuration is not optimal. Eureka takes a long time to figure out that the service went down unexpectedly and, in the meantime, your load balancer Ribbon will try to connect to the dead one. In other words, the eviction policy does not perform well by default.
 
