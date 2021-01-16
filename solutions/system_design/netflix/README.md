@@ -97,9 +97,16 @@ Zuul contains multiple components:
 
 The Netty handlers on the front and back of the filters are mainly responsible for handling the network protocol, web server, connection management and proxying work. With those inner workings abstracted away, the filters do all of the heavy lifting.
 
-The inbound filters run before proxying the request and can be used for authentication, routing, or decorating the request.
-The endpoint filters can either be used to return a static response or proxy the request to the backend service (or origin as we call it).
-The outbound filters run after a response has been returned and can be used for things like gzipping, metrics, or adding/removing custom headers.
+#### How Zuul 2 Works
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/how_zuul2_works.png)
+
+The **inbound filters** run before proxying the request and can be used for authentication, routing, or decorating the request.
+The **endpoint filters** can either be used to return a static response or proxy the request to the backend service (or origin as we call it).
+The **outbound filters** run after a response has been returned and can be used for things like gzipping, metrics, or adding/removing custom headers.
+
+Zuul’s functionality depends almost entirely on the logic that you add in each filter. That means you can deploy it in multiple contexts and have it solve different problems based on the configurations and filters it is running.
+Netflix uses Zuul at the entrypoint of all external traffic into Netflix’s cloud services and we’ve started using it for routing internal traffic, as well. We deploy the same core but with a substantially reduced amount of functionality (i.e. fewer filters). This allows us to leverage load balancing, self service routing, and resiliency features for internal traffic.
+
 
 #### **Features:**
 *	Supports http2
