@@ -67,6 +67,13 @@ Netflix uses Amazons Elastic Load Balancer (ELB) service to route traffic to our
 ### **ZUUL:**
 Zuul is the front door for all requests from devices and websites to the backend of the Netflix streaming application. As an edge service application, Zuul is built to enable dynamic routing, monitoring, resiliency, and security. 
 
+When we work with a Gateway Service like Zuul, probably we want to include a Circuit Breaker mechanism to avoid ugly errors in case of redirecting to a service which is unavailable or not responding in time. We can do that by connecting Hystrix with Zuul with a ZuulFallbackProvider bean.
+What we want to accomplish here is a better error recovery strategy when a service behind a gateway is failing. In that scenario, the problem is that Zuul would return an Internal Server Error, which might end up crashing a web page or just giving a bad time to our REST API consumers.
+
+We can avoid that using a Circuit Breaker pattern and, with Spring Boot, the best-integrated implementation is Spring Cloud Netflix Hystrix.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/blog_zuul_hystrix.png)
+
 Routing is an integral part of a microservice architecture. For example, /api/users is mapped to the user service and /api/shop is mapped to the shop service. Zuul is a JVM-based router and server side load balancer by Netflix.
 
 The volume and diversity of Netflix API traffic sometimes results in production issues arising quickly and without warning. We need a system that allows us to rapidly change behavior in order to react to these situations.
@@ -849,3 +856,90 @@ A particular service metrics can be fetched by the call to the service for ex. â
 
 Ref https://medium.com/@27.rahul.k/build-a-sample-project-with-spring-cloud-using-cloud-config-eureka-zuul-feign-hystrix-and-378b16bcb7c3 for details
 
+# Getting Zuul and Hystrix to work:
+
+The routing configuration, as usual, is located in our application.yml:
+```
+server:
+  port: 8000
+
+zuul:
+  ignoredServices: '*'
+  prefix: /api
+  routes:
+    multiplications:
+      path: /multiplications/**
+      serviceId: multiplication
+      strip-prefix: false
+    results:
+      path: /results/**
+      serviceId: multiplication
+      strip-prefix: false
+    leaders:
+      path: /leaders/**
+      serviceId: gamification
+      strip-prefix: false
+
+eureka:
+  client:
+    service-url:
+      default-zone: http://localhost:8761/eureka/
+
+endpoints:
+  routes:
+    sensitive: false
+```
+
+## ZuulFallbackProvider configuration
+```
+@Configuration
+public class HystrixFallbackConfiguration {
+
+    @Bean
+    public ZuulFallbackProvider zuulFallbackProvider() {
+        return new ZuulFallbackProvider() {
+
+            @Override
+            public String getRoute() {
+                // Might be confusing: it's the serviceId property and not the route
+                return "multiplication";
+            }
+
+            @Override
+            public ClientHttpResponse fallbackResponse() {
+                return new ClientHttpResponse() {
+                    @Override
+                    public HttpStatus getStatusCode() throws IOException {
+                        return HttpStatus.OK;
+                    }
+
+                    @Override
+                    public int getRawStatusCode() throws IOException {
+                        return HttpStatus.OK.value();
+                    }
+
+                    @Override
+                    public String getStatusText() throws IOException {
+                        return HttpStatus.OK.toString();
+                    }
+
+                    @Override
+                    public void close() {}
+
+                    @Override
+                    public InputStream getBody() throws IOException {
+                        return new ByteArrayInputStream("{\"factorA\":\"Sorry, Service is Down!\",\"factorB\":\"?\",\"id\":null}".getBytes());
+                    }
+
+                    @Override
+                    public HttpHeaders getHeaders() {
+                        HttpHeaders headers = new HttpHeaders();
+                        headers.setContentType(MediaType.APPLICATION_JSON);
+                        return headers;
+                    }
+                };
+            }
+        };
+    }
+}
+```
