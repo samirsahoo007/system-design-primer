@@ -1049,6 +1049,8 @@ Typically, the cluster never goes down as they are spread across multiple Amazon
 ### Total Cost of Operations:
 Beyond the very low cost of operating the EVCache cluster, one has to be aware that cache misses are generally much costlier — the cost of accessing services AWS SimpleDB, AWS S3, and (to a lesser degree) Cassandra on EC2, must be factored in as well. We are happy with the overall cost of operations of EVCache clusters which are highly stable, linearly scalable.
 
+Ref: https://netflixtechblog.com/ephemeral-volatile-caching-in-the-cloud-8eba7b124589
+
 ## Under the Hood
 
 ![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ev_cache_under_the_hood.png)
