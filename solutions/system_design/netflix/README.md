@@ -1018,4 +1018,82 @@ Similar to Multi-Clustered deployment the data is sharded across the 3 instances
 If zone fallback is enabled and some data is lost due to instance/zone failure or eviction, then the data can be fetched from the clusters in other zone. This however causes an increase in latency but higher reliability. In most cases fetching data from other zone is much faster than getting the data from source.
 
 
+## How is it used?
+We have over 25 different use cases of EVCache within Netflix. A particular use case is a users Home Page. For Ex, to decide which Rows to show to a particular user, the algorithm needs to know the Users Taste, Movie Viewing History, Queue, Rating, etc. This data is fetched from various services in parallel and is fronted using EVCache by these services.
+
+### Features
+We will now detail the features including both add-ons by Netflix and those that come with memcache.
+
+### Overview
+* Distributed Key-Value store, i.e., the cache is spread across multiple instances
+* AWS Zone-Aware and data can be replicated across zones.
+* Registers and works with Netflix’s internal Naming Service for automatic discovery of new nodes/services.
+* To store the data, Key has to be a non-null String and value can be a non-null byte-array, primitives, or serializable object. Value should be less than 1 MB.
+* As a generic cache cluster that can be used across various applications, it supports an optional Cache Name, to be used as namespace to avoid key collisions.
+* Typical cache hit rates are above 99%.
+* Works well with Netflix Persister Framework[7]. For e.g., In-memory -> backed by EVCache -> backed by Cassandra/SimpleDB/S3
+
+
+### Elasticity and deployment ease:
+EVCache is linearly scalable. We monitor capacity and can add capacity within a minute and potentially re-balance and warm data in the new node within a few minutes. Note that we have pretty good capacity modeling in place and so capacity change is not something we do very frequently but we have good ways of adding capacity while actively managing the cache hit rate. Stay tuned for more on this scalable cache warmer in an upcoming blog post.
+
+### Latency:
+Typical response time in low milliseconds. Reads from EVCache are typically served back from within the same AWS zone. A nice side effect of zone affinity is that we don’t have any data transfer fees for reads.
+
+### Inconsistency:
+This is a Best Effort Cache and the data can get inconsistent. The architecture we have chosen is speed instead of consistency and the applications that depend on EVCache are capable of handling any inconsistency. For data that is stored for a short duration, TTL ensures that the inconsistent data expires and for the data that is stored for a longer duration we have built consistency checkers that repairs it.
+
+### Availability:
+Typically, the cluster never goes down as they are spread across multiple Amazon Availability Zones. When instances do go down occasionally, cache misses are minimal as we use consistent hashing to shard the data across the cluster.
+
+### Total Cost of Operations:
+Beyond the very low cost of operating the EVCache cluster, one has to be aware that cache misses are generally much costlier — the cost of accessing services AWS SimpleDB, AWS S3, and (to a lesser degree) Cassandra on EC2, must be factored in as well. We are happy with the overall cost of operations of EVCache clusters which are highly stable, linearly scalable.
+
+## Under the Hood
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ev_cache_under_the_hood.png)
+
+**Server**: The Server consists of the following:
+
+* memcached server.
+* Java Sidecar — A Java app that communicates with the Discovery Service[6] (Name Server) and hosts admin pages.
+* Various apps that monitor the health of the services and report stats.
+
+**Client**: A Java client discovers EVCache servers and manages all the CRUD[3] (Create, Read, Update & Delete) operations. The client automatically handles the case when servers are added to or removed from the cluster. The client replicates data (AWS Zone[5] based) during Create, Update & Delete Operations; on the other hand, for Read operations the client gets the data from the server which is in the same zone as the client.
+
+We will be open sourcing this Java client sometime later this year so we can share more of our learnings with the developer community.
+
+### Single Zone Deployment
+* The figure below illustrates the scenario in AWS US-EAST Region[4] and Zone-A where an EVCache cluster with 3 instances has a Web Application performing CRUD operations (on the EVcache system).
+* Upon startup, an EVCache Server instance registers with the Naming Service6 (Netflix’s internal name service that contains all the hosts that we run).
+* During startup of the Web App, the EVCache Client library is initialized which looks up for all the EVCache server instances registered with the Naming Services and establishes a connection with them.
+* When the Web App needs to perform CRUD operation for a key the EVCache client selects the instance on which these operations can be performed. We use Consistent Hashing to shard the data across the cluster.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ev_cache_under_the_hood2.png)
+
+### Multi-Zone Deployment
+* The figure below illustrates the scenario where we have replication across multiple zones in AWS US-EAST Region. It has an EVCache cluster with 3 instances and a Web App in Zone-A and Zone-B.
+* Upon startup, an EVCache Server instance in Zone-A registers with the Naming Service in Zone-A and Zone-B.
+* During the startup of the Web App in Zone-A , The Web App initializes the EVCache Client library which looks up for all the EVCache server instances registered with the Naming Service and connects to them across all Zones.
+* When the Web App in Zone-A needs to Read the data for a key, the EVCache client looks up the EVCache Server instance in Zone-A which stores this data and fetches the data from this instance.
+* When the Web App in Zone-A needs to Write or Delete the data for a key, the EVCache client looks up the EVCache Server instances in Zone-A and Zone-B and writes or deletes it.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ev_cache_under_the_hood3.png)
+
+# Case Study : Movie and TV show similarity
+One of the applications that uses caching heavily is the Similars application. This application suggests Movies and TV Shows that have similarities to each other. Once the similarities are calculated they are persisted in SimpleDB/S3 and are fronted using EVCache. When any service, application or algorithm needs this data it is retrieved from the EVCache and result is returned.
+
+* A Client sends a request to the WebApp requesting a page and the algorithm that is processing this requests needs similars for a Movie to compute this data.
+* The WebApp that needs a list of similars for a Movie or TV show looks up EVCache for this data. Typical cache hit rate is above 99.9%.
+* If there is a cache miss then the WebApp calls the Similars App to compute this data.
+* If the data was previously computed but missing in the cache then Similars App will read it from SimpleDB. If it were missing in SimpleDB then the app Calculates the similars for the given Movie or TV show.
+* This computed data for the Movie or TV Show is then written to EVCache.
+* The Similars App then computes the response needed by the client and returns it to the client.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/ev_cache_under_the_hood4.png)
+
+**The EVCache Clusters currently serve over 200K Requests/sec at peak loads.**
+The average latency is around 1 millisecond to 5 millisecond. The 99th percentile is around 20 millisecond.
+Typical cache hit rates are above 99%.
+
 
