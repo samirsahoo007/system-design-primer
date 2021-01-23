@@ -259,7 +259,8 @@ This design centered around the AWS Auto Scaling engine being able to compute th
 
 The key challenge was enabling the AWS Auto Scaling engine to call the Titus control plane running in Netflix’s AWS accounts. To address this, we leveraged AWS API Gateway, a service which provides an accessible API “front door” that AWS can call and a backend that could call Titus. API Gateway exposes a common API for AWS to use to adjust resource capacity and get capacity status while allowing for pluggable backend implementations of the resources being scaled, such as services on Titus. When an auto scaling policy is configured on a Titus service, Titus creates a new scalable target with the AWS Auto Scaling engine.
 
-**Chaos Monkey** randomly shuts down the instances to ensure the resilliency of the system.
+**Chaos Monkey**: randomly shuts down the instances to ensure the resilliency of the system.
+**Mantis**: A platform that makes it easy for developers to build realtime, cost-effective, operations-focused applications.
 
 **Media processing while onboarding and later**
 Validating the video: The first thing Netflix does is spend a lot of time validating the video. It looks for digital artifacts, color changes, or missing frames that may have been caused by previous transcoding attempts or data transmission problems.
