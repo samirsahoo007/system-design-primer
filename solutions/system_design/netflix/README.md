@@ -259,6 +259,8 @@ This design centered around the AWS Auto Scaling engine being able to compute th
 
 The key challenge was enabling the AWS Auto Scaling engine to call the Titus control plane running in Netflix’s AWS accounts. To address this, we leveraged AWS API Gateway, a service which provides an accessible API “front door” that AWS can call and a backend that could call Titus. API Gateway exposes a common API for AWS to use to adjust resource capacity and get capacity status while allowing for pluggable backend implementations of the resources being scaled, such as services on Titus. When an auto scaling policy is configured on a Titus service, Titus creates a new scalable target with the AWS Auto Scaling engine.
 
+**Chaos Monkey** randomly shuts down the instances to ensure the resilliency of the system.
+
 **Media processing while onboarding and later**
 Validating the video: The first thing Netflix does is spend a lot of time validating the video. It looks for digital artifacts, color changes, or missing frames that may have been caused by previous transcoding attempts or data transmission problems.
 
@@ -1098,4 +1100,68 @@ One of the applications that uses caching heavily is the Similars application. T
 The average latency is around 1 millisecond to 5 millisecond. The 99th percentile is around 20 millisecond.
 Typical cache hit rates are above 99%.
 
+
+Ref: https://netflixtechblog.com/evolution-of-the-netflix-data-pipeline-da246ca36905
+# Evolution of the Netflix Data Pipeline
+
+Our new Keystone data pipeline went live in December of 2015. In this article, we talk about the evolution of Netflix’s data pipeline over the years. 
+
+Netflix is a data-driven company. Many business and product decisions are based on insights derived from data analysis. The charter of the data pipeline is to collect, aggregate, process and move data at cloud scale. Almost every application at Netflix uses the data pipeline.
+
+Here are some statistics about our data pipeline:
+* ~500 billion events and ~1.3 PB per day
+* ~8 million events and ~24 GB per second during peak hours
+
+There are several hundred event streams flowing through the pipeline. For example:
+* Video viewing activities
+* UI activities
+* Error logs
+* Performance events
+* Troubleshooting & diagnostic events
+
+Note that operational metrics don't flow through this data pipeline. We have a separate telemetry system **Atlas**, which we open-sourced just like many other Netflix technologies.
+
+## V1.0 Chukwa pipeline
+The sole purpose of the original data pipeline was to aggregate and upload events to Hadoop/Hive for batch processing. As you can see, the architecture is rather simple. Chukwa collects events and writes them to S3 in Hadoop sequence file format. The Big Data Platform team further processes those S3 files and writes to Hive in Parquet format. End-to-end latency is up to 10 minutes. That is sufficient for batch jobs which usually scan data at daily or hourly frequency.
+
+## V1.5 Chukwa pipeline with real-time branch
+With the emergence of Kafka and Elasticsearch over the last couple of years, there has been a growing demand for real-time analytics in Netflix. By real-time, we mean sub-minute latency.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/kafka_chukwa.png)
+
+In addition to uploading events to S3/EMR, Chukwa can also tee traffic to Kafka (the front gate of real-time branch). In V1.5, approximately 30% of the events are branched to the real-time pipeline. The centerpiece of the real-time branch is the router. It is responsible for routing data from Kafka to the various sinks: Elasticsearch or secondary Kafka.
+
+We have seen explosive growth in Elasticsearch adoption within Netflix for the last two years. There are ~150 clusters totaling ~3,500 instances hosting ~1.3 PB of data. The vast majority of the data is injected via our data pipeline.
+
+When Chukwa tees traffic to Kafka, it can deliver full or filtered streams. Sometimes, we need to apply further filtering on the Kafka streams written from Chukwa. That is why we have the router to consume from one Kafka topic and produce to a different Kafka topic.
+
+Once we deliver data to Kafka, it empowers users with real-time stream processing: Mantis, Spark, or custom applications. “Freedom and Responsibility” is the DNA of Netflix culture. It’s up to users to choose the right tool for the task at hand.
+
+Because moving data at scale is our expertise, our team maintains the router as a managed service. But there are a few lessons we learned while operating the routing service:
+* The Kafka high-level consumer can lose partition ownership and stop consuming some partitions after running stable for a while. This requires us to bounce the processes.
+* When we push out new code, sometimes the high-level consumer can get stuck in a bad state during rebalance.
+* We group hundreds of routing jobs into a dozen of clusters. The operational overhead of managing those jobs and clusters is an increasing burden. We need a better platform to manage the routing jobs.
+
+## V2.0 Keystone pipeline (Kafka fronted)
+In addition to the issues related to routing service, there are other motivations for us to revamp our data pipeline:
+* Simplify the architecture.
+* Kafka implements replication that improves durability, while Chukwa doesn’t support replication.
+* Kafka has a vibrant community with strong momentum.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/frontend_kafka_kafka.png)
+
+There are three major components:
+
+**Data Ingestion** — 
+There are two ways for applications to ingest data:
+1. use our Java library and write to Kafka directly.
+2. send to an HTTP proxy which then writes to Kafka.
+
+**Data Buffering** — 
+Kafka serves as the replicated persistent message queue. It also helps absorb temporary outages from downstream sinks.
+
+**Data Routing** —
+The routing service is responsible for moving data from fronting Kafka to various sinks: S3, Elasticsearch, and secondary Kafka.
+
+We have been running Keystone pipeline in production for the past few months. We are still evolving Keystone with a focus on QoS, scalability, availability, operability, and self-service.
 
