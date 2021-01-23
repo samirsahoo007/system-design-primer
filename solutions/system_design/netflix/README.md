@@ -1166,3 +1166,10 @@ The routing service is responsible for moving data from fronting Kafka to variou
 
 We have been running Keystone pipeline in production for the past few months. We are still evolving Keystone with a focus on QoS, scalability, availability, operability, and self-service.
 
+# Atlas
+
+Atlas was developed by Netflix to manage dimensional time series data for near real-time operational insight.Atlas features in-memory data storage,allowing it to gather and report very large numbers of metrics, very quickly.
+
+Atlas captures operational intelligence. Whereas business intelligence is data gathered for analyzing trends over time, operational intelligence provides a picture of what is currently happening within a system.
+
+Atlas was built because the existing systems Netflix was using for operational intelligence were not able to cope with the increase in metrics we were seeing as we expanded our operations in the cloud. In 2011, we were monitoring 2 million metrics related to our streaming systems. By 2014, we were at 1.2 billion metrics and the numbers continue to rise. Atlas is designed to handle this large quantity of data and can scale with the hardware we use to analyze and store it.
