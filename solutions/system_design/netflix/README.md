@@ -1127,7 +1127,7 @@ The sole purpose of the original data pipeline was to aggregate and upload event
 ## V1.5 Chukwa pipeline with real-time branch
 With the emergence of Kafka and Elasticsearch over the last couple of years, there has been a growing demand for real-time analytics in Netflix. By real-time, we mean sub-minute latency.
 
-![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/kafka_chukwa.png)
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/kafka_chukwa.jpg)
 
 In addition to uploading events to S3/EMR, Chukwa can also tee traffic to Kafka (the front gate of real-time branch). In V1.5, approximately 30% of the events are branched to the real-time pipeline. The centerpiece of the real-time branch is the router. It is responsible for routing data from Kafka to the various sinks: Elasticsearch or secondary Kafka.
 
