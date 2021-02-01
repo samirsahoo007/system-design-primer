@@ -1731,7 +1731,13 @@ A key-value store generally allows for O(1) reads and writes and is often backed
 
 Key-value stores provide high performance and are often used for simple data models or for rapidly-changing data, such as an in-memory cache layer.  Since they offer only a limited set of operations, complexity is shifted to the application layer if additional operations are needed.
 
-A key-value store is the basis for more complex systems such as a document store, and in some cases, a graph database.
+Unlike traditional relational databases, key-value databases do not require a predefined structure. They offer more flexibility when storing data and have faster performance. Without having to rely on placeholders, key-value databases are a lighter solution as they require fewer resources.
+
+Such functionalities are suitable for large databases that deal with simple data. Therefore, they are commonly used for caching, storing, and managing user sessions, ad servicing, and recommendations.
+
+Redis, Project Voldemort, and Riak are just some examples of key-value databases.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/key-value-database.png)
 
 ##### Source(s) and further reading: key-value store
 
@@ -1751,6 +1757,35 @@ Based on the underlying implementation, documents are organized in either collec
 Some document stores like [MongoDB](https://www.mongodb.com/mongodb-architecture) and [CouchDB](https://blog.couchdb.org/2016/08/01/couchdb-2-0-architecture/) also provide a SQL-like language to perform complex queries.  [DynamoDB](http://www.read.seas.harvard.edu/~kohler/class/cs239-w08/decandia07dynamo.pdf) supports both key-values and documents.
 
 Document stores provide high flexibility and are often used for working with occasionally changing data.
+
+![alt text](https://github.com/samirsahoo007/system-design-primer/blob/master/images/document-database.png)
+
+Here is an example of a simple document in JSON format that consists of three key-value pairs:
+
+{
+"ID" : "001",
+"Name" : "John",
+"Grade" : "Senior",
+}
+
+What’s more, you can also use nested queries in such formats, providing easier data distribution across multiple disks and enhanced performance.
+
+For instance, we can add a nested value string to the document above:
+
+{
+ "ID" : "001",
+ "Name" : "John",
+ "Grade" : "Senior",
+ "Classes" : {
+      "Class1" : "English"
+      "Class2" : "Geometry" 
+      "Class3" : "History"
+   } 
+}
+
+Due to their structure, document databases are optimal for use cases that require flexibility and fast, continual development. For example, you can use them for managing user profiles, which differ according to the information provided. Its schema-less structure allows you to have different attributes and values.
+
+Examples of NoSQL document databases include MongoDB, CouchDB, Elasticsearch, and others.
 
 ##### Source(s) and further reading: document store
 
@@ -1809,6 +1844,33 @@ Graphs databases offer high performance for data models with complex relationshi
 * [Scalability](http://www.lecloud.net/post/7994751381/scalability-for-dummies-part-2-database)
 * [Introduction to NoSQL](https://www.youtube.com/watch?v=qI_g07C_Q5I)
 * [NoSQL patterns](http://horicky.blogspot.com/2009/11/nosql-patterns.html)
+
+
+### What is a Column-Oriented Database
+
+Increasingly businesses are realizing a one size fits all isn't working for databases. When you want to analyse terabytes of data, with analytical queries that span 1000's of rows, column-oriented databases can provide a 100x speedup. Particularly for time-series data, column-oriented databases have been successfully used to deliver fast storage and analysis.
+
+A column-oriented database stores each column continuously. i.e. on disk or in-memory each column on the left will be stored in sequential blocks.
+
+For analytical queries that perform aggregate operations over a small number of columns retrieving data in this format is extremely fast. As PC storage is optimized for block access, by storing the data beside each other we exploit locality of reference. On hard disk drives this is partiularly important which due to their performance characteristics provide optimal performace for sequential access.
+
+![alt text](https://github.com/samirsahoo007/bigdata/blob/master/hadoop/images/column-vs-row-oriented-database.png)
+
+
+![alt text](https://github.com/samirsahoo007/bigdata/blob/master/hadoop/images/columnstore-row-vs-column-orientated_0.png)
+
+Look at the above image, now imagine which areas need read when you perform a query like "average price" for all dates. In row-oriented databases we have to read over large areas, in column-oriented databases the prices are stored as one sequential region and we can read just that region. Column-oriented databases are therefore extremely quick at aggregate queries (sum, average, min, max, etc.).
+
+Why are most databases row-oriented? I hear you ask. Imagine we want to add one row somewhere in the middle of our data for 2011-02-26, on the row oriented database no problem, column oriented we will have to move almost all the data! Lucky since we mostly deal with time series new data only appends to the end of our table.
+
+
+**Column-oriented DB is fast in the following cases**
+* Aggregate Calulation of Single Column e.g. sum(price)
+* Retrieval of a few columns from a table with many columns
+
+and **slow** in
+* Insertion/Updating of single new record
+* Retrieval of a single record
 
 ### SQL or NoSQL
 
